@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ระบบเช็คสต็อกก๋วยเตี๋ยวเรือรสจนา สาขา 2</title>
+  <title>ระบบเช็คสต็อกก๋วยเตี๋ยวเรือรสจนา</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <style>
@@ -43,7 +43,7 @@
       <div class="max-w-lg mx-auto">
         <div class="flex items-center justify-between mb-8">
           <div>
-            <h1 id="shop-title" class="text-2xl md:text-3xl font-bold text-orange-800">🍜 ก๋วยเตี๋ยวเรือรสจนา สาขา 2</h1>
+            <h1 id="shop-title" class="text-2xl md:text-3xl font-bold text-orange-800">🍜 ก๋วยเตี๋ยวเรือรสจนา</h1>
             <p id="txt-daily-check" class="text-orange-600 text-sm mt-1">เช็คสต็อกประจำวัน</p>
           </div>
           <button onclick="showHistory()" class="flex items-center gap-2 bg-white px-4 py-2 rounded-xl shadow-md hover:shadow-lg transition-all text-orange-700 font-medium">
@@ -99,12 +99,12 @@
             </div>
           </button>
 
-          <button onclick="selectCategory('เส้น')" class="w-full bg-gradient-to-r from-amber-500 to-amber-600 text-white p-5 rounded-2xl shadow-lg hover:shadow-xl transition-all transform hover:scale-[1.02] active:scale-[0.98]">
+          <button onclick="selectCategory('ของสิ้นเปลือง')" class="w-full bg-gradient-to-r from-amber-500 to-amber-600 text-white p-5 rounded-2xl shadow-lg hover:shadow-xl transition-all transform hover:scale-[1.02] active:scale-[0.98]">
             <div class="flex items-center gap-4">
-              <div class="w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center text-3xl">🍜</div>
+              <div class="w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center text-3xl">🧻</div>
               <div class="text-left">
-                <p id="cat-noodle" class="text-xl font-bold">เส้น</p>
-                <p id="cat-noodle-desc" class="text-amber-100 text-sm">เช็คสต็อกเส้น</p>
+                <p id="cat-noodle" class="text-xl font-bold">ของสิ้นเปลือง</p>
+                <p id="cat-noodle-desc" class="text-amber-100 text-sm">เช็คสต็อกของสิ้นเปลือง</p>
               </div>
               <svg class="w-6 h-6 ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
@@ -221,7 +221,7 @@
                 <option value="ผัก">ผัก</option>
                 <option value="น้ำ">น้ำ</option>
                 <option value="เนื้อสัตว์">เนื้อสัตว์</option>
-                <option value="เส้น">เส้น</option>
+                <option value="ของสิ้นเปลือง">ของสิ้นเปลือง</option>
                 <option value="ของหวาน">ของหวาน</option>
               </select>
             </div>
@@ -278,8 +278,8 @@
         waterDesc: 'เช็คสต็อกเครื่องดื่ม',
         meat: 'เนื้อสัตว์',
         meatDesc: 'เช็คสต็อกเนื้อสัตว์',
-        noodle: 'เส้น',
-        noodleDesc: 'เช็คสต็อกเส้น',
+        supplies: 'ของสิ้นเปลือง',
+        suppliesDesc: 'เช็คสต็อกของสิ้นเปลือง',
         dessert: 'ของหวาน',
         dessertDesc: 'เช็คสต็อกของหวาน',
         backHome: 'กลับหน้าหลัก',
@@ -325,8 +325,8 @@
         waterDesc: 'ກວດສະຕ໋ອກເຄື່ອງດື່ມ',
         meat: 'ຊີ້ນສັດ',
         meatDesc: 'ກວດສະຕ໋ອກຊີ້ນສັດ',
-        noodle: 'ເສັ້ນ',
-        noodleDesc: 'ກວດສະຕ໋ອກເສັ້ນ',
+        supplies: 'ຂອງໃຊ້ໝົດເປືອງ',
+        suppliesDesc: 'ກວດສະຕ໋ອກຂອງໃຊ້ໝົດເປືອງ',
         dessert: 'ຂອງຫວານ',
         dessertDesc: 'ກວດສະຕ໋ອກຂອງຫວານ',
         backHome: 'ກັບໜ້າຫຼັກ',
@@ -372,8 +372,8 @@
         waterDesc: 'အချိုရည်စတော့စစ်ခြင်း',
         meat: 'အသား',
         meatDesc: 'အသားစတော့စစ်ခြင်း',
-        noodle: 'ခေါက်ဆွဲ',
-        noodleDesc: 'ခေါက်ဆွဲစတော့စစ်ခြင်း',
+        supplies: 'အသုံးအဆောင်ကုန်ပစ္စည်း',
+        suppliesDesc: 'အသုံးအဆောင်ကုန်ပစ္စည်း စတော့စစ်ခြင်း',
         dessert: 'အချိုပွဲ',
         dessertDesc: 'အချိုပွဲစတော့စစ်ခြင်း',
         backHome: 'ပင်မစာမျက်နှာသို့ပြန်မည်',
@@ -417,19 +417,19 @@
         "ผัก": "ຜັກ",
         "น้ำ": "ນ້ຳ",
         "เนื้อสัตว์": "ຊີ້ນສັດ",
-        "เส้น": "ເສັ້ນ",
+        "ของสิ้นเปลือง": "ຂອງໃຊ້ໝົດເປືອງ",
         "ของหวาน": "ຂອງຫວານ",
-        "คะน้า": "ຄະນ້າ",
-        "กะหล่ำ": "ກະຫຼ່ຳ",
-        "มะเขือเทศ": "ໝາກເລັ່ນ",
+        "ผักบุ้ง": "ຜັກບຸ້ງ",
+        "มะนาว": "ໝາກນາວ",
+        "แตงกวา": "ໝາກແຕງ",
         "น้ำแดง": "ນ້ຳແດງ",
         "น้ำเขียว": "ນ້ຳຂຽວ",
         "โซดา": "ໂຊດາ",
         "ไก่": "ໄກ່",
         "หมู": "ໝູ",
         "เนื้อ": "ຊີ້ນງົວ",
-        "เล็ก": "ເສັ້ນນ້ອຍ",
-        "ใหญ่": "ເສັ້ນໃຫຍ່",
+        "ทิชชู่": "ທິດຊູ",
+        "ตะเกียบ": "ຕະກຽບ",
         "เฉาก๋วย": "ເຉົ້າກ້ວຍ",
         "ข้าวเกรียบ": "ເຂົ້າກຽບ"
       },
@@ -437,19 +437,19 @@
         "ผัก": "ဟင်းသီးဟင်းရွက်",
         "น้ำ": "အချိုရည်",
         "เนื้อสัตว์": "အသား",
-        "เส้น": "ခေါက်ဆွဲ",
+        "ของสิ้นเปลือง": "အသုံးအဆောင်ကုန်ပစ္စည်း",
         "ของหวาน": "အချိုပွဲ",
-        "คะน้า": "ကိုက်လန်",
-        "กะหล่ำ": "ဂေါ်ဖီထုပ်",
-        "มะเขือเทศ": "ခရမ်းချဉ်သီး",
+        "ผักบุ้ง": "ကန်စွန်းရွက်",
+        "มะนาว": "သံပုရာသီး",
+        "แตงกวา": "သခွားသီး",
         "น้ำแดง": "အနီရည်",
         "น้ำเขียว": "အစိမ်းရည်",
         "โซดา": "ဆိုဒါ",
         "ไก่": "ကြက်သား",
         "หมู": "ဝက်သား",
         "เนื้อ": "အမဲသား",
-        "เล็ก": "ခေါက်ဆွဲသေး",
-        "ใหญ่": "ခေါက်ဆွဲကြီး",
+        "ทิชชู่": "တစ်ရှူး",
+        "ตะเกียบ": "တူ",
         "เฉาก๋วย": "ချောက်ကွေး",
         "ข้าวเกรียบ": "ဆန်ကြော်"
       }
@@ -463,7 +463,9 @@
         "ขวด": "ຂວດ",
         "ลัง": "ລັງ",
         "แพ็ค": "ແພັກ",
-        "ถุง": "ຖົງ"
+        "ถุง": "ຖົງ",
+        "ม้วน": "ມ້ວນ",
+        "คู่": "ຄູ່"
       },
       my: {
         "": "",
@@ -472,15 +474,17 @@
         "ขวด": "ပုလင်း",
         "ลัง": "သေတ္တာ",
         "แพ็ค": "ပက်",
-        "ถุง": "အိတ်"
+        "ถุง": "အိတ်",
+        "ม้วน": "လိပ်",
+        "คู่": "စုံ"
       }
     };
 
     const stockItems = {
       "ผัก": [
-        { name: "คะน้า", unit: "กรัม/กิโลกรัม" },
-        { name: "กะหล่ำ", unit: "กรัม/กิโลกรัม" },
-        { name: "มะเขือเทศ", unit: "กรัม/กิโลกรัม" }
+        { name: "ผักบุ้ง", unit: "กรัม/กิโลกรัม" },
+        { name: "มะนาว", unit: "กรัม/กิโลกรัม" },
+        { name: "แตงกวา", unit: "กรัม/กิโลกรัม" }
       ],
       "น้ำ": [
         { name: "น้ำแดง", unit: "ขวด/ลัง" },
@@ -492,9 +496,9 @@
         { name: "หมู", unit: "กรัม/กิโลกรัม" },
         { name: "เนื้อ", unit: "กรัม/กิโลกรัม" }
       ],
-      "เส้น": [
-        { name: "เล็ก", unit: "กิโลกรัม" },
-        { name: "ใหญ่", unit: "กิโลกรัม" }
+      "ของสิ้นเปลือง": [
+        { name: "ทิชชู่", unit: "ม้วน" },
+        { name: "ตะเกียบ", unit: "คู่" }
       ],
       "ของหวาน": [
         { name: "เฉาก๋วย", unit: "ถุง" },
@@ -503,9 +507,9 @@
     };
 
     const UNIT_OPTIONS_BY_ITEM = {
-      "คะน้า": ["กรัม","กิโลกรัม"],
-      "กะหล่ำ": ["กรัม","กิโลกรัม"],
-      "มะเขือเทศ": ["กรัม","กิโลกรัม"],
+      "ผักบุ้ง": ["กรัม","กิโลกรัม"],
+      "มะนาว": ["กรัม","กิโลกรัม"],
+      "แตงกวา": ["กรัม","กิโลกรัม"],
       "ไก่": ["กรัม","กิโลกรัม"],
       "หมู": ["กรัม","กิโลกรัม"],
       "เนื้อ": ["กรัม","กิโลกรัม"],
@@ -543,7 +547,7 @@
         "ผัก": "vegetable",
         "น้ำ": "water",
         "เนื้อสัตว์": "meat",
-        "เส้น": "noodle",
+        "ของสิ้นเปลือง": "supplies",
         "ของหวาน": "dessert"
       };
       const k = catKeyMap[thCat];
@@ -570,9 +574,6 @@
       }
       if (opts.includes("ขวด") && opts.includes("ลัง")) {
         return { qty: u === "ลัง" ? n * 24 : n, unit: "ขวด" };
-      }
-      if (opts.includes("ขวด") && opts.includes("แพ็ค")) {
-        return { qty: u === "แพ็ค" ? n * 12 : n, unit: "ขวด" };
       }
       return { qty: n, unit: u };
     }
@@ -793,7 +794,7 @@
         <option value="ผัก">${tCategory("ผัก")}</option>
         <option value="น้ำ">${tCategory("น้ำ")}</option>
         <option value="เนื้อสัตว์">${tCategory("เนื้อสัตว์")}</option>
-        <option value="เส้น">${tCategory("เส้น")}</option>
+        <option value="ของสิ้นเปลือง">${tCategory("ของสิ้นเปลือง")}</option>
         <option value="ของหวาน">${tCategory("ของหวาน")}</option>
       `;
       select.value = currentValue;
@@ -811,6 +812,8 @@
     function updateLanguage() {
       const t = translations[currentLanguage];
 
+      document.getElementById("shop-title").textContent = "🍜 ก๋วยเตี๋ยวเรือรสจนา";
+      document.title = "ระบบเช็คสต็อกก๋วยเตี๋ยวเรือรสจนา";
       document.getElementById("txt-daily-check").textContent = t.dailyCheck;
       document.getElementById("txt-history").textContent = t.history;
       document.getElementById("txt-date2").textContent = t.date2;
@@ -821,8 +824,8 @@
       document.getElementById("cat-drink-desc").textContent = t.waterDesc;
       document.getElementById("cat-meat").textContent = t.meat;
       document.getElementById("cat-meat-desc").textContent = t.meatDesc;
-      document.getElementById("cat-noodle").textContent = t.noodle;
-      document.getElementById("cat-noodle-desc").textContent = t.noodleDesc;
+      document.getElementById("cat-noodle").textContent = t.supplies;
+      document.getElementById("cat-noodle-desc").textContent = t.suppliesDesc;
       document.getElementById("cat-dessert").textContent = t.dessert;
       document.getElementById("cat-dessert-desc").textContent = t.dessertDesc;
 
@@ -891,9 +894,9 @@
         "ผัก": { color: "bg-green-500", icon: "🥬", grad: "from-green-500 to-green-600" },
         "น้ำ": { color: "bg-cyan-500", icon: "🥤", grad: "from-cyan-500 to-cyan-600" },
         "เนื้อสัตว์": { color: "bg-red-500", icon: "🍖", grad: "from-red-500 to-red-600" },
-        "เส้น": { color: "bg-amber-500", icon: "🍜", grad: "from-amber-500 to-amber-600" },
+        "ของสิ้นเปลือง": { color: "bg-amber-500", icon: "🧻", grad: "from-amber-500 to-amber-600" },
         "ของหวาน": { color: "bg-pink-500", icon: "🍮", grad: "from-pink-500 to-pink-600" }
-      }[category];
+      }[category] || { color: "bg-gray-500", icon: "📦", grad: "from-gray-500 to-gray-600" };
     }
 
     function selectCategory(category) {
