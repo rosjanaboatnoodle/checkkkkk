@@ -165,6 +165,7 @@ Object.assign(I18N.th, {stWait: 'รอชำระ', min: 'นาที', again
 Object.assign(I18N.en, {stWait: 'To pay', min: 'min', again: '1 more', moreAct: 'More'});
 Object.assign(I18N.my, {stWait: 'ငွေရှင်းရန်', min: 'မိနစ်', again: 'နောက် ၁', moreAct: 'နောက်ထပ်'});
 Object.assign(I18N.lo, {stWait: 'ລໍຖ້າຈ່າຍ', min: 'ນາທີ', again: 'ອີກ 1', moreAct: 'ເພີ່ມເຕີມ'});
+I18N.th.dash = 'ภาพรวม'; I18N.en.dash = 'Overview'; I18N.my.dash = 'အနှစ်ချုပ်'; I18N.lo.dash = 'ພາບລວມ';
 const TA = 'กลับบ้าน';
 let UL = 'th', FB = false, M = null, store = null;
 const fmt = (s, a) => s.replace(/\{(\d)\}/g, (_, i) => a[i] ?? '');
@@ -366,7 +367,7 @@ function evText(e, l) {
   if (e.type === 'paid') return e.method === 'cash' ? fmt(TL('sCash', l), [tn, e.net, e.recv, e.chg]) : fmt(TL('sQr', l), [tn, e.net]);
   return '';
 }
-function announce(e) { V.log.unshift(e); V.log.length = Math.min(V.log.length, 40); if (D.voice && D.say[e.type]) { if (e.dev !== D.id) beep(); const l = vl(); speak(evText(e, l), l); } }
+function announce(e) { if (document.hidden && D.notif && window.Notification && Notification.permission === 'granted') { try { new Notification(M.shop, {body: evText(e, UL)}); } catch (x) {} } V.log.unshift(e); V.log.length = Math.min(V.log.length, 40); if (D.voice && D.say[e.type]) { if (e.dev !== D.id) beep(); const l = vl(); speak(evText(e, l), l); } }
 function emit(e) { e = {...e, at: Date.now(), dev: D.id, by: D.name}; const k = 'e' + uid(); if (seen) seen.add(k); announce(e); W(store.put('live/events/' + k, e)); }
 function handleEvents(evs) {
   const ks = Object.keys(evs).sort();
@@ -380,6 +381,7 @@ async function poll() {
   let ch = false;
   if (lv.mv && lv.mv !== M.v) { try { const raw = await store.get('menu'); if (raw) { M = normM(JSON.parse(raw)); ch = true; } } catch (e) {} }
   const nt = normT(lv.tables); if (JSON.stringify(nt) !== JSON.stringify(L)) { L = nt; ch = true; }
+  const sh = lv.shift || ''; if (sh !== JSON.stringify(SHIFT || '').replace(/^""$/, '')) { try { SHIFT = sh ? JSON.parse(sh) : null; } catch (e) {} if (['sales', 'dash'].includes(V.tab) && !$('#modal').innerHTML) draw(); }
   handleEvents(lv.events || {}); autoPrint();
   if (ch && !['set', 'sales'].includes(V.tab)) draw();
 }
@@ -400,16 +402,16 @@ function printTickets(jobs) {
 function printQueue(tb, st) { const its = itemsOf(tb).filter(x => x.status === st && (st !== 'new' || inCats(x, D.kcat ? [D.kcat] : []))); if (its.length) printTickets([[tb, its]]); }
 
 /* ---------- โครงหน้า ---------- */
-const ROLES = {all: ['tables', 'kitchen', 'serve', 'bill'], waiter: ['tables', 'serve'], kitchen: ['kitchen']}, TABI = {tables: '🪑', kitchen: '🍳', serve: '🛎️', bill: '💵'};
+const ROLES = {all: ['tables', 'kitchen', 'serve', 'bill'], waiter: ['tables', 'serve'], kitchen: ['kitchen'], owner: ['dash', 'tables']}, TABI = {dash: '📊', tables: '🪑', kitchen: '🍳', serve: '🛎️', bill: '💵'};
 function draw() {
   let nNew = 0, nCk = 0; Object.keys(L).forEach(tb => itemsOf(tb).forEach(x => { if (x.status === 'new') nNew++; else if (x.status === 'cooked') nCk++; }));
-  const badge = {kitchen: nNew, serve: nCk, bill: Object.keys(L).filter(tb => itemsOf(tb).length).length}, cur = ['order', 'cash'].includes(V.tab) ? 'tables' : V.tab, all = !ROLES[D.role] || D.role === 'all';
+  const badge = {kitchen: nNew, serve: nCk, bill: Object.keys(L).filter(tb => itemsOf(tb).length).length}, cur = ['order', 'cash'].includes(V.tab) ? 'tables' : V.tab, all = !ROLES[D.role] || D.role === 'all' || D.role === 'owner';
   $('#app').innerHTML = `<div class="top"><span class="brand">🍜 ${esc(M.shop)}</span><div class="nav">${(ROLES[D.role] || ROLES.all).map(t => `<button data-t="${t}" class="${cur === t ? 'on' : ''}" onclick="go('${t}')"><span>${TABI[t]}</span><small>${tx(t)}</small>${badge[t] ? `<i>${badge[t]}</i>` : ''}</button>`).join('')}</div>
     <button class="ic" title="ภาษา" onclick="langSheet()" style="font-size:15px;font-weight:700;border:1px solid var(--bd);border-radius:99px;padding:6px 12px;background:#fff;white-space:nowrap">🌐 ${LANGS[UL][0]}</button><button class="ic" title="เสียง" onclick="D.voice=!D.voice;saveD();draw()">${D.voice ? '🔊' : '🔇'}</button>${all ? `<button class="ic" title="ยอดขาย" onclick="go('sales')">🧾</button>` : ''}<button class="ic" title="${tx('log')}" onclick="showLog()">🔔</button><button class="ic" title="ตั้งค่า" onclick="go('set')">⚙️</button></div>
   ${syncErr ? '<div class="c" style="background:#fee2e2;color:#991b1b;padding:4px">⚠️ เชื่อมต่อข้อมูลกลางไม่ได้ (' + esc(syncErr) + ')</div>' : ''}
-  <div class="wrap">${({tables: vTables, order: vOrder, kitchen: () => vQueue('new'), serve: () => vQueue('cooked'), bill: vBill, cash: vCash, sales: vSales, set: vSet}[V.tab])()}</div>`;
+  <div class="wrap">${({tables: vTables, order: vOrder, kitchen: () => vQueue('new'), serve: () => vQueue('cooked'), bill: vBill, cash: vCash, sales: vSales, dash: vDash, set: vSet}[V.tab])()}</div>`;
 }
-function go(t) { V.tab = t; if (t === 'sales') loadSales().then(draw); draw(); window.scrollTo(0, 0); }
+function go(t) { if (M.pin && !V.ok && ['sales', 'set', 'dash'].includes(t)) { if (prompt('รหัส PIN เจ้าของร้าน') !== M.pin) return toast('PIN ไม่ถูกต้อง'); V.ok = true; } V.tab = t; if (t === 'sales' || t === 'dash') loadSales().then(draw); draw(); window.scrollTo(0, 0); }
 function showLog() { modal(`<h2>🔔 ${tx('log')}</h2>${V.log.map(e => `<div class="line"><div class="n">${esc(evText(e, UL))}<small class="mu th">${hm(e.at)} • ${esc(e.dev === 'cust' ? tx('cust') : e.by)}</small></div><span class="spk" onclick="speak(evText(V.log[${V.log.indexOf(e)}],vl()),vl())">🔊</span></div>`).join('') || `<p class="mu">${tx('empty')}</p>`}`); }
 
 /* ---------- 1 โต๊ะ ---------- */
@@ -529,7 +531,7 @@ function payUpd() { const net = payNet(), r = +P.recv || 0, cash = P.method === 
   $('#payOk').disabled = $('#payOk2').disabled = !ok; }
 function payDone(pr) {
   const tb = P.tb, its = payItems(), total = sum(its), net = payNet(), now = Date.now(), cash = P.method === 'cash';
-  const s = {id: 's' + uid(), no: SALES.filter(x => dayKey(x.at) === dayKey(now)).length + 1, at: now, table: tb, by: D.name, items: its.map(({name, price, qty, opts, note}) => ({name, price, qty, opts, note})), total, disc: P.disc, fee: P.fee, net, method: P.method, recv: cash ? +P.recv : net};
+  const s = {id: 's' + uid(), no: SALES.filter(x => dayKey(x.at) === dayKey(now)).length + 1, at: now, table: tb, by: D.name, items: its.map(({name, cat, price, qty, opts, note}) => ({name, cat, price, qty, opts, note})), total, disc: P.disc, fee: P.fee, net, method: P.method, recv: cash ? +P.recv : net};
   SALES.push(s); W(store.put('sales/' + s.id, JSON.stringify(s)));
   if (its.length === itemsOf(tb).length) { delete L[tb]; delete V.draft[tb]; W(store.del('live/tables/' + tb)); }
   else its.forEach(x => { delete L[tb].items[x.k]; W(store.del(`live/tables/${tb}/items/${x.k}`)); });
@@ -547,23 +549,65 @@ function receipt(s, paid) {
 }
 function printBill(tb) { const its = itemsOf(tb), t = sum(its); receipt({at: Date.now(), table: tb, items: its, total: t, disc: 0, net: t}, false); }
 
-/* ---------- ยอดขาย ---------- */
-async function loadSales() { try { const o = await store.get('sales') || {}; SALES = Object.values(o).map(s => { try { return JSON.parse(s); } catch (e) { return null; } }).filter(Boolean).sort((a, b) => a.at - b.at); } catch (e) {} }
+/* ---------- รายงาน / กะ / ภาพรวมเจ้าของ ---------- */
+let SHIFT = null, SHIFTS = [];
+const R = {tab: 'shift', from: dayKey(Date.now()), to: dayKey(Date.now())};
+const pj = x => { try { return JSON.parse(x); } catch (e) { return null; } };
+async function loadSales() { try { SALES = Object.values(await store.get('sales') || {}).map(pj).filter(Boolean).sort((a, b) => a.at - b.at); SHIFTS = Object.values(await store.get('shifts') || {}).map(pj).filter(Boolean).sort((a, b) => a.openedAt - b.openedAt); } catch (e) {} }
+const mTh = m => m === 'cash' ? 'เงินสด' : m === 'qr' ? 'โอน/QR' : m;
+const catOf = i => i.cat || (M.menu.find(m => m.name === i.name) || {}).cat || 'อื่น ๆ';
+const num = n => (Math.round(n * 100) / 100).toLocaleString('en-US');
+function summarize(list) { const r = {n: list.length, total: 0, disc: 0, fee: 0, net: 0, units: 0, by: {}, cat: {}, item: {}};
+  list.forEach(s => { r.total += s.total; r.disc += s.disc || 0; r.fee += s.fee || 0; r.net += s.net; r.by[s.method] = (r.by[s.method] || 0) + s.net;
+    s.items.forEach(i => { const a = i.price * i.qty, c = catOf(i); r.units += i.qty; (r.cat[c] = r.cat[c] || {q: 0, a: 0}).q += i.qty; r.cat[c].a += a; (r.item[i.name] = r.item[i.name] || {q: 0, a: 0, c}).q += i.qty; r.item[i.name].a += a; }); });
+  return r; }
+function sumHtml(r) { const rows = (o, f) => Object.entries(o).sort((a, b) => f(b[1]) - f(a[1]));
+  return `<div class="grid mt"><div class="stat">ยอดขายสุทธิ<b>${baht(r.net)}</b></div><div class="stat">จำนวนบิล<b>${r.n}</b></div><div class="stat">เฉลี่ยต่อบิล<b>${baht(r.n ? r.net / r.n : 0)}</b></div><div class="stat">จำนวนจาน/ชิ้น<b>${r.units}</b></div><div class="stat">ส่วนลด<b>${baht(r.disc)}</b></div><div class="stat">ค่าบริการเพิ่ม<b>${baht(r.fee)}</b></div></div>
+  <div class="grid mt" style="grid-template-columns:repeat(auto-fit,minmax(280px,1fr));align-items:start">
+  <div class="card"><h3>💳 การจ่าย</h3><table class="t">${rows(r.by, v => v).map(([m, v]) => `<tr><td>${esc(mTh(m))}</td><td class="r"><b>${num(v)}</b></td></tr>`).join('') || '<tr><td class="mu">—</td></tr>'}</table></div>
+  <div class="card"><h3>🗂️ หมวดหมู่</h3><table class="t">${rows(r.cat, v => v.a).map(([c, v]) => `<tr><td>${esc(c)}</td><td class="r">${v.q}</td><td class="r"><b>${num(v.a)}</b></td></tr>`).join('') || '<tr><td class="mu">—</td></tr>'}</table></div>
+  <div class="card"><h3>🍜 รายการ</h3><table class="t">${rows(r.item, v => v.q).map(([n, v]) => `<tr><td>${esc(n)}</td><td class="r">${v.q}</td><td class="r"><b>${num(v.a)}</b></td></tr>`).join('') || '<tr><td class="mu">—</td></tr>'}</table></div></div>`; }
+const shiftSales = sh => SALES.filter(s => s.at >= sh.openedAt && (!sh.closedAt || s.at < sh.closedAt));
+function drawer(sh, r) { const ci = sh.moves.filter(m => m.type === 'in').reduce((a, m) => a + m.amt, 0), co = sh.moves.filter(m => m.type === 'out').reduce((a, m) => a + m.amt, 0), cs = r.by.cash || 0; return {ci, co, cs, exp: sh.float + cs + ci - co}; }
+function saveShift() { W(SHIFT ? store.put('live/shift', JSON.stringify(SHIFT)) : store.del('live/shift')); }
 function vSales() {
-  const list = SALES.filter(s => dayKey(s.at) === V.day), tot = list.reduce((a, s) => a + s.net, 0), by = {}, top = {};
-  list.forEach(s => by[s.method] = (by[s.method] || 0) + s.net);
-  list.forEach(s => s.items.forEach(i => { top[i.name] = top[i.name] || {q: 0, a: 0}; top[i.name].q += i.qty; top[i.name].a += i.price * i.qty; }));
-  return `<div class="row" style="align-items:center"><input type="date" value="${V.day}" onchange="V.day=this.value;draw()" style="max-width:200px"><button style="flex:0;white-space:nowrap" onclick="csv()">⬇️ CSV</button></div>
-  <div class="grid mt"><div class="stat">ยอดขาย<b>${baht(tot)}</b></div><div class="stat">จำนวนบิล<b>${list.length}</b></div>${Object.keys(by).map(m => `<div class="stat">${esc(m === 'cash' ? 'เงินสด' : m === 'qr' ? 'โอน/QR' : m)}<b>${baht(by[m])}</b></div>`).join('')}</div>
-  <div class="split mt"><div class="card"><h3>บิล</h3><table class="t"><tr><th>#</th><th>เวลา</th><th>โต๊ะ</th><th>โดย</th><th>จ่าย</th><th class="r">สุทธิ</th><th></th></tr>${list.slice().reverse().map(s => `<tr><td>${s.no}</td><td>${hm(s.at)}</td><td>${tNameL(s.table, 'th')}</td><td>${esc(s.by || '')}</td><td>${s.method === 'cash' ? 'สด' : s.method === 'qr' ? 'โอน' : esc(s.method)}</td><td class="r">${s.net.toLocaleString()}</td><td class="r"><button class="sm" onclick="receipt(SALES.find(s=>s.id==='${s.id}'),true)">🖨️</button> <button class="sm d" onclick="voidBill('${s.id}')">✕</button></td></tr>`).join('') || '<tr><td colspan="7" class="mu">ยังไม่มีบิล</td></tr>'}</table></div>
-  <div class="card"><h3>เมนูขายดี</h3><table class="t">${Object.entries(top).sort((a, b) => b[1].q - a[1].q).map(([n, v]) => `<tr><td>${esc(n)}</td><td class="r">${v.q}</td><td class="r">${v.a.toLocaleString()}</td></tr>`).join('') || '<tr><td class="mu">—</td></tr>'}</table></div></div>`;
+  return `<div class="chips">${[['shift', '⏱ กะปัจจุบัน'], ['rep', '📈 รายงานยอดขาย'], ['hist', '🗃️ ประวัติปิดกะ']].map(t => `<button class="${R.tab === t[0] ? 'on' : ''}" onclick="R.tab='${t[0]}';draw()">${t[1]}</button>`).join('')}</div>` + ({shift: rShift, rep: rRep, hist: rHist}[R.tab])();
 }
+function rShift() {
+  if (!SHIFT) return `<div class="card" style="max-width:460px"><h3>ยังไม่ได้เปิดกะ</h3><label>เงินทอนตั้งต้นในลิ้นชัก (บาท)</label><input id="shF" type="number" inputmode="decimal" placeholder="เช่น 1000"><button class="p big" onclick="openShift()">เปิดกะ</button></div>`;
+  const r = summarize(shiftSales(SHIFT)), d = drawer(SHIFT, r);
+  return `<div class="split"><div class="card"><h3>กะนี้เปิด ${new Date(SHIFT.openedAt).toLocaleString('th-TH')} โดย ${esc(SHIFT.by)}</h3>
+    <table class="t mt"><tr><td>เงินทอนตั้งต้น</td><td class="r">${num(SHIFT.float)}</td></tr><tr><td>+ ขายเงินสด</td><td class="r">${num(d.cs)}</td></tr><tr><td>+ เงินเข้า</td><td class="r">${num(d.ci)}</td></tr><tr><td>− เงินออก</td><td class="r">${num(d.co)}</td></tr><tr style="font-weight:700;font-size:18px"><td>เงินสดที่ควรมีในลิ้นชัก</td><td class="r">${baht(d.exp)}</td></tr></table>
+    <div class="row mt"><button onclick="cashMove('in')">＋ เงินเข้า</button><button onclick="cashMove('out')">－ เงินออก</button><button onclick="printShift({...SHIFT,sum:summarize(shiftSales(SHIFT))})">🖨️ พิมพ์ยอด</button></div><button class="p big" onclick="closeShift()">ปิดกะ / นับเงิน</button></div>
+  <div class="card"><h3>เงินเข้า–ออกระหว่างกะ</h3>${SHIFT.moves.map(m => `<div class="line"><div class="n"><b>${m.type === 'in' ? 'เงินเข้า' : 'เงินออก'}</b> ${esc(m.note)}<small class="mu th">${hm(m.at)} • ${esc(m.by)}</small></div><b style="color:${m.type === 'in' ? 'var(--g)' : 'var(--r)'}">${m.type === 'in' ? '+' : '−'}${num(m.amt)}</b></div>`).join('') || '<p class="mu">ยังไม่มีรายการ</p>'}</div></div>` + sumHtml(r);
+}
+function openShift() { SHIFT = {id: 'h' + uid(), openedAt: Date.now(), by: D.name, float: Math.max(0, +$('#shF').value || 0), moves: []}; saveShift(); draw(); }
+function cashMove(type) { modal(`<h2>${type === 'in' ? '＋ เงินเข้าลิ้นชัก' : '－ เงินออกจากลิ้นชัก'}</h2><label>จำนวนเงิน</label><input id="mvA" type="number" inputmode="decimal"><label>หมายเหตุ (เช่น ซื้อน้ำแข็ง, แลกเหรียญ, เจ้าของเบิก)</label><input id="mvN"><div class="row mt"><button onclick="modal()">ยกเลิก</button><button class="p" onclick="const a=+$('#mvA').value;if(a>0){SHIFT.moves.push({at:Date.now(),type:'${type}',amt:a,note:$('#mvN').value.trim(),by:D.name});saveShift();modal();draw()}">บันทึก</button></div>`); }
+function closeShift() { const r = summarize(shiftSales(SHIFT)), d = drawer(SHIFT, r), open = Object.keys(L).filter(tb => itemsOf(tb).length).length;
+  modal(`<h2>ปิดกะ</h2>${open ? `<p style="color:var(--r)">⚠️ ยังมี ${open} โต๊ะที่ยังไม่ได้ชำระ</p>` : ''}<div class="tot"><span>เงินสดที่ควรมี</span><span>${baht(d.exp)}</span></div><label>เงินสดที่นับได้จริง</label><input id="clC" type="number" inputmode="decimal" oninput="const v=(+this.value||0)-${d.exp};$('#clD').textContent=(v===0?'พอดี':v>0?'เกิน '+num(v):'ขาด '+num(-v));$('#clD').style.color=v<0?'var(--r)':'var(--g)'"><div id="clD" class="tot"></div><label>หมายเหตุ</label><input id="clN">
+  <div class="row mt"><button onclick="modal()">ยกเลิก</button><button class="p" onclick="doClose(false)">ปิดกะ</button><button class="p" onclick="doClose(true)">ปิดกะ + พิมพ์</button></div>`); }
+function doClose(pr) { const r = summarize(shiftSales(SHIFT)), d = drawer(SHIFT, r), sh = {...SHIFT, closedAt: Date.now(), closedBy: D.name, counted: +$('#clC').value || 0, expected: d.exp, note: $('#clN').value.trim(), sum: r};
+  W(store.put('shifts/' + sh.id, JSON.stringify(sh))); SHIFTS.push(sh); SHIFT = null; saveShift(); modal(); if (pr) printShift(sh); R.tab = 'hist'; draw(); showShift(sh.id); }
+function shiftText(sh) { const r = sh.sum, d = drawer(sh, r), row = (a, b) => `<tr><td>${a}</td><td style="text-align:right">${b}</td></tr>`;
+  return `<table style="width:100%">${row('เปิดกะ', new Date(sh.openedAt).toLocaleString('th-TH') + ' ' + esc(sh.by))}${sh.closedAt ? row('ปิดกะ', new Date(sh.closedAt).toLocaleString('th-TH') + ' ' + esc(sh.closedBy)) : ''}${row('จำนวนบิล', r.n)}${row('ยอดขายสุทธิ', '<b>' + num(r.net) + '</b>')}${row('ส่วนลด', num(r.disc))}</table><hr><b>การจ่าย</b><table style="width:100%">${Object.entries(r.by).map(([m, v]) => row(esc(mTh(m)), num(v))).join('')}</table><hr><b>ลิ้นชักเงินสด</b><table style="width:100%">${row('เงินทอนตั้งต้น', num(sh.float))}${row('ขายเงินสด', num(d.cs))}${row('เงินเข้า', num(d.ci))}${row('เงินออก', num(d.co))}${row('ควรมี', '<b>' + num(d.exp) + '</b>')}${sh.closedAt ? row('นับได้', num(sh.counted)) + row('ส่วนต่าง', '<b>' + (sh.counted - d.exp > 0 ? '+' : '') + num(sh.counted - d.exp) + '</b>') : ''}</table>${sh.moves.length ? '<hr><b>เงินเข้า–ออก</b><table style="width:100%">' + sh.moves.map(m => row((m.type === 'in' ? '+ ' : '− ') + esc(m.note || ''), num(m.amt))).join('') + '</table>' : ''}<hr><b>หมวดหมู่</b><table style="width:100%">${Object.entries(r.cat).map(([c, v]) => row(esc(c) + ' ×' + v.q, num(v.a))).join('')}</table><hr><b>รายการ</b><table style="width:100%">${Object.entries(r.item).sort((a, b) => b[1].q - a[1].q).map(([n, v]) => row(esc(n) + ' ×' + v.q, num(v.a))).join('')}</table>${sh.note ? '<hr>หมายเหตุ: ' + esc(sh.note) : ''}`; }
+function printShift(sh) { const el = $('#print'); el.className = 'rc'; el.innerHTML = `<div style="text-align:center"><b style="font-size:16px">${esc(M.shop)}</b><br>${sh.closedAt ? 'สรุปปิดกะ' : 'ยอดระหว่างกะ'}</div><hr>` + shiftText(sh); setTimeout(() => window.print(), 50); }
+function showShift(id) { const sh = SHIFTS.find(x => x.id === id); modal(`<h2>สรุปปิดกะ</h2>${shiftText(sh)}<div class="row mt"><button onclick="modal()">ปิด</button><button class="p" onclick="printShift(SHIFTS.find(x=>x.id==='${id}'))">🖨️ พิมพ์</button></div>`); }
+function rHist() { return `<div class="card" style="overflow-x:auto"><table class="t"><tr><th>เปิด</th><th>ปิด</th><th>พนักงาน</th><th class="r">ยอดขาย</th><th class="r">เงินสดควรมี</th><th class="r">นับได้</th><th class="r">ส่วนต่าง</th></tr>${SHIFTS.slice().reverse().map(sh => { const df = sh.counted - sh.expected; return `<tr onclick="showShift('${sh.id}')" style="cursor:pointer"><td>${new Date(sh.openedAt).toLocaleString('th-TH', {dateStyle: 'short', timeStyle: 'short'})}</td><td>${hm(sh.closedAt)}</td><td>${esc(sh.closedBy)}</td><td class="r">${num(sh.sum.net)}</td><td class="r">${num(sh.expected)}</td><td class="r">${num(sh.counted)}</td><td class="r" style="font-weight:700;color:${df < 0 ? 'var(--r)' : 'var(--g)'}">${df > 0 ? '+' : ''}${num(df)}</td></tr>`; }).join('') || '<tr><td colspan="7" class="mu">ยังไม่มีกะที่ปิดแล้ว</td></tr>'}</table></div>`; }
+function setRange(n) { const now = new Date(); R.to = dayKey(now); R.from = n === 'm' ? dayKey(new Date(now.getFullYear(), now.getMonth(), 1)) : dayKey(now - (n - 1) * 86400000); draw(); }
+const repList = () => SALES.filter(s => dayKey(s.at) >= R.from && dayKey(s.at) <= R.to);
+function rRep() { const list = repList(), days = {}; list.forEach(s => { const k = dayKey(s.at); (days[k] = days[k] || {n: 0, a: 0}).n++; days[k].a += s.net; });
+  return `<div class="row" style="align-items:center"><input type="date" value="${R.from}" onchange="R.from=this.value;draw()"><input type="date" value="${R.to}" onchange="R.to=this.value;draw()"><button onclick="setRange(1)">วันนี้</button><button onclick="setRange(7)">7 วัน</button><button onclick="setRange('m')">เดือนนี้</button><button onclick="csv()">⬇️ CSV</button></div>` + sumHtml(summarize(list)) +
+  (Object.keys(days).length > 1 ? `<div class="card mt"><h3>📅 รายวัน</h3><table class="t"><tr><th>วันที่</th><th class="r">บิล</th><th class="r">ยอดขาย</th></tr>${Object.keys(days).sort().map(k => `<tr><td>${k}</td><td class="r">${days[k].n}</td><td class="r"><b>${num(days[k].a)}</b></td></tr>`).join('')}</table></div>` : '') +
+  `<div class="card mt" style="overflow-x:auto"><h3>🧾 บิล</h3><table class="t"><tr><th>#</th><th>เวลา</th><th>โต๊ะ</th><th>โดย</th><th>จ่าย</th><th class="r">สุทธิ</th><th></th></tr>${list.slice().reverse().slice(0, 300).map(s => `<tr><td>${s.no}</td><td>${dayKey(s.at).slice(5)} ${hm(s.at)}</td><td>${tNameL(s.table, 'th')}</td><td>${esc(s.by || '')}</td><td>${esc(mTh(s.method))}</td><td class="r">${num(s.net)}</td><td class="r" style="white-space:nowrap"><button class="sm" onclick="receipt(SALES.find(s=>s.id==='${s.id}'),true)">🖨️</button> <button class="sm d" onclick="voidBill('${s.id}')">✕</button></td></tr>`).join('') || '<tr><td colspan="7" class="mu">ยังไม่มีบิล</td></tr>'}</table></div>`; }
 function voidBill(id) { if (confirm('ลบบิลนี้ออกจากยอดขาย?')) { SALES = SALES.filter(s => s.id !== id); W(store.del('sales/' + id)); draw(); } }
 function csv() {
-  const rows = [['บิล', 'วันที่', 'เวลา', 'โต๊ะ', 'พนักงาน', 'รายการ', 'ตัวเลือก', 'จำนวน', 'ราคา', 'รวม', 'ส่วนลดบิล', 'สุทธิบิล', 'ชำระ']];
-  SALES.filter(s => dayKey(s.at) === V.day).forEach(s => s.items.forEach(i => rows.push([s.no, dayKey(s.at), hm(s.at), tNameL(s.table, 'th'), s.by || '', i.name, [...(i.opts || []), i.note].filter(Boolean).join(' '), i.qty, i.price, i.price * i.qty, s.disc, s.net, s.method])));
-  dl('sales-' + V.day + '.csv', '﻿' + rows.map(r => r.map(c => '"' + String(c).replace(/"/g, '""') + '"').join(',')).join('\n'), 'text/csv');
+  const rows = [['บิล', 'วันที่', 'เวลา', 'โต๊ะ', 'พนักงาน', 'หมวด', 'รายการ', 'ตัวเลือก', 'จำนวน', 'ราคา', 'รวม', 'ส่วนลดบิล', 'สุทธิบิล', 'ชำระ']];
+  repList().forEach(s => s.items.forEach(i => rows.push([s.no, dayKey(s.at), hm(s.at), tNameL(s.table, 'th'), s.by || '', catOf(i), i.name, [...(i.opts || []), i.note].filter(Boolean).join(' '), i.qty, i.price, i.price * i.qty, s.disc, s.net, mTh(s.method)])));
+  dl('sales-' + R.from + '_' + R.to + '.csv', '﻿' + rows.map(r => r.map(c => '"' + String(c).replace(/"/g, '""') + '"').join(',')).join('\n'), 'text/csv');
 }
+function vDash() { const today = SALES.filter(s => dayKey(s.at) === dayKey(Date.now())), r = summarize(today), open = Object.keys(L).filter(tb => itemsOf(tb).length); let nw = 0, ck = 0; open.forEach(tb => itemsOf(tb).forEach(x => { if (x.status === 'new') nw++; else if (x.status === 'cooked') ck++; }));
+  return `<h2>📊 วันนี้ ${new Date().toLocaleDateString('th-TH', {dateStyle: 'long'})}</h2><div class="grid mt"><div class="stat">โต๊ะที่เปิดอยู่<b>${open.length}</b></div><div class="stat">ยอดรอชำระ<b>${baht(open.reduce((a, tb) => a + sum(itemsOf(tb)), 0))}</b></div><div class="stat">รอครัวทำ<b>${nw}</b></div><div class="stat">รอเสิร์ฟ<b>${ck}</b></div><div class="stat">กะ<b style="font-size:16px">${SHIFT ? 'เปิด ' + hm(SHIFT.openedAt) + ' • ' + esc(SHIFT.by) : 'ยังไม่เปิดกะ'}</b></div></div>
+  ${open.length ? `<div class="card mt"><h3>โต๊ะที่เปิดอยู่</h3><table class="t">${open.map(tb => `<tr><td><b>${tName(tb)}</b></td><td>${tStat(tb)[1]}</td><td>${ageMin(L[tb].openedAt)} นาที</td><td class="r"><b>${num(sum(itemsOf(tb)))}</b></td></tr>`).join('')}</table></div>` : ''}` + sumHtml(r) + `<button class="big" style="background:#fff;border:1px solid var(--bd);font-size:16px" onclick="go('sales')">ดูรายงานและกะทั้งหมด ›</button>`; }
 function dl(name, text, type) { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([text], {type})); a.download = name; a.click(); }
 
 /* ---------- ตั้งค่า ---------- */
@@ -591,11 +635,12 @@ function sDev() {
   const want = D.vlang || D.lang, ok = hasTTS && (voiceFor(want) || !speechSynthesis.getVoices().length);
   return `<div class="split"><div class="card"><h3>เครื่องนี้ (ตั้งแยกกันได้ทุกเครื่อง)</h3>
   <label>ชื่อเครื่อง / ชื่อพนักงาน</label><input value="${esc(D.name)}" onchange="setD('name',this.value.trim()||'Staff')">
-  <label>เครื่องนี้ใช้ทำอะไร</label><select onchange="setD('role',this.value)">${[['all', 'ทุกหน้า (เจ้าของ / แคชเชียร์)'], ['waiter', 'พนักงานเสิร์ฟ — เห็นแค่ โต๊ะ กับ เสิร์ฟ'], ['kitchen', 'ครัว — เห็นแค่หน้าครัว']].map(r => `<option value="${r[0]}" ${D.role === r[0] ? 'selected' : ''}>${r[1]}</option>`).join('')}</select>
+  <label>เครื่องนี้ใช้ทำอะไร</label><select onchange="setD('role',this.value)">${[['all', 'ทุกหน้า (เจ้าของ / แคชเชียร์)'], ['waiter', 'พนักงานเสิร์ฟ — เห็นแค่ โต๊ะ กับ เสิร์ฟ'], ['kitchen', 'ครัว — เห็นแค่หน้าครัว'], ['owner', 'เจ้าของร้าน — ภาพรวมและรายงาน']].map(r => `<option value="${r[0]}" ${D.role === r[0] ? 'selected' : ''}>${r[1]}</option>`).join('')}</select>
   <label>เตือนออเดอร์ค้าง: เหลืองเมื่อเกิน / แดงเมื่อเกิน (นาที)</label><div class="row"><input type="number" min="1" value="${D.t1}" onchange="setD('t1',+this.value||8)"><input type="number" min="1" value="${D.t2}" onchange="setD('t2',+this.value||15)"></div>
   <label>ภาษาที่ใช้บนเครื่องนี้</label><select onchange="setD('lang',this.value)">${langOpts(M.slangs, D.lang)}</select>
   <h3 class="mt">🔊 เสียงพูด</h3>
   <label class="ck"><input type="checkbox" ${D.voice ? 'checked' : ''} onchange="setD('voice',this.checked)"><span>เปิดเสียงประกาศบนเครื่องนี้</span></label>
+  <label class="ck"><input type="checkbox" ${D.notif ? 'checked' : ''} onchange="if(this.checked&&window.Notification){Notification.requestPermission().then(p=>setD('notif',p==='granted'))}else setD('notif',false)"><span>แสดงการแจ้งเตือนของเครื่องเมื่อหน้าจอนี้ไม่ได้เปิดอยู่ด้านหน้า (คอมพิวเตอร์)</span></label>
   <label>ภาษาเสียงพูด</label><select onchange="setD('vlang',this.value)">${langOpts(Object.keys(LANGS), D.vlang, 'ตามภาษาของเครื่อง')}</select>
   <p class="mu" style="font-size:14px">${!hasTTS ? '⚠️ เบราว์เซอร์นี้ไม่รองรับเสียงพูด' : ok ? '✔ เครื่องนี้มีเสียงภาษา ' + LANGS[want][0] : '⚠️ เครื่องนี้ไม่มีเสียงภาษา ' + LANGS[want][0] + ' — จะพูดเป็นภาษาไทยแทน'}</p>
   <button onclick="speak(evText({type:'paid',t:'t4',method:'cash',net:105,recv:500,chg:395},vl()),vl())">▶️ ทดสอบเสียง</button>
@@ -615,6 +660,7 @@ function sShop() {
   return `<div class="split"><div class="card"><h3>ร้าน (ใช้ร่วมกันทุกเครื่อง)</h3>
   <label>ชื่อร้าน</label><input id="sShop" value="${esc(M.shop)}"><label>จำนวนโต๊ะ</label><input id="sTables" type="number" min="1" max="200" value="${M.tables}">
   <label>พร้อมเพย์ (เบอร์มือถือ หรือเลขบัตร 13 หลัก)</label><input id="sPP" inputmode="numeric" value="${esc(M.promptpay)}"><label>ข้อความท้ายใบเสร็จ</label><input id="sFoot" value="${esc(M.footer)}">
+  <label>รหัส PIN เจ้าของร้าน (กันพนักงานเข้าหน้ารายงานและตั้งค่า — เว้นว่าง = ไม่ใช้)</label><input id="sPin" inputmode="numeric" value="${esc(M.pin || '')}">
   <label>ช่องทางชำระ/ขายอื่น ๆ (คั่นด้วย , )</label><input id="sCh" value="${esc(M.channels.join(', '))}">
   <button class="p mt" style="width:100%" onclick="saveShop()">บันทึก</button>
   <h3 class="mt">ภาษาที่ลูกค้าเลือกได้ (หน้าสแกนสั่ง)</h3><div>${langChecks('clangs')}</div>
@@ -622,9 +668,9 @@ function sShop() {
   <div class="card"><h3>เชื่อมหลายเครื่อง</h3><label>Firebase Realtime Database URL</label><input id="sDb" placeholder="https://xxxx-default-rtdb.asia-southeast1.firebasedatabase.app" value="${esc(D.db)}">
   <button class="mt" onclick="setDb()">บันทึกและโหลดใหม่</button>
   <p class="mu" style="font-size:14px">เว้นว่าง = ใช้ได้เฉพาะเครื่องนี้ • ใส่ URL = เครื่องพนักงานทุกเครื่องและมือถือลูกค้าเห็นข้อมูลเดียวกัน</p>
-  ${D.db ? `<h3 class="mt">ลิงก์สำหรับเครื่องพนักงานเครื่องอื่น</h3><div class="c" style="max-width:200px;margin:0 auto">${qrSvg(link, 4)}</div><input readonly value="${esc(link)}" onclick="this.select()">` : ''}</div></div>`;
+  ${D.db ? `<h3 class="mt">ลิงก์สำหรับเครื่องพนักงานเครื่องอื่น</h3><div class="c" style="max-width:200px;margin:0 auto">${qrSvg(link, 4)}</div><input readonly value="${esc(link)}" onclick="this.select()"><h3 class="mt">ลิงก์สำหรับเจ้าของร้าน (ดูภาพรวมและรายงานจากที่ไหนก็ได้)</h3><input readonly value="${esc(link + '&role=owner')}" onclick="this.select()">` : ''}</div></div>`;
 }
-function saveShop() { Object.assign(M, {shop: $('#sShop').value.trim() || DEF.shop, tables: Math.max(1, Math.min(200, parseInt($('#sTables').value) || 1)), promptpay: $('#sPP').value.trim(), footer: $('#sFoot').value.trim(), channels: [...new Set($('#sCh').value.split(',').map(x => x.trim()).filter(Boolean))]}); saveM(); toast('บันทึกแล้ว'); draw(); }
+function saveShop() { Object.assign(M, {shop: $('#sShop').value.trim() || DEF.shop, tables: Math.max(1, Math.min(200, parseInt($('#sTables').value) || 1)), promptpay: $('#sPP').value.trim(), footer: $('#sFoot').value.trim(), pin: $('#sPin').value.trim(), channels: [...new Set($('#sCh').value.split(',').map(x => x.trim()).filter(Boolean))]}); saveM(); toast('บันทึกแล้ว'); draw(); }
 function setDb() { D.db = $('#sDb').value.trim(); saveD(); location.reload(); }
 function sTrl() {
   const langs = [...new Set([...M.clangs, ...M.slangs])].filter(l => l !== 'th'); if (!langs.includes(V.trl)) V.trl = langs[0] || '';
@@ -682,12 +728,13 @@ function saveGroup(id) {
 function delGroup(id) { if (confirm('ลบกลุ่มนี้?')) { M.groups = M.groups.filter(g => g.id !== id); M.menu.forEach(m => m.opts = m.opts.filter(o => o !== id)); saveM(); modal(); draw(); } }
 
 async function staffInit() {
-  if (Q.get('db')) { D.db = Q.get('db'); history.replaceState(null, '', location.pathname); }
+  if (ROLES[Q.get('role')]) D.role = Q.get('role');
+  if (Q.get('db') || Q.get('role')) { if (Q.get('db')) D.db = Q.get('db'); history.replaceState(null, '', location.pathname); }
   saveD(); UL = LANGS[D.lang] ? D.lang : 'th'; document.documentElement.lang = UL; store = makeStore(D.db);
   try { const raw = await store.get('menu'); if (raw) M = normM(JSON.parse(raw)); }
   catch (e) { syncErr = e.message; M = normM(clone(DEF)); }
   if (!M) { M = normM(clone(DEF)); saveM(); }
-  V.tab = (ROLES[D.role] || ROLES.all)[0]; draw(); loadSales().then(draw); await poll(); setInterval(() => { if (['tables', 'kitchen', 'serve'].includes(V.tab)) draw(); }, 30000); setInterval(poll, store.live ? 2500 : 1500);
+  const first = (ROLES[D.role] || ROLES.all)[0]; V.tab = first === 'dash' ? 'tables' : first; draw(); loadSales().then(() => first === 'dash' ? go('dash') : draw()); await poll(); setInterval(() => { if (['tables', 'kitchen', 'serve'].includes(V.tab)) draw(); else if (V.tab === 'dash') loadSales().then(() => V.tab === 'dash' && draw()); }, 30000); setInterval(poll, store.live ? 2500 : 1500);
   window.addEventListener('storage', e => { if (e.key === 'rjr_tree') poll(); });
 }
 Q.get('t') ? custInit() : staffInit();
