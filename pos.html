@@ -49,6 +49,15 @@ h1,h2,h3{margin:0}
 .item{background:#fff;border-radius:14px;padding:12px;cursor:pointer;display:flex;flex-direction:column;gap:2px;min-height:80px;justify-content:space-between}
 .item.out{opacity:.45;pointer-events:none}
 .item .pr{color:var(--o);font-weight:700}
+.item img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:10px;margin-bottom:4px}
+.sheet.w{max-width:820px}
+.pay{display:grid;grid-template-columns:1fr 1.2fr;gap:14px}
+@media(max-width:640px){.pay{grid-template-columns:1fr}}
+.pad{display:grid;grid-template-columns:repeat(4,1fr);gap:4px}
+.pad button{padding:14px 0;font-size:20px;border-radius:10px;border:0}
+.acts{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px}
+.acts button{border:0;font-weight:700;padding:12px}
+.ops span{background:#fee2e2;border-radius:8px;padding:1px 8px;font-size:14px;display:inline-block;margin:2px 2px 0 0}
 .card{background:#fff;border-radius:16px;padding:14px}
 .line{display:flex;gap:8px;align-items:flex-start;padding:8px 0;border-bottom:1px dashed var(--bd)}
 .line .n{flex:1;min-width:0}
@@ -114,6 +123,13 @@ my: {tables: 'စားပွဲ', orders: 'အော်ဒါ', kitchen: 'မ�
 lo: {tables: 'ໂຕະ', orders: 'ອໍເດີ', kitchen: 'ຄົວ', serve: 'ເສີບ', bill: 'ເຊັກບິນ', table: 'ໂຕະ', takeaway: 'ກັບບ້ານ', free: 'ຫວ່າງ', pending: 'ຍອດລໍຖ້າຈ່າຍ', all: 'ທັງໝົດ', total: 'ລວມ', send: 'ສົ່ງອໍເດີ', sent: 'ສັ່ງແລ້ວ', cart: 'ກະຕ່າ', add: 'ເພີ່ມ', note: 'ໝາຍເຫດ', req: 'ຕ້ອງເລືອກ', choose: 'ກະລຸນາເລືອກ', done: 'ສຳເລັດ', doneAll: 'ສຳເລັດທັງໝົດ', order: 'ສັ່ງອາຫານ', move: 'ຍ້າຍໂຕະ', cancel: 'ຍົກເລີກ', confirm: 'ຢືນຢັນ', confirmPrint: 'ຢືນຢັນ + ພິມ', cash: 'ເງິນສົດ', qr: 'ໂອນ / QR', recv: 'ຮັບເງິນມາ', change: 'ເງິນທອນ', disc: 'ສ່ວນຫຼຸດ', net: 'ຍອດສຸດທິ', pay: 'ຈ່າຍເງິນ', print: 'ພິມ', items: 'ລາຍການ', by: 'ໂດຍ', cust: 'ລູກຄ້າ', stNew: 'ກຳລັງເຮັດ', stCooked: 'ພ້ອມເສີບ', stServed: 'ເສີບແລ້ວ', callStaff: 'ເອີ້ນພະນັກງານ', empty: 'ບໍ່ມີລາຍການ', out: 'ໝົດ', loading: 'ກຳລັງໂຫຼດ…', closed: 'ຮ້ານຍັງບໍ່ເປີດລະບົບສັ່ງອາຫານ', sentOk: 'ສົ່ງອໍເດີແລ້ວ', fail: 'ບໍ່ສຳເລັດ ລອງໃໝ່', more: 'ເລືອກເພີ່ມ', lang: 'ພາສາ', baht: 'ບາດ', log: 'ແຈ້ງເຕືອນ', del: 'ລຶບລາຍການນີ້?', pickTable: 'ເລືອກໂຕະ', draft: 'ລາຍການໃໝ່', billSlip: 'ໃບແຈ້ງ', called: 'ແຈ້ງແລ້ວ', back: 'ກັບ',
   sOrder: '{0} ສັ່ງໃໝ່ {1} ລາຍການ', sCooked: '{0} {1} ພ້ອມເສີບ', sCookedAll: '{0} ອາຫານພ້ອມເສີບ', sServed: '{0} ເສີບ {1} ແລ້ວ', sServedAll: '{0} ເສີບຄົບແລ້ວ', sBill: '{0} ເອີ້ນເຊັກບິນ', sStaff: '{0} ເອີ້ນພະນັກງານ', sCash: '{0} ຈ່າຍ {1} ບາດ ຮັບມາ {2} ບາດ ເງິນທອນ {3} ບາດ', sQr: '{0} ໂອນຈ່າຍ {1} ບາດ'}
 };
+const I18N2 = {
+th: {orderMore: 'สั่งเพิ่ม', split: 'แยกจ่าย', quick: 'เช็คบิลด่วน', cancelTb: 'ยกเลิกรายการทั้งโต๊ะ?', qtyH: 'จำนวน', priceH: 'ราคา', statusH: 'สถานะ', itemH: 'รายการ', exact: 'ชำระพอดี', clear: 'ล้าง', fee: 'ค่าบริการเพิ่ม', search: 'ค้นหาชื่อหรือราคา', selPay: 'เลือกรายการที่ต้องการจ่าย', invoice: 'ใบเรียกเก็บเงิน', short: 'ขาดอีก'},
+en: {orderMore: 'Order more', split: 'Split bill', quick: 'Quick bill', cancelTb: 'Cancel everything on this table?', qtyH: 'Qty', priceH: 'Price', statusH: 'Status', itemH: 'Item', exact: 'Exact amount', clear: 'Clear', fee: 'Extra charge', search: 'Search name or price', selPay: 'Select items to pay', invoice: 'Bill', short: 'Short by'},
+zh: {search: '搜索名称或价格'},
+my: {orderMore: 'ထပ်မှာ', split: 'ခွဲရှင်း', quick: 'အမြန်ဘေလ်', cancelTb: 'စားပွဲတစ်ခုလုံး ဖျက်မလား?', qtyH: 'အရေအတွက်', priceH: 'စျေးနှုန်း', statusH: 'အခြေအနေ', itemH: 'စာရင်း', exact: 'အတိအကျ', clear: 'ရှင်း', fee: 'အပိုကြေး', search: 'အမည် သို့မဟုတ် စျေးနှုန်းဖြင့်ရှာ', selPay: 'ရှင်းမည့်စာရင်းရွေးပါ', invoice: 'ငွေတောင်းခံလွှာ', short: 'လိုသေး'},
+lo: {orderMore: 'ສັ່ງເພີ່ມ', split: 'ແຍກຈ່າຍ', quick: 'ເຊັກບິນດ່ວນ', cancelTb: 'ຍົກເລີກທັງໂຕະ?', qtyH: 'ຈຳນວນ', priceH: 'ລາຄາ', statusH: 'ສະຖານະ', itemH: 'ລາຍການ', exact: 'ຈ່າຍພໍດີ', clear: 'ລ້າງ', fee: 'ຄ່າບໍລິການເພີ່ມ', search: 'ຄົ້ນຫາຊື່ ຫຼື ລາຄາ', selPay: 'ເລືອກລາຍການທີ່ຈະຈ່າຍ', invoice: 'ໃບເກັບເງິນ', short: 'ຂາດອີກ'}};
+Object.keys(I18N2).forEach(l => Object.assign(I18N[l], I18N2[l]));
 let UL = 'th', FB = false, M = null, store = null;
 const fmt = (s, a) => s.replace(/\{(\d)\}/g, (_, i) => a[i] ?? '');
 const TL = (k, l) => (I18N[l] && I18N[l][k]) || (l !== 'th' && I18N.en[k]) || I18N.th[k] || k;
@@ -135,7 +151,7 @@ const hm = t => new Date(t).toLocaleTimeString('th-TH', {hour: '2-digit', minute
 const sum = items => (items || []).reduce((s, i) => s + i.price * i.qty, 0);
 const Q = new URLSearchParams(location.search);
 function toast(m) { const t = document.createElement('div'); t.className = 'toast'; t.textContent = m; document.body.appendChild(t); setTimeout(() => t.remove(), 2500); }
-function modal(html) { $('#modal').innerHTML = html ? `<div class="modal" onclick="if(event.target===this)modal()"><div class="sheet">${html}</div></div>` : ''; }
+function modal(html, wide) { $('#modal').innerHTML = html ? `<div class="modal" onclick="if(event.target===this)modal()"><div class="sheet ${wide ? 'w' : ''}">${html}</div></div>` : ''; }
 function qrSvg(text, cell) { if (typeof qrcode !== 'function') return ''; const q = qrcode(0, 'M'); q.addData(text); q.make(); return q.createSvgTag({cellSize: cell || 5, margin: 8, scalable: true}); }
 function beep() { try { const a = new (window.AudioContext || window.webkitAudioContext)(), o = a.createOscillator(), g = a.createGain(); o.connect(g); g.connect(a.destination); o.frequency.value = 880; g.gain.value = .15; o.start(); o.stop(a.currentTime + .2); } catch (e) {} }
 function promptpay(id, amount) {
@@ -175,7 +191,7 @@ function makeStore(db) {
 function normM(m) {
   m.cats = m.cats || []; m.groups = (m.groups || []).map(g => ({...g, choices: g.choices || []})); m.menu = (m.menu || []).map(x => ({...x, opts: x.opts || []}));
   m.dict = m.dict || {}; m.clangs = m.clangs && m.clangs.length ? m.clangs : ['th', 'en', 'zh']; m.slangs = m.slangs && m.slangs.length ? m.slangs : ['th', 'my', 'lo', 'en'];
-  m.tables = Number(m.tables) || 12; return m;
+  m.tables = Number(m.tables) || 12; m.channels = m.channels || ['Grab', 'LINE MAN', 'ShopeeFood']; return m;
 }
 function normT(ts) { const o = {}; Object.keys(ts || {}).forEach(k => { const t = ts[k] || {}, it = {}; Object.keys(t.items || {}).forEach(i => { const x = t.items[i]; if (x && x.name) it[i] = {...x, opts: x.opts || [], note: x.note || ''}; }); if (Object.keys(it).length || t.call) o[k] = {openedAt: t.openedAt || Date.now(), call: t.call || '', items: it}; }); return o; }
 
@@ -205,9 +221,13 @@ function pkDone() {
   for (const gid of PK.m.opts) { const g = M.groups.find(x => x.id === gid); if (g && g.required && !g.choices.some(c => o.includes(c.name))) return toast(tx('choose') + ' ' + tr(g.name)); }
   const k = PK, m = k.m; const line = {id: m.id, name: m.name, cat: m.cat, price: unitPrice(m.id, o), qty: k.qty, opts: o, note: $('#pkNote').value.trim().slice(0, 100)}; modal(); k.cb(line);
 }
-function menuGrid(cat, fn) {
-  return `<div class="chips"><button class="${!cat ? 'on' : ''}" onclick="${fn}Cat(-1)">${tx('all')}</button>${M.cats.map((c, i) => `<button class="${c === cat ? 'on' : ''}" onclick="${fn}Cat(${i})">${esc(tr(c))}</button>`).join('')}</div>
-  <div class="grid">${M.menu.filter(m => !cat || m.cat === cat).map(m => `<div class="item ${m.out ? 'out' : ''}" onclick="${fn}Pick('${m.id}')"><div><b>${esc(tr(m.name))}</b>${sub(m.name)}</div><span class="pr">${m.out ? tx('out') : baht(m.price)}</span></div>`).join('')}</div>`;
+let MQ = '', MGC = '';
+function mgItems(cat, fn) { const q = MQ.trim().toLowerCase();
+  return M.menu.filter(m => (!cat || m.cat === cat) && (!q || m.name.toLowerCase().includes(q) || tr(m.name).toLowerCase().includes(q) || String(m.price) === q)).map(m => `<div class="item ${m.out ? 'out' : ''}" onclick="${fn}Pick('${m.id}')"><div>${m.img ? `<img src="${m.img}" alt="" loading="lazy">` : ''}<b>${esc(tr(m.name))}</b>${sub(m.name)}</div><span class="pr">${m.out ? tx('out') : baht(m.price)}</span></div>`).join('') || `<p class="mu">${tx('empty')}</p>`; }
+function menuGrid(cat, fn) { MGC = cat;
+  return `<input type="search" placeholder="🔍 ${tx('search')}" value="${esc(MQ)}" oninput="MQ=this.value;$('#mg').innerHTML=mgItems(MGC,'${fn}')" style="margin-bottom:8px">
+  <div class="chips"><button class="${!cat ? 'on' : ''}" onclick="${fn}Cat(-1)">${tx('all')}</button>${M.cats.map((c, i) => `<button class="${c === cat ? 'on' : ''}" onclick="${fn}Cat(${i})">${esc(tr(c))}</button>`).join('')}</div>
+  <div class="grid" id="mg">${mgItems(cat, fn)}</div>`;
 }
 function addLine(list, line) { const s = list.find(x => x.id === line.id && x.note === line.note && x.opts.join() === line.opts.join()); if (s) s.qty += line.qty; else list.push(line); }
 
@@ -348,7 +368,7 @@ function draw() {
   $('#app').innerHTML = `<div class="top"><div class="step">${tabs.map((t, i) => `<button style="--c:${t[3]}" class="${V.tab === t[0] ? 'on' : ''}" onclick="go('${t[0]}')"><b>${i + 1}</b><small>${t[1]}</small>${t[2] ? `<i>${t[2]}</i>` : ''}</button>`).join('')}</div>
     <button class="ic" title="เสียง" onclick="D.voice=!D.voice;saveD();draw()">${D.voice ? '🔊' : '🔇'}</button><button class="ic" title="ยอดขาย" onclick="go('sales')">🧾</button><button class="ic" title="${tx('log')}" onclick="showLog()">🔔</button><button class="ic" title="ตั้งค่า" onclick="go('set')">⚙️</button></div>
   ${syncErr ? '<div class="c" style="background:#fee2e2;color:#991b1b;padding:4px">⚠️ เชื่อมต่อข้อมูลกลางไม่ได้ (' + esc(syncErr) + ')</div>' : ''}
-  <div class="wrap">${({tables: vTables, order: vOrder, kitchen: () => vQueue('new'), serve: () => vQueue('cooked'), bill: vBill, sales: vSales, set: vSet}[V.tab])()}</div>`;
+  <div class="wrap">${({tables: vTables, order: vOrder, kitchen: () => vQueue('new'), serve: () => vQueue('cooked'), bill: vBill, cash: vCash, sales: vSales, set: vSet}[V.tab])()}</div>`;
 }
 function go(t) { V.tab = t; if (t === 'sales') loadSales().then(draw); draw(); window.scrollTo(0, 0); }
 function showLog() { modal(`<h2>🔔 ${tx('log')}</h2>${V.log.map(e => `<div class="line"><div class="n">${esc(evText(e, UL))}<small class="mu th">${hm(e.at)} • ${esc(e.dev === 'cust' ? tx('cust') : e.by)}</small></div><span class="spk" onclick="speak(evText(V.log[${V.log.indexOf(e)}],vl()),vl())">🔊</span></div>`).join('') || `<p class="mu">${tx('empty')}</p>`}`); }
@@ -361,9 +381,9 @@ function vTables() {
 }
 function tblTap(tb) {
   if (L[tb] && L[tb].call) { L[tb].call = ''; W(store.del(`live/tables/${tb}/call`)); if (!itemsOf(tb).length) { delete L[tb]; draw(); } }
-  if (!itemsOf(tb).length) return openOrder(tb);
-  modal(`<h1 class="c">${tName(tb)}</h1><button class="big" style="background:#fde68a" onclick="modal();openOrder('${tb}')">${tx('order')}</button><button class="big" style="background:#a7f3d0" onclick="pay('${tb}')">${tx('bill')}</button><button class="big" style="background:#bae6fd" onclick="moveTable('${tb}')">${tx('move')}</button>`);
+  itemsOf(tb).length ? openCash(tb) : openOrder(tb);
 }
+function openCash(tb) { V.table = tb; go('cash'); }
 function openOrder(tb) { V.table = tb; V.cat = ''; go('order'); }
 
 /* ---------- 2 ออเดอร์ ---------- */
@@ -386,8 +406,7 @@ function vOrder() {
     <button class="p mt" style="width:100%;padding:14px;font-size:18px" onclick="sendDraft()">${tx('send')} ${baht(sum(d))}</button>` : ''}
     ${its.length ? `<div class="mt"><b class="mu">${tx('sent')}</b></div>${its.map(x => `<div class="line"><div class="n"><b>${x.qty}× ${esc(tr(x.name))}</b><span class="spk" onclick="readItem('${tb}','${x.k}')">🔊</span><small class="mu th">${esc(optLine(x))}</small><span class="st ${x.status}">${tx(sk[x.status])}</span>${x.src === 'qr' ? ' 📱' : ''}</div><b>${baht(x.price * x.qty)}</b><button class="sm d" onclick="delItem('${tb}','${x.k}')">✕</button></div>`).join('')}
     <div class="tot"><span>${tx('total')}</span><span>${baht(sum(its))}</span></div>
-    <div class="row"><button onclick="printBill('${tb}')">🖨️ ${tx('billSlip')}</button><button onclick="moveTable('${tb}')">⇄ ${tx('move')}</button></div>
-    <button class="g mt" style="width:100%;padding:14px;font-size:18px" onclick="pay('${tb}')">💵 ${tx('pay')} ${baht(sum(its))}</button>` : (d.length ? '' : `<p class="mu">${tx('empty')}</p>`)}</div></div>`;
+    <button class="g mt" style="width:100%;padding:14px;font-size:18px" onclick="openCash('${tb}')">💵 ${tx('bill')} ${baht(sum(its))}</button>` : (d.length ? '' : `<p class="mu">${tx('empty')}</p>`)}</div></div>`;
 }
 function readItem(tb, k) { const x = L[tb].items[k], l = vl(); speak([x.qty, trL(x.name, l), ...x.opts.map(o => trL(o, l)), x.note].filter(Boolean).join(' '), l); }
 function moveTable(from) { modal(`<h2>${tx('move')} — ${tName(from)}</h2><div class="grid mt">${tableIds().filter(t => t !== from).map(t => `<button onclick="doMove('${from}','${t}')">${tName(t)}${itemsOf(t).length ? ' •' : ''}</button>`).join('')}</div>`); }
@@ -409,34 +428,68 @@ function adv(tb, k) { const x = L[tb].items[k], n = nextSt(x.status); setSt(tb, 
 function advAll(tb, st) { const its = itemsOf(tb).filter(x => x.status === st && (st !== 'new' || inCats(x, D.kcat ? [D.kcat] : []))); its.forEach(x => setSt(tb, x.k, nextSt(st))); emit({type: nextSt(st), t: tb, all: its.length > 1, items: its.map(x => ({name: x.name, qty: x.qty}))}); draw(); }
 
 /* ---------- 5 เช็คบิล ---------- */
-function vBill() { const tbs = Object.keys(L).filter(tb => itemsOf(tb).length); return tbs.length ? `<div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(260px,1fr))">${tbs.map(tb => `<button class="big" style="margin:0;background:#fff;display:flex;justify-content:space-between" onclick="pay('${tb}')"><span>${tName(tb)}${L[tb].call === 'bill' ? ' 🔔' : ''}</span><span style="color:var(--o)">${baht(sum(itemsOf(tb)))}</span></button>`).join('')}</div>` : `<p class="mu c" style="padding:40px">${tx('empty')}</p>`; }
-function pay(tb) { P = {tb, disc: 0, recv: 0, method: 'cash'}; payDraw(); }
-function payDraw() {
-  const total = sum(itemsOf(P.tb)), net = Math.max(0, total - P.disc), pp = promptpay(M.promptpay, net);
-  const quick = [...new Set([net, Math.ceil(net / 20) * 20, Math.ceil(net / 50) * 50, Math.ceil(net / 100) * 100, Math.ceil(net / 500) * 500, Math.ceil(net / 1000) * 1000])].filter(v => v > 0);
-  modal(`<h2>${tx('pay')} — ${tName(P.tb)}</h2>
-  <div class="row" style="align-items:end"><div><label>${tx('total')}</label><b style="font-size:20px">${baht(total)}</b></div><div><label>${tx('disc')}</label><input type="number" inputmode="decimal" min="0" value="${P.disc || ''}" onchange="P.disc=Math.max(0,+this.value||0);payDraw()"></div></div>
-  <div class="tot"><span>${tx('net')}</span><span style="color:var(--o)">${baht(net)}</span></div>
-  <div class="chips"><button class="${P.method === 'cash' ? 'on' : ''}" onclick="P.method='cash';payDraw()">${tx('cash')}</button><button class="${P.method === 'qr' ? 'on' : ''}" onclick="P.method='qr';payDraw()">${tx('qr')}</button></div>
-  ${P.method === 'cash' ? `<label>${tx('recv')}</label><input id="recv" type="number" inputmode="decimal" value="${P.recv || ''}" oninput="P.recv=+this.value||0;payChg()"><div class="row mt">${quick.map(v => `<button class="sm" onclick="P.recv=${v};payDraw()">${v.toLocaleString()}</button>`).join('')}</div><div class="tot"><span>${tx('change')}</span><span id="chg"></span></div>`
-  : (pp ? `<div class="c" style="max-width:240px;margin:0 auto">${qrSvg(pp)}</div><p class="c mu">PromptPay ${esc(M.promptpay)} • ${baht(net)}</p>` : '')}
-  <div class="row mt"><button onclick="modal()">${tx('cancel')}</button><button class="g" id="payOk" onclick="payDone(false)">${tx('confirm')}</button><button class="g" id="payOk2" onclick="payDone(true)">${tx('confirmPrint')}</button></div>`);
-  if (P.method === 'cash') payChg();
+function vBill() { const tbs = Object.keys(L).filter(tb => itemsOf(tb).length); return tbs.length ? `<div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(260px,1fr))">${tbs.map(tb => `<button class="big" style="margin:0;background:#fff;display:flex;justify-content:space-between" onclick="openCash('${tb}')"><span>${tName(tb)}${L[tb].call === 'bill' ? ' 🔔' : ''}</span><span style="color:var(--o)">${baht(sum(itemsOf(tb)))}</span></button>`).join('')}</div>` : `<p class="mu c" style="padding:40px">${tx('empty')}</p>`; }
+const stKey = {new: 'stNew', cooked: 'stCooked', served: 'stServed'};
+function vCash() {
+  const tb = V.table, its = itemsOf(tb); if (!tb || !its.length) { V.tab = 'tables'; return vTables(); }
+  return `<div class="row" style="align-items:center"><button class="sm" style="flex:0;white-space:nowrap" onclick="go('tables')">‹ ${tx('back')}</button><h2 class="c" style="flex:5">${tName(tb)}</h2></div>
+  <div class="acts mt"><button style="background:#a7f3d0" onclick="openOrder('${tb}')">${tx('orderMore')}</button><button style="background:#ddd6fe" onclick="splitPay('${tb}')">${tx('split')}</button><button style="background:#fde68a" onclick="billPreview('${tb}')">${tx('quick')}</button><button style="background:#bae6fd" onclick="moveTable('${tb}')">${tx('move')}</button><button style="background:#fecaca" onclick="cancelTable('${tb}')">${tx('cancel')}</button></div>
+  <div class="card mt" style="overflow-x:auto"><table class="t"><tr><th>${tx('itemH')}</th><th class="r">${tx('qtyH')}</th><th class="r">${tx('priceH')}</th><th class="r">${tx('statusH')}</th></tr>
+  ${its.map((x, i) => `<tr><td>${i + 1}. <b>${esc(tr(x.name))}</b><span class="spk" onclick="readItem('${tb}','${x.k}')">🔊</span>${x.src === 'qr' ? '📱' : ''}${sub(x.name)}<div class="ops">${x.opts.map(o => `<span>${esc(tr(o))}</span>`).join('')}${x.note ? `<span style="background:#fef08a">✎ ${esc(x.note)}</span>` : ''}</div></td>
+    <td class="r" style="white-space:nowrap">${x.qty} <button class="sm" onclick="editQty('${tb}','${x.k}')">✎</button></td><td class="r" style="white-space:nowrap">${(x.price * x.qty).toLocaleString()} <button class="sm" onclick="editPrice('${tb}','${x.k}')">✎</button></td><td class="r"><span class="st ${x.status}">${tx(stKey[x.status])}</span></td></tr>`).join('')}
+  <tr style="background:#f3f4f6;font-weight:700"><td>${tx('total')}</td><td class="r">${its.reduce((s, x) => s + x.qty, 0)}</td><td class="r" colspan="2" style="font-size:18px">${sum(its).toLocaleString('en-US', {minimumFractionDigits: 2})}</td></tr></table></div>
+  <button class="g big" onclick="pay('${tb}')">💵 ${tx('pay')} ${baht(sum(its))}</button>`;
 }
-function payChg() { const net = Math.max(0, sum(itemsOf(P.tb)) - P.disc), ok = P.recv >= net; $('#chg').textContent = ok ? baht(P.recv - net) : '—'; $('#payOk').disabled = $('#payOk2').disabled = !ok; }
+function editQty(tb, k) { const x = L[tb].items[k], v = prompt(tx('qtyH') + ' — ' + tr(x.name), x.qty); if (v === null) return; const n = parseInt(v); if (!(n >= 0)) return; if (n === 0) return delItem(tb, k); x.qty = Math.min(999, n); W(store.put(`live/tables/${tb}/items/${k}/qty`, x.qty)); draw(); }
+function editPrice(tb, k) { const x = L[tb].items[k], v = prompt(tx('priceH') + ' / 1 — ' + tr(x.name), x.price); if (v === null) return; const n = parseFloat(v); if (!(n >= 0)) return; x.price = n; W(store.put(`live/tables/${tb}/items/${k}/price`, n)); draw(); }
+function cancelTable(tb) { if (!confirm(tx('cancelTb') + ' ' + tName(tb))) return; delete L[tb]; delete V.draft[tb]; W(store.del('live/tables/' + tb)); V.table = null; go('tables'); }
+function splitPay(tb) { modal(`<h2>${tx('selPay')}</h2>${itemsOf(tb).map(x => `<label class="ck"><input type="checkbox" class="spC" value="${x.k}"><span><b>${esc(tr(x.name))}</b> x ${x.qty}<small class="mu th">${esc(optLine(x))}</small></span><b>${(x.price * x.qty).toLocaleString()}</b></label>`).join('')}
+  <div class="row mt"><button onclick="modal()">${tx('cancel')}</button><button class="p" onclick="const k=[...document.querySelectorAll('.spC:checked')].map(e=>e.value);if(k.length)pay('${tb}',k)">${tx('confirm')}</button></div>`); }
+function billPreview(tb) { const its = itemsOf(tb), t = sum(its), pp = promptpay(M.promptpay, t);
+  modal(`<div class="c"><div class="mu">${tx('invoice')}</div><h2>${esc(M.shop)}</h2></div><div>${tName(tb)}<br>${new Date().toLocaleString('th-TH')}</div><hr>
+  ${its.map(x => `<div class="row"><span style="flex:4">${x.qty}× ${esc(tr(x.name))}</span><b style="text-align:right">${(x.price * x.qty).toLocaleString()}</b></div>`).join('')}<hr>
+  <div class="tot"><span>${tx('total')}</span><span>${t.toLocaleString('en-US', {minimumFractionDigits: 2})}</span></div>${pp ? `<div style="max-width:220px;margin:0 auto">${qrSvg(pp)}</div><p class="c mu">PromptPay</p>` : ''}
+  <div class="row mt"><button onclick="modal()">${tx('cancel')}</button><button class="p" onclick="modal();printBill('${tb}')">🖨️ ${tx('print')}</button></div>`); }
+function pay(tb, keys) { P = {tb, keys: keys || null, disc: 0, fee: 0, recv: '', method: 'cash'}; payDraw(); }
+const payItems = () => itemsOf(P.tb).filter(x => !P.keys || P.keys.includes(x.k));
+const payNet = () => Math.max(0, sum(payItems()) - P.disc + P.fee);
+const mLabel = m => m === 'cash' ? tx('cash') : m === 'qr' ? tx('qr') : m;
+function payDraw() {
+  const total = sum(payItems()), net = payNet(), pp = promptpay(M.promptpay, net), ms = ['cash', 'qr', ...M.channels];
+  const kb = (k, l, st) => `<button style="${st || ''}" onclick="payKey('${k}')">${l || k}</button>`;
+  modal(`<h2>${tx('pay')} — ${tName(P.tb)}${P.keys ? ' (' + tx('split') + ')' : ''}</h2><div class="pay mt"><div>
+    <div class="tot" style="font-size:17px"><span>${tx('total')}</span><span>${baht(total)}</span></div>
+    <div class="row" style="align-items:center"><span>${tx('disc')}</span><input type="number" inputmode="decimal" min="0" value="${P.disc || ''}" onchange="P.disc=Math.max(0,+this.value||0);payDraw()"></div>
+    <div class="row mt" style="align-items:center"><span>${tx('fee')}</span><input type="number" inputmode="decimal" min="0" value="${P.fee || ''}" onchange="P.fee=Math.max(0,+this.value||0);payDraw()"></div>
+    <div class="tot" style="color:#047857;font-size:24px"><span>${tx('net')}</span><span>${baht(net)}</span></div><div id="chg" style="font-size:20px;font-weight:700;text-align:right;min-height:30px"></div>
+    <button class="g big" id="payOk" onclick="payDone(false)">${tx('confirm')}</button><button class="big" id="payOk2" style="background:#d1fae5" onclick="payDone(true)">🖨️ ${tx('confirmPrint')}</button><button class="big" style="background:#fff" onclick="modal()">${tx('cancel')}</button></div>
+  <div><div class="chips" style="flex-wrap:wrap">${ms.map((m, i) => `<button class="${P.method === m ? 'on' : ''}" onclick="P.method=['cash','qr',...M.channels][${i}];payDraw()">${esc(mLabel(m))}</button>`).join('')}</div>
+    ${P.method === 'cash' ? `<div id="pRecv" style="font-size:38px;font-weight:700;padding:4px 8px"></div><div class="pad">
+      <button style="grid-column:span 2;background:#fde047" onclick="payKey('C')">${tx('clear')}</button>${kb('<', '⌫', 'background:#e5e7eb')}${kb('+1000', '1,000', 'background:#d1d5db')}
+      ${kb('7')}${kb('8')}${kb('9')}${kb('+500', '500', 'background:#e9d5ff')}${kb('4')}${kb('5')}${kb('6')}${kb('+100', '100', 'background:#fca5a5')}
+      ${kb('1')}${kb('2')}${kb('3')}${kb('+50', '50', 'background:#bfdbfe')}${kb('0')}${kb('.')}${kb('=', tx('exact'), 'background:#34d399;font-size:15px;font-weight:700')}${kb('+20', '20', 'background:#bbf7d0')}</div>`
+    : P.method === 'qr' && pp ? `<div class="c" style="max-width:240px;margin:0 auto">${qrSvg(pp)}</div><p class="c mu">PromptPay ${esc(M.promptpay)} • ${baht(net)}</p>` : `<p class="c mu" style="padding:30px 0;font-size:20px">${esc(mLabel(P.method))} • ${baht(net)}</p>`}</div></div>`, true);
+  payUpd();
+}
+function payKey(k) { if (k === 'C') P.recv = ''; else if (k === '<') P.recv = P.recv.slice(0, -1); else if (k === '=') P.recv = String(payNet()); else if (k[0] === '+') P.recv = String((+P.recv || 0) + +k.slice(1)); else if (!(k === '.' && P.recv.includes('.')) && P.recv.length < 9) P.recv += k; payUpd(); }
+function payUpd() { const net = payNet(), r = +P.recv || 0, cash = P.method === 'cash', ok = !cash || r >= net;
+  if (cash) { $('#pRecv').textContent = (P.recv === '' ? '0' : (+P.recv).toLocaleString('en-US') + (P.recv.endsWith('.') ? '.' : '')); $('#chg').textContent = ok ? tx('change') + ' ' + baht(r - net) : tx('short') + ' ' + baht(net - r); $('#chg').style.color = ok ? '#047857' : '#ea580c'; }
+  $('#payOk').disabled = $('#payOk2').disabled = !ok; }
 function payDone(pr) {
-  const its = itemsOf(P.tb), total = sum(its), net = Math.max(0, total - P.disc), now = Date.now();
-  const s = {id: 's' + uid(), no: SALES.filter(x => dayKey(x.at) === dayKey(now)).length + 1, at: now, table: P.tb, by: D.name, items: its.map(({name, price, qty, opts, note}) => ({name, price, qty, opts, note})), total, disc: P.disc, net, method: P.method, recv: P.method === 'cash' ? P.recv : net};
-  SALES.push(s); W(store.put('sales/' + s.id, JSON.stringify(s))); delete L[P.tb]; W(store.del('live/tables/' + P.tb)); delete V.draft[P.tb];
-  emit({type: 'paid', t: P.tb, method: s.method, net, recv: s.recv, chg: s.recv - net}); modal(); if (pr) receipt(s, true);
-  toast(tx('change') + ' ' + baht(s.recv - net)); if (V.table === P.tb) V.table = null; V.tab = 'tables'; draw();
+  const tb = P.tb, its = payItems(), total = sum(its), net = payNet(), now = Date.now(), cash = P.method === 'cash';
+  const s = {id: 's' + uid(), no: SALES.filter(x => dayKey(x.at) === dayKey(now)).length + 1, at: now, table: tb, by: D.name, items: its.map(({name, price, qty, opts, note}) => ({name, price, qty, opts, note})), total, disc: P.disc, fee: P.fee, net, method: P.method, recv: cash ? +P.recv : net};
+  SALES.push(s); W(store.put('sales/' + s.id, JSON.stringify(s)));
+  if (its.length === itemsOf(tb).length) { delete L[tb]; delete V.draft[tb]; W(store.del('live/tables/' + tb)); }
+  else its.forEach(x => { delete L[tb].items[x.k]; W(store.del(`live/tables/${tb}/items/${x.k}`)); });
+  emit({type: 'paid', t: tb, method: cash ? 'cash' : 'other', net, recv: s.recv, chg: s.recv - net}); modal(); if (pr) receipt(s, true);
+  if (cash) toast(tx('change') + ' ' + baht(s.recv - net)); if (!L[tb]) { if (V.table === tb) V.table = null; V.tab = 'tables'; } draw();
 }
 function receipt(s, paid) {
   const el = $('#print'); el.className = 'rc', ol = x => [...(x.opts || []), x.note].filter(Boolean).join(', ');
   el.innerHTML = `<div style="text-align:center"><b style="font-size:16px">${esc(M.shop)}</b><br>${paid ? 'ใบเสร็จรับเงิน #' + s.no : 'ใบแจ้งรายการ'}<br>${tNameL(s.table, 'th')} • ${new Date(s.at).toLocaleString('th-TH')}</div><hr>
   <table style="width:100%;border-collapse:collapse">${s.items.map(x => `<tr><td style="vertical-align:top">${x.qty}×</td><td>${esc(x.name)}${ol(x) ? '<br><small>' + esc(ol(x)) + '</small>' : ''}</td><td style="text-align:right;vertical-align:top">${(x.price * x.qty).toLocaleString()}</td></tr>`).join('')}</table><hr>
-  <table style="width:100%"><tr><td>รวม</td><td style="text-align:right">${s.total.toLocaleString()}</td></tr>${s.disc ? `<tr><td>ส่วนลด</td><td style="text-align:right">-${s.disc.toLocaleString()}</td></tr>` : ''}<tr><td><b>สุทธิ</b></td><td style="text-align:right"><b>${s.net.toLocaleString()}</b></td></tr>
-  ${paid ? `<tr><td>${s.method === 'cash' ? 'เงินสด' : 'โอน/QR'}</td><td style="text-align:right">${s.recv.toLocaleString()}</td></tr>${s.method === 'cash' ? `<tr><td>ทอน</td><td style="text-align:right">${(s.recv - s.net).toLocaleString()}</td></tr>` : ''}` : ''}</table>
+  <table style="width:100%"><tr><td>รวม</td><td style="text-align:right">${s.total.toLocaleString()}</td></tr>${s.disc ? `<tr><td>ส่วนลด</td><td style="text-align:right">-${s.disc.toLocaleString()}</td></tr>` : ''}${s.fee ? `<tr><td>ค่าบริการเพิ่ม</td><td style="text-align:right">${s.fee.toLocaleString()}</td></tr>` : ''}<tr><td><b>สุทธิ</b></td><td style="text-align:right"><b>${s.net.toLocaleString()}</b></td></tr>
+  ${paid ? `<tr><td>${s.method === 'cash' ? 'เงินสด' : s.method === 'qr' ? 'โอน/QR' : esc(s.method)}</td><td style="text-align:right">${s.recv.toLocaleString()}</td></tr>${s.method === 'cash' ? `<tr><td>ทอน</td><td style="text-align:right">${(s.recv - s.net).toLocaleString()}</td></tr>` : ''}` : ''}</table>
   ${!paid && promptpay(M.promptpay, s.net) ? `<div style="width:45mm;margin:6px auto">${qrSvg(promptpay(M.promptpay, s.net))}</div><div style="text-align:center">สแกนจ่ายพร้อมเพย์</div>` : ''}<p style="text-align:center">${esc(M.footer)}</p>`;
   setTimeout(() => window.print(), 50);
 }
@@ -445,11 +498,12 @@ function printBill(tb) { const its = itemsOf(tb), t = sum(its); receipt({at: Dat
 /* ---------- ยอดขาย ---------- */
 async function loadSales() { try { const o = await store.get('sales') || {}; SALES = Object.values(o).map(s => { try { return JSON.parse(s); } catch (e) { return null; } }).filter(Boolean).sort((a, b) => a.at - b.at); } catch (e) {} }
 function vSales() {
-  const list = SALES.filter(s => dayKey(s.at) === V.day), tot = list.reduce((a, s) => a + s.net, 0), cash = list.filter(s => s.method === 'cash').reduce((a, s) => a + s.net, 0), top = {};
+  const list = SALES.filter(s => dayKey(s.at) === V.day), tot = list.reduce((a, s) => a + s.net, 0), by = {}, top = {};
+  list.forEach(s => by[s.method] = (by[s.method] || 0) + s.net);
   list.forEach(s => s.items.forEach(i => { top[i.name] = top[i.name] || {q: 0, a: 0}; top[i.name].q += i.qty; top[i.name].a += i.price * i.qty; }));
   return `<div class="row" style="align-items:center"><input type="date" value="${V.day}" onchange="V.day=this.value;draw()" style="max-width:200px"><button style="flex:0;white-space:nowrap" onclick="csv()">⬇️ CSV</button></div>
-  <div class="grid mt"><div class="stat">ยอดขาย<b>${baht(tot)}</b></div><div class="stat">จำนวนบิล<b>${list.length}</b></div><div class="stat">เงินสด<b>${baht(cash)}</b></div><div class="stat">โอน/QR<b>${baht(tot - cash)}</b></div></div>
-  <div class="split mt"><div class="card"><h3>บิล</h3><table class="t"><tr><th>#</th><th>เวลา</th><th>โต๊ะ</th><th>โดย</th><th>จ่าย</th><th class="r">สุทธิ</th><th></th></tr>${list.slice().reverse().map(s => `<tr><td>${s.no}</td><td>${hm(s.at)}</td><td>${tNameL(s.table, 'th')}</td><td>${esc(s.by || '')}</td><td>${s.method === 'cash' ? 'สด' : 'โอน'}</td><td class="r">${s.net.toLocaleString()}</td><td class="r"><button class="sm" onclick="receipt(SALES.find(s=>s.id==='${s.id}'),true)">🖨️</button> <button class="sm d" onclick="voidBill('${s.id}')">✕</button></td></tr>`).join('') || '<tr><td colspan="7" class="mu">ยังไม่มีบิล</td></tr>'}</table></div>
+  <div class="grid mt"><div class="stat">ยอดขาย<b>${baht(tot)}</b></div><div class="stat">จำนวนบิล<b>${list.length}</b></div>${Object.keys(by).map(m => `<div class="stat">${esc(m === 'cash' ? 'เงินสด' : m === 'qr' ? 'โอน/QR' : m)}<b>${baht(by[m])}</b></div>`).join('')}</div>
+  <div class="split mt"><div class="card"><h3>บิล</h3><table class="t"><tr><th>#</th><th>เวลา</th><th>โต๊ะ</th><th>โดย</th><th>จ่าย</th><th class="r">สุทธิ</th><th></th></tr>${list.slice().reverse().map(s => `<tr><td>${s.no}</td><td>${hm(s.at)}</td><td>${tNameL(s.table, 'th')}</td><td>${esc(s.by || '')}</td><td>${s.method === 'cash' ? 'สด' : s.method === 'qr' ? 'โอน' : esc(s.method)}</td><td class="r">${s.net.toLocaleString()}</td><td class="r"><button class="sm" onclick="receipt(SALES.find(s=>s.id==='${s.id}'),true)">🖨️</button> <button class="sm d" onclick="voidBill('${s.id}')">✕</button></td></tr>`).join('') || '<tr><td colspan="7" class="mu">ยังไม่มีบิล</td></tr>'}</table></div>
   <div class="card"><h3>เมนูขายดี</h3><table class="t">${Object.entries(top).sort((a, b) => b[1].q - a[1].q).map(([n, v]) => `<tr><td>${esc(n)}</td><td class="r">${v.q}</td><td class="r">${v.a.toLocaleString()}</td></tr>`).join('') || '<tr><td class="mu">—</td></tr>'}</table></div></div>`;
 }
 function voidBill(id) { if (confirm('ลบบิลนี้ออกจากยอดขาย?')) { SALES = SALES.filter(s => s.id !== id); W(store.del('sales/' + id)); draw(); } }
@@ -497,6 +551,7 @@ function sShop() {
   return `<div class="split"><div class="card"><h3>ร้าน (ใช้ร่วมกันทุกเครื่อง)</h3>
   <label>ชื่อร้าน</label><input id="sShop" value="${esc(M.shop)}"><label>จำนวนโต๊ะ</label><input id="sTables" type="number" min="1" max="200" value="${M.tables}">
   <label>พร้อมเพย์ (เบอร์มือถือ หรือเลขบัตร 13 หลัก)</label><input id="sPP" inputmode="numeric" value="${esc(M.promptpay)}"><label>ข้อความท้ายใบเสร็จ</label><input id="sFoot" value="${esc(M.footer)}">
+  <label>ช่องทางชำระ/ขายอื่น ๆ (คั่นด้วย , )</label><input id="sCh" value="${esc(M.channels.join(', '))}">
   <button class="p mt" style="width:100%" onclick="saveShop()">บันทึก</button>
   <h3 class="mt">ภาษาที่ลูกค้าเลือกได้ (หน้าสแกนสั่ง)</h3><div>${langChecks('clangs')}</div>
   <h3 class="mt">ภาษาของพนักงาน (หลังร้าน)</h3><div>${langChecks('slangs')}</div><p class="mu" style="font-size:14px">ลูกค้าจะเห็นเฉพาะภาษาในรายการบน ภาษาของพนักงานไม่แสดงให้ลูกค้า</p></div>
@@ -505,7 +560,7 @@ function sShop() {
   <p class="mu" style="font-size:14px">เว้นว่าง = ใช้ได้เฉพาะเครื่องนี้ • ใส่ URL = เครื่องพนักงานทุกเครื่องและมือถือลูกค้าเห็นข้อมูลเดียวกัน</p>
   ${D.db ? `<h3 class="mt">ลิงก์สำหรับเครื่องพนักงานเครื่องอื่น</h3><div class="c" style="max-width:200px;margin:0 auto">${qrSvg(link, 4)}</div><input readonly value="${esc(link)}" onclick="this.select()">` : ''}</div></div>`;
 }
-function saveShop() { Object.assign(M, {shop: $('#sShop').value.trim() || DEF.shop, tables: Math.max(1, Math.min(200, parseInt($('#sTables').value) || 1)), promptpay: $('#sPP').value.trim(), footer: $('#sFoot').value.trim()}); saveM(); toast('บันทึกแล้ว'); draw(); }
+function saveShop() { Object.assign(M, {shop: $('#sShop').value.trim() || DEF.shop, tables: Math.max(1, Math.min(200, parseInt($('#sTables').value) || 1)), promptpay: $('#sPP').value.trim(), footer: $('#sFoot').value.trim(), channels: [...new Set($('#sCh').value.split(',').map(x => x.trim()).filter(Boolean))]}); saveM(); toast('บันทึกแล้ว'); draw(); }
 function setDb() { D.db = $('#sDb').value.trim(); saveD(); location.reload(); }
 function sTrl() {
   const langs = [...new Set([...M.clangs, ...M.slangs])].filter(l => l !== 'th'); if (!langs.includes(V.trl)) V.trl = langs[0] || '';
@@ -530,15 +585,18 @@ function vMenu() {
 }
 function togOut(id) { const m = M.menu.find(x => x.id === id); m.out = !m.out; saveM(); draw(); }
 function editItem(id) {
-  const m = M.menu.find(x => x.id === id) || {name: '', price: '', cat: M.cats[0], opts: []};
+  const m = M.menu.find(x => x.id === id) || {name: '', price: '', cat: M.cats[0], opts: []}; EIMG = m.img || '';
   modal(`<h2>${id ? 'แก้ไขเมนู' : 'เพิ่มเมนู'}</h2><label>ชื่อ (ภาษาไทย)</label><input id="eN" value="${esc(m.name)}"><label>ราคา</label><input id="eP" type="number" inputmode="decimal" value="${m.price}">
   <label>หมวด</label><select id="eC">${M.cats.map(c => `<option ${c === m.cat ? 'selected' : ''}>${esc(c)}</option>`).join('')}</select>
+  <label>รูปอาหาร</label><div class="row" style="align-items:center"><div id="eImg" style="flex:0 0 110px">${EIMG ? `<img src="${EIMG}" style="width:110px;border-radius:10px">` : '<span class="mu">ไม่มีรูป</span>'}</div><input type="file" accept="image/*" onchange="pickImg(this)"><button class="sm d" style="flex:0" onclick="EIMG='';$('#eImg').innerHTML=''">ลบรูป</button></div>
   <label>ตัวเลือก</label>${M.groups.map(g => `<label class="ck"><input type="checkbox" class="eO" value="${g.id}" ${m.opts.includes(g.id) ? 'checked' : ''}><span>${esc(g.name)}</span></label>`).join('')}
   <div class="row mt">${id ? `<button class="d" onclick="delMenu('${id}')">ลบ</button>` : ''}<button onclick="modal()">ยกเลิก</button><button class="p" onclick="saveItem('${id || ''}')">บันทึก</button></div>`);
 }
+let EIMG = '';
+function pickImg(inp) { const f = inp.files[0]; if (!f) return; const im = new Image(); im.onload = () => { const sc = Math.min(1, 240 / Math.max(im.width, im.height)), c = document.createElement('canvas'); c.width = Math.round(im.width * sc); c.height = Math.round(im.height * sc); c.getContext('2d').drawImage(im, 0, 0, c.width, c.height); EIMG = c.toDataURL('image/jpeg', .72); $('#eImg').innerHTML = `<img src="${EIMG}" style="width:110px;border-radius:10px">`; URL.revokeObjectURL(im.src); }; im.src = URL.createObjectURL(f); }
 function saveItem(id) {
   const name = $('#eN').value.trim(), price = +$('#eP').value; if (!name || !(price >= 0)) return toast('กรอกชื่อและราคา');
-  const v = {name, price, cat: $('#eC').value, opts: [...document.querySelectorAll('.eO:checked')].map(e => e.value)};
+  const v = {name, price, img: EIMG, cat: $('#eC').value, opts: [...document.querySelectorAll('.eO:checked')].map(e => e.value)};
   if (id) Object.assign(M.menu.find(x => x.id === id), v); else M.menu.push({id: 'm' + uid(), out: false, ...v}); saveM(); modal(); draw();
 }
 function delMenu(id) { if (confirm('ลบเมนูนี้?')) { M.menu = M.menu.filter(x => x.id !== id); saveM(); modal(); draw(); } }
