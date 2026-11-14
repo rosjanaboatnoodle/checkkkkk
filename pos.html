@@ -7,7 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&family=Noto+Sans+Myanmar:wght@400;600&family=Noto+Sans+Lao:wght@400;600&display=swap" rel="stylesheet" />
 <script src="qrcode.js"></script>
 <style>
-:root{--o:#ea580c;--bd:#e5e7eb;--tx:#1f2937;--mu:#6b7280;--g:#16a34a;--r:#dc2626;--bg:#f1f1f1}
+:root{--o:#8a2a17;--bd:#e7dfd3;--tx:#2b211c;--mu:#7a6f66;--g:#15803d;--r:#dc2626;--bg:#f7f1e7;--snew:#d97706;--sready:#2563eb;--swait:#15803d}
 *{box-sizing:border-box;font-family:'Sarabun','Noto Sans Myanmar','Noto Sans Lao',system-ui,sans-serif;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;height:100%;background:var(--bg);color:var(--tx);font-size:16px}
 button{font:inherit;cursor:pointer;border-radius:12px;padding:10px 14px;background:#fff;color:var(--tx);border:1px solid var(--bd)}
@@ -102,6 +102,31 @@ table.t td.r,table.t th.r{text-align:right}
   #print.tk .pg{break-after:page;padding-bottom:8mm}
   html,body{background:#fff}
 }
+.top{gap:10px}
+.brand{font-weight:700;color:var(--o);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:26vw}
+.nav{display:flex;gap:4px;flex:1;justify-content:center}
+.nav button{border:0;background:transparent;padding:4px 16px;border-radius:12px;position:relative;display:flex;flex-direction:column;align-items:center;min-width:76px;color:var(--mu);line-height:1.2}
+.nav button span{font-size:22px}.nav button small{font-size:13px;font-weight:600;white-space:nowrap}
+.nav button.on{background:var(--o);color:#fff}
+.nav i{position:absolute;top:0;right:6px;font-style:normal;font-size:12px;font-weight:700;min-width:20px;height:20px;line-height:20px;border-radius:99px;background:var(--r);color:#fff;text-align:center;padding:0 4px}
+@media(max-width:700px){.brand{display:none}.nav{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--bd);padding:4px 4px calc(4px + env(safe-area-inset-bottom));z-index:25}.nav button{flex:1;min-width:0}.top{justify-content:flex-end}.wrap{padding-bottom:86px}.toast{bottom:110px}}
+.chips button.on{background:var(--tx)}
+.tbl{text-align:left;border-left:8px solid #d6cec2;min-height:112px;padding:10px 12px}
+.tbl .nm{background:none!important;padding:0;font-size:19px}
+.tbl .amt{font-size:22px;padding:4px 0}
+.tbl .ss{font-size:14px;font-weight:600;color:var(--mu)}
+.tbl.s-new{border-color:var(--snew);background:#fffaf0}.tbl.s-new .ss{color:var(--snew)}
+.tbl.s-ready{border-color:var(--sready);background:#eff5ff}.tbl.s-ready .ss{color:var(--sready)}
+.tbl.s-wait{border-color:var(--swait);background:#f0fbf3}.tbl.s-wait .ss{color:var(--swait)}
+.tbl.s-call{border-color:var(--r);background:#fef2f2;animation:pulse 1.2s infinite}.tbl.s-call .ss{color:var(--r)}
+@keyframes pulse{50%{box-shadow:0 0 0 4px #fca5a5}}
+.lg{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:14px;color:var(--mu)}.lg i{display:inline-block;width:10px;height:10px;border-radius:99px;margin-right:5px}
+.hd{display:flex;align-items:center;gap:8px;margin-bottom:10px}.hd h2{flex:1;text-align:center}.hd button{white-space:nowrap}
+.kq .card{border-top:6px solid var(--swait)}.kq .card.a1{border-color:var(--snew)}.kq .card.a2{border-color:var(--r)}
+.age{font-weight:700;color:var(--swait);white-space:nowrap}.a1 .age{color:var(--snew)}.a2 .age{color:var(--r)}
+.ki button{background:var(--g);color:#fff}
+.st{background:#fef3c7;color:#92400e}.st.cooked{background:#dbeafe;color:#1e40af}
+.acts button{background:#fff;border:1px solid var(--bd)}
 </style>
 </head>
 <body>
@@ -136,6 +161,10 @@ zh: {rec: '推荐', hot: '热销', pick1: '选1项', pickMany: '可多选', scan
 my: {printQr: 'QR ပရင့်', history: 'မှာထားသည့်မှတ်တမ်း', units: 'ခု', rec: 'အကြံပြု', hot: 'ရောင်းအားကောင်း', pick1: '၁ ခုရွေး', pickMany: 'အများရွေးနိုင်', clearQ: 'မပို့ရသေးသည်များ ဖျက်မလား?', scan: 'မှာရန် စကင်ဖတ်ပါ', paidToday: 'ယနေ့ရှင်းပြီးဘေလ်'},
 lo: {printQr: 'ພິມ QR code', history: 'ປະຫວັດການສັ່ງ', units: 'ໜ່ວຍ', rec: 'ແນະນຳ', hot: 'ຂາຍດີ', pick1: 'ເລືອກ 1 ຂໍ້', pickMany: 'ເລືອກໄດ້ຫຼາຍຂໍ້', clearQ: 'ລ້າງລາຍການໃໝ່?', scan: 'ສະແກນເພື່ອສັ່ງອາຫານ', paidToday: 'ບິນທີ່ຈ່າຍແລ້ວມື້ນີ້'}};
 Object.keys(I18N2).forEach(l => Object.assign(I18N[l], I18N2[l], I18N3[l]));
+Object.assign(I18N.th, {stWait: 'รอชำระ', min: 'นาที', again: 'อีก 1', moreAct: 'เพิ่มเติม'});
+Object.assign(I18N.en, {stWait: 'To pay', min: 'min', again: '1 more', moreAct: 'More'});
+Object.assign(I18N.my, {stWait: 'ငွေရှင်းရန်', min: 'မိနစ်', again: 'နောက် ၁', moreAct: 'နောက်ထပ်'});
+Object.assign(I18N.lo, {stWait: 'ລໍຖ້າຈ່າຍ', min: 'ນາທີ', again: 'ອີກ 1', moreAct: 'ເພີ່ມເຕີມ'});
 const TA = 'กลับบ้าน';
 let UL = 'th', FB = false, M = null, store = null;
 const fmt = (s, a) => s.replace(/\{(\d)\}/g, (_, i) => a[i] ?? '');
@@ -217,7 +246,7 @@ function pickItem(id, cb) {
   ${gs.map(g => `<h3 class="mt">${esc(tr(g.name))} <small class="mu">${g.multi ? tx('pickMany') : tx('pick1')}${g.required ? ' • ' + tx('req') : ''}</small></h3>
     ${g.choices.map((c, i) => `<label class="ck"><input type="${g.multi ? 'checkbox' : 'radio'}" name="g_${g.id}" value="${esc(c.name)}" ${!g.multi && g.required && i === 0 ? 'checked' : ''} onchange="pkUpd()"><span>${esc(tr(c.name))}</span><b class="mu">${c.price ? '+' + c.price : ''}</b></label>`).join('')}`).join('')}
   <label class="ck mt"><input type="checkbox" id="pkTA"><span>🛍️ ${tx('takeaway')}</span></label><label>${tx('note')}</label><input id="pkNote">
-  <div class="row mt" style="align-items:center"><div class="qty" style="flex:0"><button onclick="pkQty(-1)">−</button><b id="pkQ" style="min-width:28px;text-align:center">1</b><button onclick="pkQty(1)">+</button></div><button class="p" id="pkOk" onclick="pkDone()"></button></div>`);
+  <div class="row mt" style="align-items:center"><div class="qty" style="flex:0"><button onclick="pkQty(-1)">−</button><b id="pkQ" style="min-width:28px;text-align:center">1</b><button onclick="pkQty(1)">+</button></div><button class="p" id="pkOk" onclick="pkDone()"></button></div><div class="row mt">${[2, 3, 5, 10].map(n => `<button class="sm" onclick="PK.qty=${n};pkUpd()">×${n}</button>`).join('')}</div>`);
   pkUpd();
 }
 function pkOpts() { return [...document.querySelectorAll('#modal input[name^=g_]:checked')].map(e => e.value); }
@@ -317,7 +346,7 @@ const DEF = {
     'น้ำเปล่า': ['Water', 'ရေသန့်'], 'น้ำแข็ง': ['Ice', 'ရေခဲ'], 'โค้ก': ['Coke', 'ကိုကာကိုလာ'], 'น้ำกระเจี๊ยบ': ['Roselle juice', 'ချဉ်ပေါင်ရည်'], 'น้ำโอเลี้ยง': ['Thai iced black coffee', 'အိုလျန်']
   }).map(([k, v]) => [k, {en: v[0], my: v[1]}]))
 };
-let D = Object.assign({id: 'd' + uid(), name: 'Staff', lang: 'th', db: '', voice: true, vlang: '', say: {order: 1, cooked: 1, served: 0, call: 1, paid: 1}, autoPrint: false, pcats: [], plang: '', pth: true, paper: 80, kcat: ''}, (() => { try { return JSON.parse(localStorage.getItem('rj_dev')) || {}; } catch (e) { return {}; } })());
+let D = Object.assign({id: 'd' + uid(), name: 'Staff', lang: 'th', db: '', voice: true, vlang: '', say: {order: 1, cooked: 1, served: 0, call: 1, paid: 1}, autoPrint: false, pcats: [], plang: '', pth: true, paper: 80, kcat: '', role: 'all', t1: 8, t2: 15}, (() => { try { return JSON.parse(localStorage.getItem('rj_dev')) || {}; } catch (e) { return {}; } })());
 const saveD = () => localStorage.setItem('rj_dev', JSON.stringify(D));
 let L = {}, SALES = [], pending = 0, seq = 0, syncErr = '', seen = null, P = null;
 const V = {tab: 'tables', table: null, cat: '', day: dayKey(Date.now()), draft: {}, log: [], set: 'dev', trl: ''};
@@ -371,12 +400,12 @@ function printTickets(jobs) {
 function printQueue(tb, st) { const its = itemsOf(tb).filter(x => x.status === st && (st !== 'new' || inCats(x, D.kcat ? [D.kcat] : []))); if (its.length) printTickets([[tb, its]]); }
 
 /* ---------- โครงหน้า ---------- */
+const ROLES = {all: ['tables', 'kitchen', 'serve', 'bill'], waiter: ['tables', 'serve'], kitchen: ['kitchen']}, TABI = {tables: '🪑', kitchen: '🍳', serve: '🛎️', bill: '💵'};
 function draw() {
   let nNew = 0, nCk = 0; Object.keys(L).forEach(tb => itemsOf(tb).forEach(x => { if (x.status === 'new') nNew++; else if (x.status === 'cooked') nCk++; }));
-  const nBill = Object.keys(L).filter(tb => itemsOf(tb).length).length;
-  const tabs = [['tables', tx('tables'), 0, '#fecaca'], ['order', tx('orders'), 0, '#fde68a'], ['kitchen', tx('kitchen'), nNew, '#34d399'], ['serve', tx('serve'), nCk, '#7dd3fc'], ['bill', tx('bill'), nBill, '#c7d2fe']];
-  $('#app').innerHTML = `<div class="top"><div class="step">${tabs.map((t, i) => `<button style="--c:${t[3]}" class="${V.tab === t[0] ? 'on' : ''}" onclick="go('${t[0]}')"><b>${i + 1}</b><small>${t[1]}</small>${t[2] ? `<i>${t[2]}</i>` : ''}</button>`).join('')}</div>
-    <button class="ic" title="เสียง" onclick="D.voice=!D.voice;saveD();draw()">${D.voice ? '🔊' : '🔇'}</button><button class="ic" title="ยอดขาย" onclick="go('sales')">🧾</button><button class="ic" title="${tx('log')}" onclick="showLog()">🔔</button><button class="ic" title="ตั้งค่า" onclick="go('set')">⚙️</button></div>
+  const badge = {kitchen: nNew, serve: nCk, bill: Object.keys(L).filter(tb => itemsOf(tb).length).length}, cur = ['order', 'cash'].includes(V.tab) ? 'tables' : V.tab, all = !ROLES[D.role] || D.role === 'all';
+  $('#app').innerHTML = `<div class="top"><span class="brand">🍜 ${esc(M.shop)}</span><div class="nav">${(ROLES[D.role] || ROLES.all).map(t => `<button data-t="${t}" class="${cur === t ? 'on' : ''}" onclick="go('${t}')"><span>${TABI[t]}</span><small>${tx(t)}</small>${badge[t] ? `<i>${badge[t]}</i>` : ''}</button>`).join('')}</div>
+    <button class="ic" title="เสียง" onclick="D.voice=!D.voice;saveD();draw()">${D.voice ? '🔊' : '🔇'}</button>${all ? `<button class="ic" title="ยอดขาย" onclick="go('sales')">🧾</button>` : ''}<button class="ic" title="${tx('log')}" onclick="showLog()">🔔</button><button class="ic" title="ตั้งค่า" onclick="go('set')">⚙️</button></div>
   ${syncErr ? '<div class="c" style="background:#fee2e2;color:#991b1b;padding:4px">⚠️ เชื่อมต่อข้อมูลกลางไม่ได้ (' + esc(syncErr) + ')</div>' : ''}
   <div class="wrap">${({tables: vTables, order: vOrder, kitchen: () => vQueue('new'), serve: () => vQueue('cooked'), bill: vBill, cash: vCash, sales: vSales, set: vSet}[V.tab])()}</div>`;
 }
@@ -384,16 +413,21 @@ function go(t) { V.tab = t; if (t === 'sales') loadSales().then(draw); draw(); w
 function showLog() { modal(`<h2>🔔 ${tx('log')}</h2>${V.log.map(e => `<div class="line"><div class="n">${esc(evText(e, UL))}<small class="mu th">${hm(e.at)} • ${esc(e.dev === 'cust' ? tx('cust') : e.by)}</small></div><span class="spk" onclick="speak(evText(V.log[${V.log.indexOf(e)}],vl()),vl())">🔊</span></div>`).join('') || `<p class="mu">${tx('empty')}</p>`}`); }
 
 /* ---------- 1 โต๊ะ ---------- */
+const ageMin = t => Math.max(0, Math.floor((Date.now() - t) / 60000));
+function tStat(tb) { const its = itemsOf(tb), o = L[tb]; if (o && o.call) return ['call', '🔔 ' + (o.call === 'bill' ? tx('bill') : tx('callStaff'))]; if (!its.length) return ['free', tx('free')];
+  const ck = its.filter(x => x.status === 'cooked').length, nw = its.filter(x => x.status === 'new').length; return ck ? ['ready', tx('stCooked') + ' ' + ck] : nw ? ['new', tx('stNew') + ' ' + nw] : ['wait', tx('stWait')]; }
 function vTables() {
   const pend = Object.keys(L).reduce((s, tb) => s + sum(itemsOf(tb)), 0);
-  return `<b class="mu">${tx('pending')} ${pend.toLocaleString('en-US', {minimumFractionDigits: 2})}</b><div class="grid mt" style="grid-template-columns:repeat(auto-fill,minmax(150px,1fr))">${tableIds().map(tb => { const its = itemsOf(tb), o = L[tb], ck = its.filter(x => x.status === 'cooked').length;
-    return `<div class="tbl ${its.length ? 'busy' : ''}" onclick="tblTap('${tb}')">${o && o.call ? `<span class="tag">${o.call === 'bill' ? tx('bill') : tx('callStaff')}</span>` : ''}${ck ? `<span class="tag l">${tx('stCooked')} ${ck}</span>` : ''}<div class="amt">${its.length ? sum(its).toLocaleString('en-US', {minimumFractionDigits: 2}) : (tb === 't0' ? '🛍️' : '<span class="mu" style="font-weight:400;font-size:16px">' + tx('free') + '</span>')}</div><div class="nm">${tName(tb)}</div></div>`; }).join('')}</div>`;
+  return `<div class="row" style="align-items:center"><b>${tx('pending')} ${baht(pend)}</b><div class="lg" style="flex:3;justify-content:flex-end"><span><i style="background:#d6cec2"></i>${tx('free')}</span><span><i style="background:var(--snew)"></i>${tx('stNew')}</span><span><i style="background:var(--sready)"></i>${tx('stCooked')}</span><span><i style="background:var(--swait)"></i>${tx('stWait')}</span><span><i style="background:var(--r)"></i>${tx('callStaff')}</span></div></div>
+  <div class="grid mt" style="grid-template-columns:repeat(auto-fill,minmax(150px,1fr))">${tableIds().map(tb => { const its = itemsOf(tb), [st, lab] = tStat(tb);
+    return `<div class="tbl s-${st}" onclick="tblTap('${tb}')"><div class="nm">${tb === 't0' ? '🛍️ ' : ''}${tName(tb)}</div><div class="amt">${its.length ? baht(sum(its)) : '&nbsp;'}</div><div class="ss">${lab}${its.length ? ' • ' + ageMin(L[tb].openedAt) + ' ' + tx('min') : ''}</div></div>`; }).join('')}</div>`;
 }
 function tblTap(tb) {
-  if (L[tb] && L[tb].call) { L[tb].call = ''; W(store.del(`live/tables/${tb}/call`)); if (!itemsOf(tb).length) { delete L[tb]; draw(); } }
-  const has = itemsOf(tb).length;
-  modal(`<h1 class="c">${tName(tb)}</h1>${tb !== 't0' ? `<button class="big" style="background:#c7d2fe" onclick="modal();printOneQr('${tb}')">${tx('printQr')}</button>` : ''}<button class="big" style="background:#fde68a" onclick="modal();openOrder('${tb}')">${tx('order')}</button><button class="big" style="background:#fca5a5" onclick="tblHistory('${tb}')">${tx('history')}</button>${has ? `<button class="big" style="background:#a7f3d0" onclick="modal();openCash('${tb}')">${tx('bill')}</button><button class="big" style="background:#bae6fd" onclick="moveTable('${tb}')">${tx('move')}</button>` : ''}`);
+  if (L[tb] && L[tb].call) { L[tb].call = ''; W(store.del(`live/tables/${tb}/call`)); if (!itemsOf(tb).length) delete L[tb]; }
+  itemsOf(tb).length ? openCash(tb) : openOrder(tb);
 }
+function tblMore(tb) { const has = itemsOf(tb).length;
+  modal(`<h2 class="c">${tName(tb)}</h2>${tb !== 't0' ? `<button class="big" style="background:#fff" onclick="modal();printOneQr('${tb}')">🔳 ${tx('printQr')}</button>` : ''}<button class="big" style="background:#fff" onclick="tblHistory('${tb}')">🕘 ${tx('history')}</button>${has ? `<button class="big" style="background:#fff" onclick="moveTable('${tb}')">⇄ ${tx('move')}</button><button class="big" style="background:#fff;color:var(--r)" onclick="modal();cancelTable('${tb}')">✕ ${tx('cancel')}</button>` : ''}`); }
 function printOneQr(tb) { const el = $('#print'); el.className = ''; el.innerHTML = `<div style="text-align:center;width:72mm;margin:0 auto"><h2>${esc(M.shop)}</h2>${qrSvg(custUrl(tb.slice(1)), 5)}<h1 style="margin:0">${tNameL(tb, 'th')}</h1><p>สแกนเพื่อสั่งอาหาร / Scan to order</p></div>`; setTimeout(() => window.print(), 50); }
 async function tblHistory(tb) { await loadSales(); const its = itemsOf(tb), bills = SALES.filter(s => s.table === tb && dayKey(s.at) === dayKey(Date.now())).reverse();
   modal(`<h2>${tx('history')} — ${tName(tb)}</h2>${its.map(x => `<div class="line"><div class="n"><b>${x.qty}× ${esc(tr(x.name))}</b><small class="mu th">${esc(optLine(x))} • ${hm(x.at)} • ${esc(x.src === 'qr' ? tx('cust') : x.by)}</small></div><span class="st ${x.status}">${tx(stKey[x.status])}</span></div>`).join('') || `<p class="mu">${tx('empty')}</p>`}
@@ -413,16 +447,15 @@ function sendDraft() {
 }
 function delItem(tb, k) { if (!confirm(tx('del'))) return; delete L[tb].items[k]; if (Object.keys(L[tb].items).length) W(store.del(`live/tables/${tb}/items/${k}`)); else { delete L[tb]; W(store.del('live/tables/' + tb)); } draw(); }
 function vOrder() {
-  const tb = V.table, chips = `<div class="chips">${tableIds().map(x => `<button class="${x === tb ? 'on' : ''} ${itemsOf(x).length ? 'has' : ''}" onclick="openOrder('${x}')">${tName(x)}</button>`).join('')}</div>`;
-  if (!tb) return chips + `<p class="mu c">${tx('pickTable')}</p>`;
-  const d = V.draft[tb] || [], its = itemsOf(tb), sk = {new: 'stNew', cooked: 'stCooked', served: 'stServed'};
-  return chips + `<div class="split"><div>${menuGrid(V.cat, 'po')}</div><div class="card" style="position:sticky;top:70px"><div class="row" style="align-items:center"><h3 style="flex:5">${tName(tb)}</h3><button class="sm" style="flex:0" title="รูป" onclick="D.noImg=!D.noImg;saveD();draw()">${D.noImg ? '🚫' : '🖼️'}</button>${d.length ? `<button class="sm d" style="flex:0" onclick="if(confirm(tx('clearQ'))){V.draft['${tb}']=[];draw()}">🗑️</button>` : ''}</div>
-    ${d.length ? `<b class="mu">${tx('draft')}</b>${d.map((x, i) => `<div class="line"><div class="n"><b>${esc(tr(x.name))}</b>${sub(x.name)}<small class="mu th">${esc(optLine(x))}</small></div><div class="qty"><button onclick="drQty(${i},-1)">−</button><b>${x.qty}</b><button onclick="drQty(${i},1)">+</button></div><b style="min-width:52px;text-align:right">${baht(x.price * x.qty)}</b></div>`).join('')}
-    <div class="row mt c" style="background:#fecaca;border-radius:14px;padding:8px"><div><b style="font-size:22px">${d.length}</b><br><small>${tx('items')}</small></div><div><b style="font-size:22px">${d.reduce((a, x) => a + x.qty, 0)}</b><br><small>${tx('units')}</small></div><div style="flex:2"><b style="font-size:22px">${sum(d).toLocaleString('en-US', {minimumFractionDigits: 2})}</b><br><small>${tx('baht')}</small></div></div>
-    <div class="row mt"><button style="background:#374151;color:#fff;padding:14px;font-weight:700" onclick="sendDraft()">${tx('send')}</button><button style="background:#ef4444;color:#fff;padding:14px;font-weight:700" onclick="sendDraft();openCash('${tb}')">${tx('pay')}</button></div>` : ''}
-    ${its.length ? `<div class="mt"><b class="mu">${tx('sent')}</b></div>${its.map(x => `<div class="line"><div class="n"><b>${x.qty}× ${esc(tr(x.name))}</b><span class="spk" onclick="readItem('${tb}','${x.k}')">🔊</span><small class="mu th">${esc(optLine(x))}</small><span class="st ${x.status}">${tx(sk[x.status])}</span>${x.src === 'qr' ? ' 📱' : ''}</div><b>${baht(x.price * x.qty)}</b><button class="sm d" onclick="delItem('${tb}','${x.k}')">✕</button></div>`).join('')}
-    <div class="tot"><span>${tx('total')}</span><span>${baht(sum(its))}</span></div>
-    <button class="g mt" style="width:100%;padding:14px;font-size:18px" onclick="openCash('${tb}')">💵 ${tx('bill')} ${baht(sum(its))}</button>` : (d.length ? '' : `<p class="mu">${tx('empty')}</p>`)}</div></div>`;
+  const tb = V.table; if (!tb) { V.tab = 'tables'; return vTables(); }
+  const d = V.draft[tb] || [], its = itemsOf(tb);
+  return `<div class="hd"><button onclick="${its.length ? `openCash('${tb}')` : `go('tables')`}">‹ ${tx('back')}</button><h2>${tName(tb)}</h2><button title="รูป" onclick="D.noImg=!D.noImg;saveD();draw()">${D.noImg ? '🚫' : '🖼️'}</button><button onclick="tblMore('${tb}')">⋯</button></div>
+  <div class="split"><div>${menuGrid(V.cat, 'po')}</div><div class="card" style="position:sticky;top:70px"><div class="row" style="align-items:center"><h3 style="flex:5">${tx('draft')}</h3>${d.length ? `<button class="sm d" style="flex:0" onclick="if(confirm(tx('clearQ'))){V.draft['${tb}']=[];draw()}">🗑️</button>` : ''}</div>
+    ${d.length ? `${d.map((x, i) => `<div class="line"><div class="n"><b>${esc(tr(x.name))}</b>${sub(x.name)}<small class="mu th">${esc(optLine(x))}</small></div><div class="qty"><button onclick="drQty(${i},-1)">−</button><b>${x.qty}</b><button onclick="drQty(${i},1)">+</button></div><b style="min-width:52px;text-align:right">${baht(x.price * x.qty)}</b></div>`).join('')}
+    <div class="mu mt" id="dsum">${d.length} ${tx('items')} • ${d.reduce((a, x) => a + x.qty, 0)} ${tx('units')}</div>
+    <button class="p big" style="margin-top:6px" onclick="sendDraft()">${tx('send')} ${baht(sum(d))}</button><button class="big" style="background:#fff;border:1px solid var(--bd);font-size:16px;padding:12px" onclick="sendDraft();openCash('${tb}')">${tx('send')} + ${tx('pay')}</button>` : `<p class="mu">${tx('empty')}</p>`}
+    ${its.length ? `<div class="mt"><b class="mu">${tx('sent')}</b></div>${its.map(x => `<div class="line"><div class="n"><b>${x.qty}× ${esc(tr(x.name))}</b><small class="mu th">${esc(optLine(x))}</small><span class="st ${x.status}">${tx(stKey[x.status])}</span>${x.src === 'qr' ? ' 📱' : ''}</div><b>${baht(x.price * x.qty)}</b></div>`).join('')}
+    <div class="tot"><span>${tx('total')}</span><span>${baht(sum(its))}</span></div>` : ''}</div></div>`;
 }
 function readItem(tb, k) { const x = L[tb].items[k], l = vl(); speak([x.qty, trL(x.name, l), ...x.opts.map(o => trL(o, l)), x.note].filter(Boolean).join(' '), l); }
 function moveTable(from) { modal(`<h2>${tx('move')} — ${tName(from)}</h2><div class="grid mt">${tableIds().filter(t => t !== from).map(t => `<button onclick="doMove('${from}','${t}')">${tName(t)}${itemsOf(t).length ? ' •' : ''}</button>`).join('')}</div>`); }
@@ -431,12 +464,14 @@ function doMove(from, to) { ensureTable(to); Object.entries(L[from].items).forEa
 /* ---------- 3 ครัว / 4 เสิร์ฟ ---------- */
 function setKcat(i) { D.kcat = i < 0 ? '' : M.cats[i]; saveD(); draw(); }
 function vQueue(st) {
-  const kit = st === 'new', col = kit ? '#34d399' : '#7dd3fc', f = x => x.status === st && (!kit || inCats(x, D.kcat ? [D.kcat] : []));
+  const kit = st === 'new', f = x => x.status === st && (!kit || inCats(x, D.kcat ? [D.kcat] : []));
   const tbs = Object.keys(L).map(tb => [tb, itemsOf(tb).filter(f)]).filter(x => x[1].length).sort((a, b) => a[1][0].at - b[1][0].at);
   return (kit ? `<div class="chips"><button class="${!D.kcat ? 'on' : ''}" onclick="setKcat(-1)">${tx('all')}</button>${M.cats.map((c, i) => `<button class="${c === D.kcat ? 'on' : ''}" onclick="setKcat(${i})">${esc(tr(c))}</button>`).join('')}</div>` : '') +
-  (tbs.length ? `<div class="kq">${tbs.map(([tb, its]) => `<div class="card"><div class="row" style="align-items:center"><h2>${tName(tb)}</h2><button class="sm" style="flex:0;white-space:nowrap" onclick="advAll('${tb}','${st}')">${tx('doneAll')}</button>${kit ? `<button class="sm" style="flex:0" onclick="printQueue('${tb}','${st}')">🖨️</button>` : ''}</div>
-    <div style="color:var(--r);font-weight:600">${its.length} ${tx('items')} ${tx('by')} ${esc(its[0].src === 'qr' ? tx('cust') : its[0].by)}</div><div class="mu">${new Date(its[0].at).toLocaleString('th-TH')}</div>
-    ${its.map(x => `<div class="ki"><div class="n">x ${x.qty} ${esc(tr(x.name))}<span class="spk" onclick="readItem('${tb}','${x.k}')">🔊</span>${sub(x.name)}<div class="ops">${x.opts.map(o => `<span>${esc(tr(o))}</span>`).join('')}${x.note ? `<span style="background:#fef08a">✎ ${esc(x.note)}</span>` : ''}</div></div><button style="--c:${col}" onclick="adv('${tb}','${x.k}')">${tx('done')}</button></div>`).join('')}</div>`).join('')}</div>` : `<p class="mu c" style="padding:40px">${tx('empty')} 🎉</p>`);
+  (tbs.length ? `<div class="kq">${tbs.map(([tb, its]) => { const a = ageMin(its[0].at);
+    return `<div class="card ${a >= D.t2 ? 'a2' : a >= D.t1 ? 'a1' : ''}"><div class="row" style="align-items:center"><h2 style="flex:3">${tName(tb)}</h2><span class="age" style="flex:0">⏱ ${a} ${tx('min')}</span>${kit ? `<button class="sm" style="flex:0" onclick="printQueue('${tb}','${st}')">🖨️</button>` : ''}</div>
+    <div class="mu">${hm(its[0].at)} • ${its.length} ${tx('items')} • ${esc(its[0].src === 'qr' ? '📱 ' + tx('cust') : its[0].by)}</div>
+    ${its.map(x => `<div class="ki"><div class="n">${x.qty} × ${esc(tr(x.name))}<span class="spk" onclick="readItem('${tb}','${x.k}')">🔊</span>${sub(x.name)}<div class="ops">${x.opts.map(o => `<span>${esc(tr(o))}</span>`).join('')}${x.note ? `<span style="background:#fef08a">✎ ${esc(x.note)}</span>` : ''}</div></div><button onclick="adv('${tb}','${x.k}')">✔ ${tx('done')}</button></div>`).join('')}
+    ${its.length > 1 ? `<button class="big" style="background:#fff;border:1px solid var(--bd);font-size:16px;padding:10px" onclick="advAll('${tb}','${st}')">✔✔ ${tx('doneAll')}</button>` : ''}</div>`; }).join('')}</div>` : `<p class="mu c" style="padding:40px">${tx('empty')} 🎉</p>`);
 }
 const nextSt = s => s === 'new' ? 'cooked' : 'served';
 function setSt(tb, k, s) { L[tb].items[k].status = s; W(store.put(`live/tables/${tb}/items/${k}/status`, s)); }
@@ -448,14 +483,15 @@ function vBill() { const tbs = Object.keys(L).filter(tb => itemsOf(tb).length); 
 const stKey = {new: 'stNew', cooked: 'stCooked', served: 'stServed'};
 function vCash() {
   const tb = V.table, its = itemsOf(tb); if (!tb || !its.length) { V.tab = 'tables'; return vTables(); }
-  return `<div class="row" style="align-items:center"><button class="sm" style="flex:0;white-space:nowrap" onclick="go('tables')">‹ ${tx('back')}</button><h2 class="c" style="flex:5">${tName(tb)}</h2></div>
-  <div class="acts mt"><button style="background:#a7f3d0" onclick="openOrder('${tb}')">${tx('orderMore')}</button><button style="background:#ddd6fe" onclick="splitPay('${tb}')">${tx('split')}</button><button style="background:#fde68a" onclick="billPreview('${tb}')">${tx('quick')}</button><button style="background:#bae6fd" onclick="moveTable('${tb}')">${tx('move')}</button><button style="background:#fecaca" onclick="cancelTable('${tb}')">${tx('cancel')}</button></div>
+  return `<div class="hd"><button onclick="go('tables')">‹ ${tx('back')}</button><h2>${tName(tb)}</h2><button onclick="tblMore('${tb}')">⋯ ${tx('moreAct')}</button></div>
+  <div class="acts"><button class="p" onclick="openOrder('${tb}')">＋ ${tx('orderMore')}</button><button onclick="splitPay('${tb}')">✂ ${tx('split')}</button><button onclick="billPreview('${tb}')">🧾 ${tx('quick')}</button></div>
   <div class="card mt" style="overflow-x:auto"><table class="t"><tr><th>${tx('itemH')}</th><th class="r">${tx('qtyH')}</th><th class="r">${tx('priceH')}</th><th class="r">${tx('statusH')}</th></tr>
   ${its.map((x, i) => `<tr><td>${i + 1}. <b>${esc(tr(x.name))}</b><span class="spk" onclick="readItem('${tb}','${x.k}')">🔊</span>${x.src === 'qr' ? '📱' : ''}${sub(x.name)}<div class="ops">${x.opts.map(o => `<span>${esc(tr(o))}</span>`).join('')}${x.note ? `<span style="background:#fef08a">✎ ${esc(x.note)}</span>` : ''}</div></td>
-    <td class="r" style="white-space:nowrap">${x.qty} <button class="sm" onclick="editQty('${tb}','${x.k}')">✎</button></td><td class="r" style="white-space:nowrap">${(x.price * x.qty).toLocaleString()} <button class="sm" onclick="editPrice('${tb}','${x.k}')">✎</button></td><td class="r"><span class="st ${x.status}">${tx(stKey[x.status])}</span></td></tr>`).join('')}
+    <td class="r" style="white-space:nowrap">${x.qty} <button class="sm" onclick="editQty('${tb}','${x.k}')">✎</button> <button class="sm" title="${tx('again')}" onclick="again('${tb}','${x.k}')">＋${tx('again')}</button></td><td class="r" style="white-space:nowrap">${(x.price * x.qty).toLocaleString()} <button class="sm" onclick="editPrice('${tb}','${x.k}')">✎</button></td><td class="r"><span class="st ${x.status}">${tx(stKey[x.status])}</span></td></tr>`).join('')}
   <tr style="background:#f3f4f6;font-weight:700"><td>${tx('total')}</td><td class="r">${its.reduce((s, x) => s + x.qty, 0)}</td><td class="r" colspan="2" style="font-size:18px">${sum(its).toLocaleString('en-US', {minimumFractionDigits: 2})}</td></tr></table></div>
   <button class="g big" onclick="pay('${tb}')">💵 ${tx('pay')} ${baht(sum(its))}</button>`;
 }
+function again(tb, k) { const x = L[tb].items[k], nk = 'i' + uid(), it = {id: x.id, name: x.name, cat: x.cat, price: x.price, qty: 1, opts: x.opts, note: x.note, status: 'new', src: 'staff', by: D.name, at: Date.now()}; L[tb].items[nk] = it; W(store.put(`live/tables/${tb}/items/${nk}`, it)); emit({type: 'order', t: tb, n: 1, items: [{name: x.name, qty: 1}]}); autoPrint(); draw(); }
 function editQty(tb, k) { const x = L[tb].items[k], v = prompt(tx('qtyH') + ' — ' + tr(x.name), x.qty); if (v === null) return; const n = parseInt(v); if (!(n >= 0)) return; if (n === 0) return delItem(tb, k); x.qty = Math.min(999, n); W(store.put(`live/tables/${tb}/items/${k}/qty`, x.qty)); draw(); }
 function editPrice(tb, k) { const x = L[tb].items[k], v = prompt(tx('priceH') + ' / 1 — ' + tr(x.name), x.price); if (v === null) return; const n = parseFloat(v); if (!(n >= 0)) return; x.price = n; W(store.put(`live/tables/${tb}/items/${k}/price`, n)); draw(); }
 function cancelTable(tb) { if (!confirm(tx('cancelTb') + ' ' + tName(tb))) return; delete L[tb]; delete V.draft[tb]; W(store.del('live/tables/' + tb)); V.table = null; go('tables'); }
@@ -545,6 +581,8 @@ function sDev() {
   const want = D.vlang || D.lang, ok = hasTTS && (voiceFor(want) || !speechSynthesis.getVoices().length);
   return `<div class="split"><div class="card"><h3>เครื่องนี้ (ตั้งแยกกันได้ทุกเครื่อง)</h3>
   <label>ชื่อเครื่อง / ชื่อพนักงาน</label><input value="${esc(D.name)}" onchange="setD('name',this.value.trim()||'Staff')">
+  <label>เครื่องนี้ใช้ทำอะไร</label><select onchange="setD('role',this.value)">${[['all', 'ทุกหน้า (เจ้าของ / แคชเชียร์)'], ['waiter', 'พนักงานเสิร์ฟ — เห็นแค่ โต๊ะ กับ เสิร์ฟ'], ['kitchen', 'ครัว — เห็นแค่หน้าครัว']].map(r => `<option value="${r[0]}" ${D.role === r[0] ? 'selected' : ''}>${r[1]}</option>`).join('')}</select>
+  <label>เตือนออเดอร์ค้าง: เหลืองเมื่อเกิน / แดงเมื่อเกิน (นาที)</label><div class="row"><input type="number" min="1" value="${D.t1}" onchange="setD('t1',+this.value||8)"><input type="number" min="1" value="${D.t2}" onchange="setD('t2',+this.value||15)"></div>
   <label>ภาษาที่ใช้บนเครื่องนี้</label><select onchange="setD('lang',this.value)">${langOpts(M.slangs, D.lang)}</select>
   <h3 class="mt">🔊 เสียงพูด</h3>
   <label class="ck"><input type="checkbox" ${D.voice ? 'checked' : ''} onchange="setD('voice',this.checked)"><span>เปิดเสียงประกาศบนเครื่องนี้</span></label>
@@ -639,7 +677,7 @@ async function staffInit() {
   try { const raw = await store.get('menu'); if (raw) M = normM(JSON.parse(raw)); }
   catch (e) { syncErr = e.message; M = normM(clone(DEF)); }
   if (!M) { M = normM(clone(DEF)); saveM(); }
-  draw(); loadSales(); await poll(); setInterval(poll, store.live ? 2500 : 1500);
+  V.tab = (ROLES[D.role] || ROLES.all)[0]; draw(); loadSales().then(draw); await poll(); setInterval(() => { if (['tables', 'kitchen', 'serve'].includes(V.tab)) draw(); }, 30000); setInterval(poll, store.live ? 2500 : 1500);
   window.addEventListener('storage', e => { if (e.key === 'rjr_tree') poll(); });
 }
 Q.get('t') ? custInit() : staffInit();
