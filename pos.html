@@ -129,12 +129,19 @@ en: {orderMore: 'Order more', split: 'Split bill', quick: 'Quick bill', cancelTb
 zh: {search: '搜索名称或价格'},
 my: {orderMore: 'ထပ်မှာ', split: 'ခွဲရှင်း', quick: 'အမြန်ဘေလ်', cancelTb: 'စားပွဲတစ်ခုလုံး ဖျက်မလား?', qtyH: 'အရေအတွက်', priceH: 'စျေးနှုန်း', statusH: 'အခြေအနေ', itemH: 'စာရင်း', exact: 'အတိအကျ', clear: 'ရှင်း', fee: 'အပိုကြေး', search: 'အမည် သို့မဟုတ် စျေးနှုန်းဖြင့်ရှာ', selPay: 'ရှင်းမည့်စာရင်းရွေးပါ', invoice: 'ငွေတောင်းခံလွှာ', short: 'လိုသေး'},
 lo: {orderMore: 'ສັ່ງເພີ່ມ', split: 'ແຍກຈ່າຍ', quick: 'ເຊັກບິນດ່ວນ', cancelTb: 'ຍົກເລີກທັງໂຕະ?', qtyH: 'ຈຳນວນ', priceH: 'ລາຄາ', statusH: 'ສະຖານະ', itemH: 'ລາຍການ', exact: 'ຈ່າຍພໍດີ', clear: 'ລ້າງ', fee: 'ຄ່າບໍລິການເພີ່ມ', search: 'ຄົ້ນຫາຊື່ ຫຼື ລາຄາ', selPay: 'ເລືອກລາຍການທີ່ຈະຈ່າຍ', invoice: 'ໃບເກັບເງິນ', short: 'ຂາດອີກ'}};
-Object.keys(I18N2).forEach(l => Object.assign(I18N[l], I18N2[l]));
+const I18N3 = {
+th: {printQr: 'ปริ้น QR code', history: 'ประวัติการสั่ง', units: 'หน่วย', rec: 'แนะนำ', hot: 'ขายดี', pick1: 'เลือก 1 ข้อ', pickMany: 'เลือกได้หลายข้อ', clearQ: 'ล้างรายการใหม่ที่ยังไม่ส่ง?', scan: 'สแกนเพื่อสั่งอาหาร', paidToday: 'บิลที่ชำระแล้ววันนี้'},
+en: {printQr: 'Print QR code', history: 'Order history', units: 'units', rec: 'Recommended', hot: 'Popular', pick1: 'choose 1', pickMany: 'choose any', clearQ: 'Clear unsent items?', scan: 'Scan to order', paidToday: 'Bills paid today'},
+zh: {rec: '推荐', hot: '热销', pick1: '选1项', pickMany: '可多选', scan: '扫码点餐'},
+my: {printQr: 'QR ပရင့်', history: 'မှာထားသည့်မှတ်တမ်း', units: 'ခု', rec: 'အကြံပြု', hot: 'ရောင်းအားကောင်း', pick1: '၁ ခုရွေး', pickMany: 'အများရွေးနိုင်', clearQ: 'မပို့ရသေးသည်များ ဖျက်မလား?', scan: 'မှာရန် စကင်ဖတ်ပါ', paidToday: 'ယနေ့ရှင်းပြီးဘေလ်'},
+lo: {printQr: 'ພິມ QR code', history: 'ປະຫວັດການສັ່ງ', units: 'ໜ່ວຍ', rec: 'ແນະນຳ', hot: 'ຂາຍດີ', pick1: 'ເລືອກ 1 ຂໍ້', pickMany: 'ເລືອກໄດ້ຫຼາຍຂໍ້', clearQ: 'ລ້າງລາຍການໃໝ່?', scan: 'ສະແກນເພື່ອສັ່ງອາຫານ', paidToday: 'ບິນທີ່ຈ່າຍແລ້ວມື້ນີ້'}};
+Object.keys(I18N2).forEach(l => Object.assign(I18N[l], I18N2[l], I18N3[l]));
+const TA = 'กลับบ้าน';
 let UL = 'th', FB = false, M = null, store = null;
 const fmt = (s, a) => s.replace(/\{(\d)\}/g, (_, i) => a[i] ?? '');
 const TL = (k, l) => (I18N[l] && I18N[l][k]) || (l !== 'th' && I18N.en[k]) || I18N.th[k] || k;
 const tx = (k, ...a) => fmt(TL(k, UL), a);
-function trL(x, l) { if (l === 'th' || !M) return x; const d = (M.dict || {})[x] || {}; return d[l] || (FB && d.en) || x; }
+function trL(x, l) { if (x === TA) return TL('takeaway', l); if (l === 'th' || !M) return x; const d = (M.dict || {})[x] || {}; return d[l] || (FB && d.en) || x; }
 const tr = x => trL(x, UL);
 const sub = x => UL !== 'th' && tr(x) !== x ? `<small class="mu th">${esc(x)}</small>` : '';
 const tNameL = (tb, l) => tb === 't0' ? TL('takeaway', l) : TL('table', l) + ' ' + tb.slice(1);
@@ -206,10 +213,10 @@ let PK = null;
 function pickItem(id, cb) {
   const m = M.menu.find(x => x.id === id); if (!m || m.out) return; PK = {m, cb, qty: 1};
   const gs = m.opts.map(g => M.groups.find(x => x.id === g)).filter(Boolean);
-  modal(`<h2>${esc(tr(m.name))}</h2>${sub(m.name)}<div class="mu">${baht(m.price)}</div>
-  ${gs.map(g => `<h3 class="mt">${esc(tr(g.name))} <small class="mu">${g.required ? '(' + tx('req') + ')' : ''}</small></h3>
+  modal(`${m.img ? `<img src="${m.img}" alt="" style="width:100%;max-height:220px;object-fit:cover;border-radius:14px;margin-bottom:8px">` : ''}<h2>${esc(tr(m.name))}</h2>${sub(m.name)}<div class="mu">${baht(m.price)}</div>
+  ${gs.map(g => `<h3 class="mt">${esc(tr(g.name))} <small class="mu">${g.multi ? tx('pickMany') : tx('pick1')}${g.required ? ' • ' + tx('req') : ''}</small></h3>
     ${g.choices.map((c, i) => `<label class="ck"><input type="${g.multi ? 'checkbox' : 'radio'}" name="g_${g.id}" value="${esc(c.name)}" ${!g.multi && g.required && i === 0 ? 'checked' : ''} onchange="pkUpd()"><span>${esc(tr(c.name))}</span><b class="mu">${c.price ? '+' + c.price : ''}</b></label>`).join('')}`).join('')}
-  <label>${tx('note')}</label><input id="pkNote">
+  <label class="ck mt"><input type="checkbox" id="pkTA"><span>🛍️ ${tx('takeaway')}</span></label><label>${tx('note')}</label><input id="pkNote">
   <div class="row mt" style="align-items:center"><div class="qty" style="flex:0"><button onclick="pkQty(-1)">−</button><b id="pkQ" style="min-width:28px;text-align:center">1</b><button onclick="pkQty(1)">+</button></div><button class="p" id="pkOk" onclick="pkDone()"></button></div>`);
   pkUpd();
 }
@@ -217,18 +224,21 @@ function pkOpts() { return [...document.querySelectorAll('#modal input[name^=g_]
 function pkUpd() { $('#pkOk').textContent = tx('add') + ' ' + baht(unitPrice(PK.m.id, pkOpts()) * PK.qty); $('#pkQ').textContent = PK.qty; }
 function pkQty(d) { PK.qty = Math.max(1, PK.qty + d); pkUpd(); }
 function pkDone() {
-  const o = pkOpts();
+  const o = pkOpts(); if ($('#pkTA').checked) o.push(TA);
   for (const gid of PK.m.opts) { const g = M.groups.find(x => x.id === gid); if (g && g.required && !g.choices.some(c => o.includes(c.name))) return toast(tx('choose') + ' ' + tr(g.name)); }
   const k = PK, m = k.m; const line = {id: m.id, name: m.name, cat: m.cat, price: unitPrice(m.id, o), qty: k.qty, opts: o, note: $('#pkNote').value.trim().slice(0, 100)}; modal(); k.cb(line);
 }
 let MQ = '', MGC = '';
 function mgItems(cat, fn) { const q = MQ.trim().toLowerCase();
-  return M.menu.filter(m => (!cat || m.cat === cat) && (!q || m.name.toLowerCase().includes(q) || tr(m.name).toLowerCase().includes(q) || String(m.price) === q)).map(m => `<div class="item ${m.out ? 'out' : ''}" onclick="${fn}Pick('${m.id}')"><div>${m.img ? `<img src="${m.img}" alt="" loading="lazy">` : ''}<b>${esc(tr(m.name))}</b>${sub(m.name)}</div><span class="pr">${m.out ? tx('out') : baht(m.price)}</span></div>`).join('') || `<p class="mu">${tx('empty')}</p>`; }
+  const hot = cat === '*hot' ? hotIds() : [];
+  return M.menu.filter(m => (!cat || (cat === '*rec' ? m.rec : cat === '*hot' ? hot.includes(m.id) : m.cat === cat)) && (!q || m.name.toLowerCase().includes(q) || tr(m.name).toLowerCase().includes(q) || String(m.price) === q)).map(m => `<div class="item ${m.out ? 'out' : ''}" onclick="${fn}Pick('${m.id}')"><div>${m.img && !D.noImg ? `<img src="${m.img}" alt="" loading="lazy">` : ''}<b>${m.rec ? '⭐ ' : ''}${esc(tr(m.name))}</b>${sub(m.name)}</div><span class="pr">${m.out ? tx('out') : baht(m.price)}</span></div>`).join('') || `<p class="mu">${tx('empty')}</p>`; }
 function menuGrid(cat, fn) { MGC = cat;
   return `<input type="search" placeholder="🔍 ${tx('search')}" value="${esc(MQ)}" oninput="MQ=this.value;$('#mg').innerHTML=mgItems(MGC,'${fn}')" style="margin-bottom:8px">
-  <div class="chips"><button class="${!cat ? 'on' : ''}" onclick="${fn}Cat(-1)">${tx('all')}</button>${M.cats.map((c, i) => `<button class="${c === cat ? 'on' : ''}" onclick="${fn}Cat(${i})">${esc(tr(c))}</button>`).join('')}</div>
+  <div class="chips"><button class="${!cat ? 'on' : ''}" onclick="${fn}Cat(-1)">${tx('all')}</button>${hotIds().length ? `<button class="${cat === '*hot' ? 'on' : ''}" onclick="${fn}Cat(-3)">🔥 ${tx('hot')}</button>` : ''}${M.menu.some(m => m.rec) ? `<button class="${cat === '*rec' ? 'on' : ''}" onclick="${fn}Cat(-2)">⭐ ${tx('rec')}</button>` : ''}${M.cats.map((c, i) => `<button class="${c === cat ? 'on' : ''}" onclick="${fn}Cat(${i})">${esc(tr(c))}</button>`).join('')}</div>
   <div class="grid" id="mg">${mgItems(cat, fn)}</div>`;
 }
+const catAt = i => i === -2 ? '*rec' : i === -3 ? '*hot' : i < 0 ? '' : M.cats[i];
+function hotIds() { if (typeof SALES === 'undefined' || !SALES.length) return []; const q = {}; SALES.forEach(s => s.items.forEach(i => q[i.name] = (q[i.name] || 0) + i.qty)); return Object.keys(q).sort((a, b) => q[b] - q[a]).slice(0, 12).map(n => (M.menu.find(m => m.name === n) || {}).id).filter(Boolean); }
 function addLine(list, line) { const s = list.find(x => x.id === line.id && x.note === line.note && x.opts.join() === line.opts.join()); if (s) s.qty += line.qty; else list.push(line); }
 
 /* ============================================================
@@ -236,7 +246,7 @@ function addLine(list, line) { const s = list.find(x => x.id === line.id && x.no
    ============================================================ */
 const C = {cat: '', cart: [], mine: null, err: '', T: ''};
 function cuSave() { sessionStorage.setItem('rjc_cart_' + C.T, JSON.stringify(C.cart)); }
-function cuCat(i) { C.cat = i < 0 ? '' : M.cats[i]; cuDraw(); }
+function cuCat(i) { C.cat = catAt(i); cuDraw(); }
 function cuPick(id) { pickItem(id, line => { addLine(C.cart, line); cuSave(); cuDraw(); }); }
 function cuQty(i, d) { C.cart[i].qty += d; if (C.cart[i].qty <= 0) C.cart.splice(i, 1); cuSave(); cuDraw(); C.cart.length ? cuCart() : modal(); }
 function cuCart() { modal(`<h2>${tx('cart')} — ${tName(C.T)}</h2>${C.cart.map((x, i) => `<div class="line"><div class="n"><b>${esc(tr(x.name))}</b><small class="mu th">${esc(optLine(x))}</small><span class="mu">${baht(x.price * x.qty)}</span></div><div class="qty"><button onclick="cuQty(${i},-1)">−</button><b>${x.qty}</b><button onclick="cuQty(${i},1)">+</button></div></div>`).join('')}
@@ -381,13 +391,18 @@ function vTables() {
 }
 function tblTap(tb) {
   if (L[tb] && L[tb].call) { L[tb].call = ''; W(store.del(`live/tables/${tb}/call`)); if (!itemsOf(tb).length) { delete L[tb]; draw(); } }
-  itemsOf(tb).length ? openCash(tb) : openOrder(tb);
+  const has = itemsOf(tb).length;
+  modal(`<h1 class="c">${tName(tb)}</h1>${tb !== 't0' ? `<button class="big" style="background:#c7d2fe" onclick="modal();printOneQr('${tb}')">${tx('printQr')}</button>` : ''}<button class="big" style="background:#fde68a" onclick="modal();openOrder('${tb}')">${tx('order')}</button><button class="big" style="background:#fca5a5" onclick="tblHistory('${tb}')">${tx('history')}</button>${has ? `<button class="big" style="background:#a7f3d0" onclick="modal();openCash('${tb}')">${tx('bill')}</button><button class="big" style="background:#bae6fd" onclick="moveTable('${tb}')">${tx('move')}</button>` : ''}`);
 }
+function printOneQr(tb) { const el = $('#print'); el.className = ''; el.innerHTML = `<div style="text-align:center;width:72mm;margin:0 auto"><h2>${esc(M.shop)}</h2>${qrSvg(custUrl(tb.slice(1)), 5)}<h1 style="margin:0">${tNameL(tb, 'th')}</h1><p>สแกนเพื่อสั่งอาหาร / Scan to order</p></div>`; setTimeout(() => window.print(), 50); }
+async function tblHistory(tb) { await loadSales(); const its = itemsOf(tb), bills = SALES.filter(s => s.table === tb && dayKey(s.at) === dayKey(Date.now())).reverse();
+  modal(`<h2>${tx('history')} — ${tName(tb)}</h2>${its.map(x => `<div class="line"><div class="n"><b>${x.qty}× ${esc(tr(x.name))}</b><small class="mu th">${esc(optLine(x))} • ${hm(x.at)} • ${esc(x.src === 'qr' ? tx('cust') : x.by)}</small></div><span class="st ${x.status}">${tx(stKey[x.status])}</span></div>`).join('') || `<p class="mu">${tx('empty')}</p>`}
+  <h3 class="mt">${tx('paidToday')}</h3>${bills.map(s => `<div class="line" style="align-items:center"><div class="n"><b>#${s.no}</b> ${hm(s.at)} • ${esc(mLabel(s.method))}<small class="mu th">${esc(s.items.map(i => i.qty + '× ' + tr(i.name)).join(', '))}</small></div><b>${baht(s.net)}</b><button class="sm" onclick="receipt(SALES.find(s=>s.id==='${s.id}'),true)">🖨️</button></div>`).join('') || `<p class="mu">${tx('empty')}</p>`}`); }
 function openCash(tb) { V.table = tb; go('cash'); }
 function openOrder(tb) { V.table = tb; V.cat = ''; go('order'); }
 
 /* ---------- 2 ออเดอร์ ---------- */
-function poCat(i) { V.cat = i < 0 ? '' : M.cats[i]; draw(); }
+function poCat(i) { V.cat = catAt(i); draw(); }
 function poPick(id) { const m = M.menu.find(x => x.id === id), d = V.draft[V.table] = V.draft[V.table] || []; if (!m.opts.length) { addLine(d, {id, name: m.name, cat: m.cat, price: Number(m.price), qty: 1, opts: [], note: ''}); draw(); } else pickItem(id, line => { addLine(d, line); draw(); }); }
 function drQty(i, n) { const d = V.draft[V.table]; d[i].qty += n; if (d[i].qty <= 0) d.splice(i, 1); draw(); }
 function ensureTable(tb) { if (!L[tb]) { L[tb] = {openedAt: Date.now(), call: '', items: {}}; W(store.put(`live/tables/${tb}/openedAt`, L[tb].openedAt)); } }
@@ -401,9 +416,10 @@ function vOrder() {
   const tb = V.table, chips = `<div class="chips">${tableIds().map(x => `<button class="${x === tb ? 'on' : ''} ${itemsOf(x).length ? 'has' : ''}" onclick="openOrder('${x}')">${tName(x)}</button>`).join('')}</div>`;
   if (!tb) return chips + `<p class="mu c">${tx('pickTable')}</p>`;
   const d = V.draft[tb] || [], its = itemsOf(tb), sk = {new: 'stNew', cooked: 'stCooked', served: 'stServed'};
-  return chips + `<div class="split"><div>${menuGrid(V.cat, 'po')}</div><div class="card" style="position:sticky;top:70px"><h3>${tName(tb)}</h3>
+  return chips + `<div class="split"><div>${menuGrid(V.cat, 'po')}</div><div class="card" style="position:sticky;top:70px"><div class="row" style="align-items:center"><h3 style="flex:5">${tName(tb)}</h3><button class="sm" style="flex:0" title="รูป" onclick="D.noImg=!D.noImg;saveD();draw()">${D.noImg ? '🚫' : '🖼️'}</button>${d.length ? `<button class="sm d" style="flex:0" onclick="if(confirm(tx('clearQ'))){V.draft['${tb}']=[];draw()}">🗑️</button>` : ''}</div>
     ${d.length ? `<b class="mu">${tx('draft')}</b>${d.map((x, i) => `<div class="line"><div class="n"><b>${esc(tr(x.name))}</b>${sub(x.name)}<small class="mu th">${esc(optLine(x))}</small></div><div class="qty"><button onclick="drQty(${i},-1)">−</button><b>${x.qty}</b><button onclick="drQty(${i},1)">+</button></div><b style="min-width:52px;text-align:right">${baht(x.price * x.qty)}</b></div>`).join('')}
-    <button class="p mt" style="width:100%;padding:14px;font-size:18px" onclick="sendDraft()">${tx('send')} ${baht(sum(d))}</button>` : ''}
+    <div class="row mt c" style="background:#fecaca;border-radius:14px;padding:8px"><div><b style="font-size:22px">${d.length}</b><br><small>${tx('items')}</small></div><div><b style="font-size:22px">${d.reduce((a, x) => a + x.qty, 0)}</b><br><small>${tx('units')}</small></div><div style="flex:2"><b style="font-size:22px">${sum(d).toLocaleString('en-US', {minimumFractionDigits: 2})}</b><br><small>${tx('baht')}</small></div></div>
+    <div class="row mt"><button style="background:#374151;color:#fff;padding:14px;font-weight:700" onclick="sendDraft()">${tx('send')}</button><button style="background:#ef4444;color:#fff;padding:14px;font-weight:700" onclick="sendDraft();openCash('${tb}')">${tx('pay')}</button></div>` : ''}
     ${its.length ? `<div class="mt"><b class="mu">${tx('sent')}</b></div>${its.map(x => `<div class="line"><div class="n"><b>${x.qty}× ${esc(tr(x.name))}</b><span class="spk" onclick="readItem('${tb}','${x.k}')">🔊</span><small class="mu th">${esc(optLine(x))}</small><span class="st ${x.status}">${tx(sk[x.status])}</span>${x.src === 'qr' ? ' 📱' : ''}</div><b>${baht(x.price * x.qty)}</b><button class="sm d" onclick="delItem('${tb}','${x.k}')">✕</button></div>`).join('')}
     <div class="tot"><span>${tx('total')}</span><span>${baht(sum(its))}</span></div>
     <button class="g mt" style="width:100%;padding:14px;font-size:18px" onclick="openCash('${tb}')">💵 ${tx('bill')} ${baht(sum(its))}</button>` : (d.length ? '' : `<p class="mu">${tx('empty')}</p>`)}</div></div>`;
@@ -588,7 +604,7 @@ function editItem(id) {
   const m = M.menu.find(x => x.id === id) || {name: '', price: '', cat: M.cats[0], opts: []}; EIMG = m.img || '';
   modal(`<h2>${id ? 'แก้ไขเมนู' : 'เพิ่มเมนู'}</h2><label>ชื่อ (ภาษาไทย)</label><input id="eN" value="${esc(m.name)}"><label>ราคา</label><input id="eP" type="number" inputmode="decimal" value="${m.price}">
   <label>หมวด</label><select id="eC">${M.cats.map(c => `<option ${c === m.cat ? 'selected' : ''}>${esc(c)}</option>`).join('')}</select>
-  <label>รูปอาหาร</label><div class="row" style="align-items:center"><div id="eImg" style="flex:0 0 110px">${EIMG ? `<img src="${EIMG}" style="width:110px;border-radius:10px">` : '<span class="mu">ไม่มีรูป</span>'}</div><input type="file" accept="image/*" onchange="pickImg(this)"><button class="sm d" style="flex:0" onclick="EIMG='';$('#eImg').innerHTML=''">ลบรูป</button></div>
+  <label class="ck"><input type="checkbox" id="eR" ${m.rec ? 'checked' : ''}><span>⭐ เมนูแนะนำ</span></label><label>รูปอาหาร</label><div class="row" style="align-items:center"><div id="eImg" style="flex:0 0 110px">${EIMG ? `<img src="${EIMG}" style="width:110px;border-radius:10px">` : '<span class="mu">ไม่มีรูป</span>'}</div><input type="file" accept="image/*" onchange="pickImg(this)"><button class="sm d" style="flex:0" onclick="EIMG='';$('#eImg').innerHTML=''">ลบรูป</button></div>
   <label>ตัวเลือก</label>${M.groups.map(g => `<label class="ck"><input type="checkbox" class="eO" value="${g.id}" ${m.opts.includes(g.id) ? 'checked' : ''}><span>${esc(g.name)}</span></label>`).join('')}
   <div class="row mt">${id ? `<button class="d" onclick="delMenu('${id}')">ลบ</button>` : ''}<button onclick="modal()">ยกเลิก</button><button class="p" onclick="saveItem('${id || ''}')">บันทึก</button></div>`);
 }
@@ -596,7 +612,7 @@ let EIMG = '';
 function pickImg(inp) { const f = inp.files[0]; if (!f) return; const im = new Image(); im.onload = () => { const sc = Math.min(1, 240 / Math.max(im.width, im.height)), c = document.createElement('canvas'); c.width = Math.round(im.width * sc); c.height = Math.round(im.height * sc); c.getContext('2d').drawImage(im, 0, 0, c.width, c.height); EIMG = c.toDataURL('image/jpeg', .72); $('#eImg').innerHTML = `<img src="${EIMG}" style="width:110px;border-radius:10px">`; URL.revokeObjectURL(im.src); }; im.src = URL.createObjectURL(f); }
 function saveItem(id) {
   const name = $('#eN').value.trim(), price = +$('#eP').value; if (!name || !(price >= 0)) return toast('กรอกชื่อและราคา');
-  const v = {name, price, img: EIMG, cat: $('#eC').value, opts: [...document.querySelectorAll('.eO:checked')].map(e => e.value)};
+  const v = {name, price, img: EIMG, rec: $('#eR').checked, cat: $('#eC').value, opts: [...document.querySelectorAll('.eO:checked')].map(e => e.value)};
   if (id) Object.assign(M.menu.find(x => x.id === id), v); else M.menu.push({id: 'm' + uid(), out: false, ...v}); saveM(); modal(); draw();
 }
 function delMenu(id) { if (confirm('ลบเมนูนี้?')) { M.menu = M.menu.filter(x => x.id !== id); saveM(); modal(); draw(); } }
