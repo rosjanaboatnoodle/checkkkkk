@@ -227,7 +227,7 @@ function makeStore(db) {
 function normM(m) {
   m.cats = m.cats || []; m.groups = (m.groups || []).map(g => ({...g, choices: g.choices || []})); m.menu = (m.menu || []).map(x => ({...x, opts: x.opts || []}));
   m.dict = m.dict || {}; m.clangs = m.clangs && m.clangs.length ? m.clangs : ['th', 'en', 'zh']; m.slangs = m.slangs && m.slangs.length ? m.slangs : ['th', 'my', 'lo', 'en'];
-  m.tables = Number(m.tables) || 12; m.channels = m.channels || ['Grab', 'LINE MAN', 'ShopeeFood']; return m;
+  m.tables = Number(m.tables) || 12; m.cdef = m.clangs.includes(m.cdef) ? m.cdef : 'th'; m.channels = m.channels || ['Grab', 'LINE MAN', 'ShopeeFood']; return m;
 }
 function normT(ts) { const o = {}; Object.keys(ts || {}).forEach(k => { const t = ts[k] || {}, it = {}; Object.keys(t.items || {}).forEach(i => { const x = t.items[i]; if (x && x.name) it[i] = {...x, opts: x.opts || [], note: x.note || ''}; }); if (Object.keys(it).length || t.call) o[k] = {openedAt: t.openedAt || Date.now(), call: t.call || '', items: it}; }); return o; }
 
@@ -306,7 +306,7 @@ let cuMv = 0;
 async function cuPull() {
   try {
     const mv = await store.get('live/mv');
-    if (!M || mv !== cuMv) { const raw = await store.get('menu'); if (raw) { M = normM(JSON.parse(raw)); cuMv = mv; if (!M.clangs.includes(UL)) UL = M.clangs[0]; if (!$('#modal').innerHTML) cuDraw(); } else C.err = tx('closed'); }
+    if (!M || mv !== cuMv) { const raw = await store.get('menu'); if (raw) { M = normM(JSON.parse(raw)); cuMv = mv; if (!localStorage.getItem('rjc_lang') || !M.clangs.includes(UL)) UL = M.cdef; if (!$('#modal').innerHTML) cuDraw(); } else C.err = tx('closed'); }
     if (M && (C.T !== 't0' && !(+C.T.slice(1) >= 1 && +C.T.slice(1) <= M.tables))) { M = null; C.err = tx('closed'); }
     const m = normT({x: await store.get('live/tables/' + C.T)}).x || null; if (JSON.stringify(m) !== JSON.stringify(C.mine)) { C.mine = m; if (!$('#modal').innerHTML) cuDraw(); }
   } catch (e) { if (!M) C.err = tx('fail'); }
@@ -405,7 +405,7 @@ function draw() {
   let nNew = 0, nCk = 0; Object.keys(L).forEach(tb => itemsOf(tb).forEach(x => { if (x.status === 'new') nNew++; else if (x.status === 'cooked') nCk++; }));
   const badge = {kitchen: nNew, serve: nCk, bill: Object.keys(L).filter(tb => itemsOf(tb).length).length}, cur = ['order', 'cash'].includes(V.tab) ? 'tables' : V.tab, all = !ROLES[D.role] || D.role === 'all';
   $('#app').innerHTML = `<div class="top"><span class="brand">🍜 ${esc(M.shop)}</span><div class="nav">${(ROLES[D.role] || ROLES.all).map(t => `<button data-t="${t}" class="${cur === t ? 'on' : ''}" onclick="go('${t}')"><span>${TABI[t]}</span><small>${tx(t)}</small>${badge[t] ? `<i>${badge[t]}</i>` : ''}</button>`).join('')}</div>
-    <button class="ic" title="เสียง" onclick="D.voice=!D.voice;saveD();draw()">${D.voice ? '🔊' : '🔇'}</button>${all ? `<button class="ic" title="ยอดขาย" onclick="go('sales')">🧾</button>` : ''}<button class="ic" title="${tx('log')}" onclick="showLog()">🔔</button><button class="ic" title="ตั้งค่า" onclick="go('set')">⚙️</button></div>
+    <button class="ic" title="ภาษา" onclick="langSheet()" style="font-size:15px;font-weight:700;border:1px solid var(--bd);border-radius:99px;padding:6px 12px;background:#fff;white-space:nowrap">🌐 ${LANGS[UL][0]}</button><button class="ic" title="เสียง" onclick="D.voice=!D.voice;saveD();draw()">${D.voice ? '🔊' : '🔇'}</button>${all ? `<button class="ic" title="ยอดขาย" onclick="go('sales')">🧾</button>` : ''}<button class="ic" title="${tx('log')}" onclick="showLog()">🔔</button><button class="ic" title="ตั้งค่า" onclick="go('set')">⚙️</button></div>
   ${syncErr ? '<div class="c" style="background:#fee2e2;color:#991b1b;padding:4px">⚠️ เชื่อมต่อข้อมูลกลางไม่ได้ (' + esc(syncErr) + ')</div>' : ''}
   <div class="wrap">${({tables: vTables, order: vOrder, kitchen: () => vQueue('new'), serve: () => vQueue('cooked'), bill: vBill, cash: vCash, sales: vSales, set: vSet}[V.tab])()}</div>`;
 }
@@ -569,8 +569,18 @@ function dl(name, text, type) { const a = document.createElement('a'); a.href = 
 /* ---------- ตั้งค่า ---------- */
 const langOpts = (list, cur, blank) => (blank ? `<option value="">${blank}</option>` : '') + list.map(l => `<option value="${l}" ${l === cur ? 'selected' : ''}>${LANGS[l][0]}</option>`).join('');
 const langChecks = (key) => Object.keys(LANGS).map(l => `<label class="ck" style="display:inline-flex;border:0;margin-right:12px"><input type="checkbox" ${M[key].includes(l) ? 'checked' : ''} ${l === 'th' ? 'disabled' : ''} onchange="togLang('${key}','${l}',this.checked)"><span>${LANGS[l][0]}</span></label>`).join('');
-function togLang(key, l, on) { M[key] = Object.keys(LANGS).filter(x => x === l ? on : M[key].includes(x)); saveM(); draw(); }
-function setD(k, v) { D[k] = v; saveD(); if (k === 'lang') { UL = D.lang; document.documentElement.lang = UL; } draw(); }
+function togLang(key, l, on) { M[key] = Object.keys(LANGS).filter(x => x === l ? on : M[key].includes(x)); if (!M.clangs.includes(M.cdef)) M.cdef = 'th'; saveM(); draw(); if ($('#modal').innerHTML) langSheet(); }
+function langSheet() {
+  const btn = (l, on, fn) => `<button style="margin:0 6px 6px 0;font-weight:700;${on ? 'background:var(--o);color:#fff;border-color:var(--o)' : ''}" onclick="${fn}">${on ? '✔ ' : ''}${LANGS[l][0]}</button>`;
+  modal(`<h2>🌐 ภาษา</h2>
+  <div class="card mt"><h3>👩‍🍳 หลังบ้าน — ภาษาของเครื่องนี้</h3><p class="mu" style="margin:4px 0 10px">เปลี่ยนเฉพาะเครื่องนี้ เครื่องอื่นตั้งของตัวเองได้</p>${M.slangs.map(l => btn(l, l === D.lang, `setD('lang','${l}');langSheet()`)).join('')}
+    <details class="mt"><summary class="mu">เลือกว่าพนักงานใช้ภาษาอะไรได้บ้าง</summary>${langChecks('slangs')}</details></div>
+  <div class="card mt"><h3>👤 หน้าบ้าน — ภาษาที่ลูกค้าเห็น</h3><p class="mu" style="margin:4px 0 10px">ภาษาแรกที่ลูกค้าเห็นเมื่อสแกน QR</p>${M.clangs.map(l => btn(l, l === M.cdef, `M.cdef='${l}';saveM();langSheet()`)).join('')}
+    <label>ภาษาที่ลูกค้ากดเปลี่ยนเองได้</label>${langChecks('clangs')}
+    <p class="mu" style="font-size:14px">ภาษาหลังบ้านที่ไม่ได้ติ๊กตรงนี้ ลูกค้าจะไม่เห็น</p></div>
+  <button class="big" style="background:#fff;border:1px solid var(--bd);font-size:16px" onclick="modal();V.set='trl';go('set')">✎ แก้คำแปลชื่อเมนูแต่ละภาษา</button>`);
+}
+function setD(k, v) { D[k] = v; saveD(); if (k === 'lang') { UL = LANGS[D.lang] ? D.lang : 'th'; document.documentElement.lang = UL; } draw(); }
 function setSay(k, v) { D.say[k] = v ? 1 : 0; saveD(); }
 function togPcat(i, on) { const c = M.cats[i]; D.pcats = M.cats.filter(x => x === c ? on : D.pcats.includes(x)); saveD(); }
 function vSet() {
