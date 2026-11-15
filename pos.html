@@ -423,20 +423,21 @@ const SEED_WORDS = { /* ไทย: [พม่า, อังกฤษ] — หม
   'เนื้อสัตว์': ['အမဲသားသေး', 'Meat'], 'ไก่': ['ကြက်သား', 'Chicken'], 'หมู': ['ဝက်', 'Pork'], 'หมูเปื่อย': ['ဝက်ပုတ်', 'Stewed pork'], 'เนื้อ': ['အမဲသား', 'Beef'], 'เนื้อเปื่อย': ['မဲပုတ်', 'Stewed beef'], 'กุ้ง': ['ပုစွန်', 'Shrimp'], 'หมึก': ['ပြည်ကြီးငါး', 'Squid'], 'ทะเล': ['ပင်လယ်စာ', 'Seafood'],
   'เครื่อง': ['', 'Toppings'], 'ใส่ทุกอย่าง': ['ဆိုင့်ထုတ်ယန့်', 'Everything'], 'สด': ['ဆုတ် - အစိမ်း', 'Fresh meat'], 'เปื่อย': ['ပွိုက် - ပြုတ်နူး', 'Stewed meat'], 'ตับ': ['တပ် - အသည်း', 'Liver'], 'ลูกชิ้น': ['လုတ်ချင် - အသားလုံး', 'Meatballs'], 'เนื้อหมัก (เฉพาะเนื้อเท่านั้น)': ['နွားမုတ်', 'Marinated beef (beef only)'], 'ตับหมัก (เฉพาะเนื้อเท่านั้น)': ['တက်မွတ်', 'Marinated liver (beef only)'],
   'ระดับความเผ็ด': ['အစပ်', 'Spice level'], 'ไม่ปรุง': ['အရသာမထည့်', 'Unseasoned'], 'ไม่เผ็ด (ไม่ใส่พริก ใส่น้ำส้มได้)': ['မိုင်ဖက် (မိုင်ဖရိတ် နမ်ဆွမ်ဒိုင်)', 'Not spicy (no chili, vinegar is fine)'], 'เผ็ดน้อย': ['အစပ်နည်းနည်း', 'Mild'], 'เผ็ดปกติ': ['အစပ်ပုံမှန်', 'Medium spicy'], 'เผ็ดมากกก': ['အရမ်းစပ်', 'Very spicy'],
-  'น้ำ': ['', 'Soup'], 'น้ำ (ใส่เลือด)': ['ဟင်း - သွေးထည့်', 'Soup with blood (boat-noodle style)'], 'น้ำ (ใส่เลือด+เพิ่มน้ำ)': ['နမ်း - လွတ် + ဖိမနမ်း', 'Soup with blood, extra soup'], 'แห้ง': ['ဟိန်', 'Dry (no soup)'], 'น้ำใส (ไม่เลือด)': ['နမ်းဆိုင် (မိုင်လွတ်)', 'Clear soup (no blood)'],
+  'น้ำ': ['နမ်း', 'Soup'], 'น้ำ (ใส่เลือด)': ['ဟင်း - သွေးထည့်', 'Soup with blood (boat-noodle style)'], 'น้ำ (ใส่เลือด+เพิ่มน้ำ)': ['နမ်း - လွတ် + ဖိမနမ်း', 'Soup with blood, extra soup'], 'แห้ง': ['ဟိန်', 'Dry (no soup)'], 'น้ำใส (ไม่เลือด)': ['နမ်းဆိုင် (မိုင်လွတ်)', 'Clear soup (no blood)'],
   'ไม่พริก': ['ငရုတ်သီးမထည့်', 'No chili'], 'เผ็ดมาก': ['အရမ်းစပ်', 'Very spicy'], 'รูปแบบ': ['', 'Cut'], 'เนื้อ+หนัง': ['အသားသရေ', 'Meat and skin'], 'เนื้อล้วน': ['အသား', 'Meat only'], 'หนังล้วน': ['သရေ', 'Skin only'], 'กลับบ้าน (พิเศษ)': ['ကလပ်ဘန် ++', 'Takeaway (large)'], 'เพิ่มเส้น': ['', 'Extra noodles'],
+  'หมูสับ': ['ဝက်သေး', 'Minced pork'], 'ไก่สับ': ['ကြက်သေး', 'Minced chicken'], 'ชะอม': ['ချာအို', 'Acacia (cha-om)'], 'ไหลบัว': ['လိုင်ဘူဝါ', 'Lotus stem'], 'หน่อไม้ดอง': ['နော့မိုင်ဒေါင်', 'Pickled bamboo shoots'], 'ขนมจีน': ['ခနုံကျင်း', 'Rice noodles (khanom chin)'], 'ข้าวโพด': ['ခေါက်ဖုတ်', 'Corn'], 'หมูยอ': ['မူယော်', 'Vietnamese pork sausage'], 'ลูกชิ้นหมู': ['လုတ်ချင်မူ', 'Pork meatballs'], 'ลูกชิ้นเนื้อ': ['လုတ်ချင်နွာ', 'Beef meatballs'], 'กุ้งสุก': ['ကုန်းစွတ်', 'Cooked shrimp'], 'ปลาหมึก': ['(ရေဘဝဲ)ပါမွတ်', 'Squid'], 'ไข่เค็ม': ['ခိုင်ခိမ်', 'Salted egg'], 'บะหมี่หยก': ['စန်းမီယောက် - အစိမ်းရောင်', 'Green (jade) noodles'],
   'ผัก': ['အရွက်', 'Vegetables'], 'ไม่ผัก': ['အရွက်မထည့်', 'No vegetables'],
   'ไข่': ['ကြက်ဥ', 'Egg'], 'ไข่ดาวไม่สุก': ['ခိုင်ဒေါက်မိုင်စွတ်', 'Fried egg, runny'], 'ไข่ดาวสุก': ['ခိုင်ဒေါက်စွတ်', 'Fried egg, well done'], 'ไข่เยี่ยวม้า': ['ခိုင်ယွတ်မား', 'Century egg'], 'ไข่ชะอม': ['ခိုင်ချာအို', 'Acacia omelette'],
   'ขนาด': ['အနည်းအများ', 'Size'], 'ธรรมดา': ['ရိုးရိုး', 'Regular'], 'พิเศษ': ['အထူး', 'Large'], 'เปลี่ยนเป็นกับข้าว จานเล็ก': ['ကပ်ခေါ် ကျန်လက်', 'As a side dish, small plate'], 'เปลี่ยนเป็นกับข้าว จานกลาง': ['ကပခေါင် ချန်ကလန်', 'As a side dish, medium plate'], 'เปลี่ยนเป็นกับข้าว จานใหญ่': ['ကပ်ခေါင် ချန်ရှိုင်', 'As a side dish, large plate']
 };
 const ch = a => a.map(x => Array.isArray(x) ? {name: x[0], price: x[1]} : {name: x, price: 0});
-const N25 = ['line25', 'nmeat', 'part', 'spicy', 'soup', 'veg'], N40 = ['line40', 'nmeat', 'part', 'spicy', 'soup', 'veg'], R45 = ['meat45', 'spicy2', 'veg', 'egg', 'size'], R55 = ['meat55', 'spicy2', 'veg', 'egg', 'size'], NX = ['line40', 'nmeat', 'part', 'spicy', 'soup', 'veg', 'addline'];
+const N25 = ['line25', 'nmeat', 'part', 'spicy', 'soup', 'veg', 'addline25'], SOM = ['spicy2', 'somadd'], N40 = ['line40', 'nmeat', 'part', 'spicy', 'soup', 'veg'], R45 = ['meat45', 'spicy2', 'veg', 'egg', 'size'], R55 = ['meat55', 'spicy2', 'veg', 'egg', 'size'], NX = ['line40', 'nmeat', 'part', 'spicy', 'soup', 'veg', 'addline'];
 const SEED_OPTS = { /* เมนูไหนใช้ตัวเลือกกลุ่มไหน */
   'ก๋วยเตี๋ยวชาม 25': N25, 'ก๋วยเตี๋ยวเรือชาม 40': [...NX, 'ta40'], 'ก๋วยเตี๋ยว (กลับบ้าน)': NX, 'เตี๋ยวกลับบ้าน +': NX, 'เตี๋ยวกลับบ้าน ++': NX,
-  'เกาเหลา': ['nmeat', 'part', 'spicy', 'soup', 'veg'], 'ก๋วยเตี๋ยวเป็ดย่าง': ['line40', 'spicy', 'soup', 'veg'], 'เส้นลวก': ['lineb'], 'ข้าวหน้าเป็ด': ['size2'],
+  'เกาเหลา': ['nmeat', 'part', 'spicy', 'soup', 'veg'], 'ก๋วยเตี๋ยวเป็ดย่าง': ['lineduck', 'styleduck', 'sizeduck', 'spicy', 'veg'], 'เนื้อลวก': ['meatboil'], 'หม้อไฟรสจนา': ['meatpot'], 'เส้นลวก': ['lineb'], 'ข้าวหน้าเป็ด': ['sizeduck'],
   'ข้าวผัดกระเพรา': R45, 'ข้าวผัดน้ำมันหอย': R45, 'ข้าวผัดพริกแกง': R45, 'ข้าวผัด': R55,
-  'ข้าวกระเพราเป็ด': ['spicy2', 'veg', 'egg', 'size'], 'ข้าวขาหมู': ['cut', 'egg', 'size2'], 'ข้าวไข่เจียว': ['size2'],
-  'ตำปูปลาร้า': ['spicy2'], 'ตำซั่ว': ['spicy2'], 'ตำถั่ว': ['spicy2'], 'ตำเส้นเล็ก': ['spicy2'], 'ตำไข่เยี่ยวม้า': ['spicy2']
+  'ข้าวกระเพราเป็ด': ['spicy2', 'veg', 'egg', 'size'], 'ข้าวขาหมู': ['cut', 'egg', 'size2'], 'ข้าวไข่เจียว': ['omfill', 'size2'],
+  'ตำปูปลาร้า': SOM, 'ตำซั่ว': SOM, 'ตำถั่ว': SOM, 'ตำเส้นเล็ก': SOM, 'ตำไข่เยี่ยวม้า': SOM
 };
 const DEF = {
   shop: 'ก๋วยเตี๋ยวเรือรสจนา', tables: 12, promptpay: '', footer: 'ขอบคุณที่อุดหนุนค่ะ', clangs: ['th', 'en', 'zh'], slangs: ['th', 'my', 'lo', 'en'],
@@ -460,6 +461,14 @@ const DEF = {
     {id: 'size2', name: 'ขนาด', note: 'ธรรมดา/พิเศษ', required: false, multi: false, choices: ch(['ธรรมดา', ['พิเศษ', 10]])},
     {id: 'line2', name: 'เส้น', note: 'ใหญ่/หมี่ขาว (ยังไม่ได้ผูกกับเมนู)', required: true, multi: false, choices: ch(['ใหญ่', 'หมี่ขาว'])},
     {id: 'addline', name: 'เพิ่มเส้น', note: 'ก๋วยเตี๋ยวเรือ', pre: true, required: false, multi: true, choices: ch([['เล็ก', 10], ['ใหญ่', 10], ['หมี่ขาว', 10], ['วุ้นเส้น', 10], ['บะหมี่เหลือง', 15], ['มาม่า', 20]])},
+    {id: 'addline25', name: 'เพิ่มเส้น', note: 'ก๋วยเตี๋ยวเรือชาม 25', pre: true, required: false, multi: true, choices: ch([['เล็ก', 10], ['ใหญ่', 10], ['หมี่ขาว', 10], ['วุ้นเส้น', 10]])},
+    {id: 'meatboil', name: 'เนื้อสัตว์', note: 'เนื้อลวก', required: true, multi: false, choices: ch(['หมู', ['เนื้อ', 10]])},
+    {id: 'omfill', name: 'เนื้อสัตว์', note: 'หมูสับ/ไก่สับ/ชะอม', required: false, multi: true, choices: ch([['หมูสับ', 10], ['ไก่สับ', 10], ['ชะอม', 5]])},
+    {id: 'somadd', name: 'เพิ่มเติม', note: 'ส้มตำ', required: false, multi: true, choices: ch([['ไหลบัว', 5], ['หน่อไม้ดอง', 5], ['ขนมจีน', 10], ['ข้าวโพด', 10], ['หมูยอ', 10], ['แคปหมู', 10], ['ลูกชิ้นหมู', 10], ['ลูกชิ้นเนื้อ', 10], ['หมูเปื่อย', 10], ['เนื้อเปื่อย', 20], ['ทะเล', 20], ['กุ้งสุก', 20], ['ปลาหมึก', 20], ['มาม่า', 20], ['ไข่เค็ม', 20], ['ไข่เยี่ยวม้า', 20], ['แคปวัว', 20]])},
+    {id: 'sizeduck', name: 'ขนาด', note: 'เป็ด', required: false, multi: false, choices: ch(['ธรรมดา', ['พิเศษ', 20]])},
+    {id: 'styleduck', name: 'รูปแบบ', note: 'ก๋วยเตี๋ยวเป็ด', required: true, multi: false, choices: ch(['น้ำ', 'แห้ง'])},
+    {id: 'meatpot', name: 'เนื้อสัตว์', note: 'หม้อไฟ', required: true, multi: false, choices: ch(['หมู', ['เนื้อ', 20]])},
+    {id: 'lineduck', name: 'เส้น', note: 'ก๋วยเตี๋ยวเป็ด', required: true, multi: false, choices: ch(['เล็ก', 'ใหญ่', 'หมี่ขาว', 'วุ้นเส้น', 'มาม่า', 'บะหมี่เหลือง', 'บะหมี่หยก', ['เกาเหลา', 20]])},
     {id: 'size', name: 'ขนาด', note: 'มีเปลี่ยนเป็นกับข้าว', required: false, multi: false, choices: ch(['ธรรมดา', ['พิเศษ', 10], ['เปลี่ยนเป็นกับข้าว จานเล็ก', 10], ['เปลี่ยนเป็นกับข้าว จานกลาง', 20], ['เปลี่ยนเป็นกับข้าว จานใหญ่', 50]])}
   ],
   menu: SEED_MENU.map((m, i) => ({id: 'm' + i, cat: m[0], name: m[1], price: m[2], opts: SEED_OPTS[m[1]] || [], out: false})),
