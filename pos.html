@@ -171,7 +171,7 @@ let UL = 'th', FB = false, M = null, store = null;
 const fmt = (s, a) => s.replace(/\{(\d)\}/g, (_, i) => a[i] ?? '');
 const TL = (k, l) => (I18N[l] && I18N[l][k]) || (l !== 'th' && I18N.en[k]) || I18N.th[k] || k;
 const tx = (k, ...a) => fmt(TL(k, UL), a);
-function trL(x, l) { if (x === TA) return TL('takeaway', l); if (l === 'th' || !M) return x; const d = (M.dict || {})[x] || {}; return d[l] || (FB && d.en) || x; }
+function trL(x, l) { if (x === TA) return TL('takeaway', l); const ci = x.indexOf(': '); if (ci > 0 && M && !(M.dict || {})[x]) return trL(x.slice(0, ci), l) + ': ' + trL(x.slice(ci + 2), l); if (l === 'th' || !M) return x; const d = (M.dict || {})[x] || {}; return d[l] || (FB && d.en) || x; }
 const tr = x => trL(x, UL);
 const sub = x => UL !== 'th' && tr(x) !== x ? `<small class="mu th">${esc(x)}</small>` : '';
 const tNameL = (tb, l) => tb === 't0' ? TL('takeaway', l) : TL('table', l) + ' ' + tb.slice(1);
@@ -261,18 +261,19 @@ function pickItem(id, cb) {
   const gs = m.opts.map(g => M.groups.find(x => x.id === g)).filter(Boolean);
   modal(`${m.img ? `<img src="${m.img}" alt="" style="width:100%;max-height:220px;object-fit:cover;border-radius:14px;margin-bottom:8px">` : ''}<h2>${esc(tr(m.name))}</h2>${sub(m.name)}<div class="mu">${baht(m.price)}</div>
   ${gs.map(g => `<h3 class="mt">${esc(tr(g.name))} <small class="mu">${g.multi ? tx('pickMany') : tx('pick1')}${g.required ? ' • ' + tx('req') : ''}</small></h3>
-    ${g.choices.map((c, i) => `<label class="ck"><input type="${g.multi ? 'checkbox' : 'radio'}" name="g_${g.id}" value="${esc(c.name)}" ${!g.multi && g.required && i === 0 ? 'checked' : ''} onchange="pkUpd()"><span>${esc(bi(c.name))}</span><b class="mu">${c.price ? '+' + c.price : ''}</b></label>`).join('')}`).join('')}
-  <label class="ck mt"><input type="checkbox" id="pkTA"><span>🛍️ ${tx('takeaway')}</span></label><label>${tx('note')}</label><input id="pkNote">
+    ${g.choices.map((c, i) => `<label class="ck"><input type="${g.multi ? 'checkbox' : 'radio'}" name="g_${g.id}" data-p="${Number(c.price) || 0}" value="${esc(g.pre ? g.name + ': ' + c.name : c.name)}" ${!g.multi && g.required && i === 0 ? 'checked' : ''} onchange="pkUpd()"><span>${esc(bi(c.name))}</span><b class="mu">${c.price ? '+' + c.price : ''}</b></label>`).join('')}`).join('')}
+  ${gs.some(g => g.choices.some(c => c.name === TA)) ? '' : `<label class="ck mt"><input type="checkbox" id="pkTA"><span>🛍️ ${tx('takeaway')}</span></label>`}<label>${tx('note')}</label><input id="pkNote">
   <div class="row mt" style="align-items:center"><div class="qty" style="flex:0"><button onclick="pkQty(-1)">−</button><b id="pkQ" style="min-width:28px;text-align:center">1</b><button onclick="pkQty(1)">+</button></div><button class="p" id="pkOk" onclick="pkDone()"></button></div><div class="row mt">${[2, 3, 5, 10].map(n => `<button class="sm" onclick="PK.qty=${n};pkUpd()">×${n}</button>`).join('')}</div>`);
   pkUpd();
 }
 function pkOpts() { return [...document.querySelectorAll('#modal input[name^=g_]:checked')].map(e => e.value); }
-function pkUpd() { $('#pkOk').textContent = tx('add') + ' ' + baht(unitPrice(PK.m.id, pkOpts()) * PK.qty); $('#pkQ').textContent = PK.qty; }
+function pkPrice() { return (Number(PK.m.price) || 0) + [...document.querySelectorAll('#modal input[name^=g_]:checked')].reduce((a, e) => a + (+e.dataset.p || 0), 0); }
+function pkUpd() { $('#pkOk').textContent = tx('add') + ' ' + baht(pkPrice() * PK.qty); $('#pkQ').textContent = PK.qty; }
 function pkQty(d) { PK.qty = Math.max(1, PK.qty + d); pkUpd(); }
 function pkDone() {
-  const o = pkOpts(); if ($('#pkTA').checked) o.push(TA);
-  for (const gid of PK.m.opts) { const g = M.groups.find(x => x.id === gid); if (g && g.required && !g.choices.some(c => o.includes(c.name))) return toast(tx('choose') + ' ' + tr(g.name)); }
-  const k = PK, m = k.m; const line = {id: m.id, name: m.name, cat: m.cat, price: unitPrice(m.id, o), qty: k.qty, opts: o, note: $('#pkNote').value.trim().slice(0, 100)}; modal(); k.cb(line);
+  const o = pkOpts(); if ($('#pkTA') && $('#pkTA').checked) o.push(TA);
+  for (const gid of PK.m.opts) { const g = M.groups.find(x => x.id === gid); if (g && g.required && !document.querySelector('#modal input[name="g_' + g.id + '"]:checked')) return toast(tx('choose') + ' ' + tr(g.name)); }
+  const k = PK, m = k.m; const line = {id: m.id, name: m.name, cat: m.cat, price: pkPrice(), qty: k.qty, opts: o, note: $('#pkNote').value.trim().slice(0, 100)}; modal(); k.cb(line);
 }
 let MQ = '', MGC = '';
 function mgItems(cat, fn) { const q = MQ.trim().toLowerCase();
@@ -423,18 +424,19 @@ const SEED_WORDS = { /* ไทย: [พม่า, อังกฤษ] — หม
   'เครื่อง': ['', 'Toppings'], 'ใส่ทุกอย่าง': ['ဆိုင့်ထုတ်ယန့်', 'Everything'], 'สด': ['ဆုတ် - အစိမ်း', 'Fresh meat'], 'เปื่อย': ['ပွိုက် - ပြုတ်နူး', 'Stewed meat'], 'ตับ': ['တပ် - အသည်း', 'Liver'], 'ลูกชิ้น': ['လုတ်ချင် - အသားလုံး', 'Meatballs'], 'เนื้อหมัก (เฉพาะเนื้อเท่านั้น)': ['နွားမုတ်', 'Marinated beef (beef only)'], 'ตับหมัก (เฉพาะเนื้อเท่านั้น)': ['တက်မွတ်', 'Marinated liver (beef only)'],
   'ระดับความเผ็ด': ['အစပ်', 'Spice level'], 'ไม่ปรุง': ['အရသာမထည့်', 'Unseasoned'], 'ไม่เผ็ด (ไม่ใส่พริก ใส่น้ำส้มได้)': ['မိုင်ဖက် (မိုင်ဖရိတ် နမ်ဆွမ်ဒိုင်)', 'Not spicy (no chili, vinegar is fine)'], 'เผ็ดน้อย': ['အစပ်နည်းနည်း', 'Mild'], 'เผ็ดปกติ': ['အစပ်ပုံမှန်', 'Medium spicy'], 'เผ็ดมากกก': ['အရမ်းစပ်', 'Very spicy'],
   'น้ำ': ['', 'Soup'], 'น้ำ (ใส่เลือด)': ['ဟင်း - သွေးထည့်', 'Soup with blood (boat-noodle style)'], 'น้ำ (ใส่เลือด+เพิ่มน้ำ)': ['နမ်း - လွတ် + ဖိမနမ်း', 'Soup with blood, extra soup'], 'แห้ง': ['ဟိန်', 'Dry (no soup)'], 'น้ำใส (ไม่เลือด)': ['နမ်းဆိုင် (မိုင်လွတ်)', 'Clear soup (no blood)'],
+  'ไม่พริก': ['ငရုတ်သီးမထည့်', 'No chili'], 'เผ็ดมาก': ['အရမ်းစပ်', 'Very spicy'], 'รูปแบบ': ['', 'Cut'], 'เนื้อ+หนัง': ['အသားသရေ', 'Meat and skin'], 'เนื้อล้วน': ['အသား', 'Meat only'], 'หนังล้วน': ['သရေ', 'Skin only'], 'กลับบ้าน (พิเศษ)': ['ကလပ်ဘန် ++', 'Takeaway (large)'], 'เพิ่มเส้น': ['', 'Extra noodles'],
   'ผัก': ['အရွက်', 'Vegetables'], 'ไม่ผัก': ['အရွက်မထည့်', 'No vegetables'],
   'ไข่': ['ကြက်ဥ', 'Egg'], 'ไข่ดาวไม่สุก': ['ခိုင်ဒေါက်မိုင်စွတ်', 'Fried egg, runny'], 'ไข่ดาวสุก': ['ခိုင်ဒေါက်စွတ်', 'Fried egg, well done'], 'ไข่เยี่ยวม้า': ['ခိုင်ယွတ်မား', 'Century egg'], 'ไข่ชะอม': ['ခိုင်ချာအို', 'Acacia omelette'],
   'ขนาด': ['အနည်းအများ', 'Size'], 'ธรรมดา': ['ရိုးရိုး', 'Regular'], 'พิเศษ': ['အထူး', 'Large'], 'เปลี่ยนเป็นกับข้าว จานเล็ก': ['ကပ်ခေါ် ကျန်လက်', 'As a side dish, small plate'], 'เปลี่ยนเป็นกับข้าว จานกลาง': ['ကပခေါင် ချန်ကလန်', 'As a side dish, medium plate'], 'เปลี่ยนเป็นกับข้าว จานใหญ่': ['ကပ်ခေါင် ချန်ရှိုင်', 'As a side dish, large plate']
 };
 const ch = a => a.map(x => Array.isArray(x) ? {name: x[0], price: x[1]} : {name: x, price: 0});
-const N25 = ['line25', 'nmeat', 'part', 'spicy', 'soup', 'veg'], N40 = ['line40', 'nmeat', 'part', 'spicy', 'soup', 'veg'], R45 = ['meat45', 'spicy', 'veg', 'egg', 'size'], R55 = ['meat55', 'spicy', 'veg', 'egg', 'size'];
+const N25 = ['line25', 'nmeat', 'part', 'spicy', 'soup', 'veg'], N40 = ['line40', 'nmeat', 'part', 'spicy', 'soup', 'veg'], R45 = ['meat45', 'spicy2', 'veg', 'egg', 'size'], R55 = ['meat55', 'spicy2', 'veg', 'egg', 'size'], NX = ['line40', 'nmeat', 'part', 'spicy', 'soup', 'veg', 'addline'];
 const SEED_OPTS = { /* เมนูไหนใช้ตัวเลือกกลุ่มไหน */
-  'ก๋วยเตี๋ยวชาม 25': N25, 'ก๋วยเตี๋ยวเรือชาม 40': N40, 'ก๋วยเตี๋ยว (กลับบ้าน)': N40, 'เตี๋ยวกลับบ้าน +': N40, 'เตี๋ยวกลับบ้าน ++': N40,
-  'เกาเหลา': ['nmeat', 'part', 'spicy', 'soup', 'veg'], 'ก๋วยเตี๋ยวเป็ดย่าง': ['line40', 'spicy', 'soup', 'veg'], 'เส้นลวก': ['line40'],
+  'ก๋วยเตี๋ยวชาม 25': N25, 'ก๋วยเตี๋ยวเรือชาม 40': [...NX, 'ta40'], 'ก๋วยเตี๋ยว (กลับบ้าน)': NX, 'เตี๋ยวกลับบ้าน +': NX, 'เตี๋ยวกลับบ้าน ++': NX,
+  'เกาเหลา': ['nmeat', 'part', 'spicy', 'soup', 'veg'], 'ก๋วยเตี๋ยวเป็ดย่าง': ['line40', 'spicy', 'soup', 'veg'], 'เส้นลวก': ['lineb'], 'ข้าวหน้าเป็ด': ['size2'],
   'ข้าวผัดกระเพรา': R45, 'ข้าวผัดน้ำมันหอย': R45, 'ข้าวผัดพริกแกง': R45, 'ข้าวผัด': R55,
-  'ข้าวกระเพราเป็ด': ['spicy', 'veg', 'egg', 'size'], 'ข้าวขาหมู': ['egg', 'size'], 'ข้าวไข่เจียว': ['size'],
-  'ตำปูปลาร้า': ['spicy'], 'ตำซั่ว': ['spicy'], 'ตำถั่ว': ['spicy'], 'ตำเส้นเล็ก': ['spicy'], 'ตำไข่เยี่ยวม้า': ['spicy']
+  'ข้าวกระเพราเป็ด': ['spicy2', 'veg', 'egg', 'size'], 'ข้าวขาหมู': ['cut', 'egg', 'size2'], 'ข้าวไข่เจียว': ['size2'],
+  'ตำปูปลาร้า': ['spicy2'], 'ตำซั่ว': ['spicy2'], 'ตำถั่ว': ['spicy2'], 'ตำเส้นเล็ก': ['spicy2'], 'ตำไข่เยี่ยวม้า': ['spicy2']
 };
 const DEF = {
   shop: 'ก๋วยเตี๋ยวเรือรสจนา', tables: 12, promptpay: '', footer: 'ขอบคุณที่อุดหนุนค่ะ', clangs: ['th', 'en', 'zh'], slangs: ['th', 'my', 'lo', 'en'],
@@ -450,7 +452,15 @@ const DEF = {
     {id: 'meat45', name: 'เนื้อสัตว์', note: 'อาหารตามสั่ง 45 บาท', required: true, multi: false, choices: ch(['ไก่', 'หมู', ['หมูเปื่อย', 5], ['เนื้อ', 20], ['เนื้อเปื่อย', 25], ['เป็ดย่าง', 5], ['กุ้ง', 20], ['หมึก', 20], ['ทะเล', 20]])},
     {id: 'meat55', name: 'เนื้อสัตว์', note: 'อาหารตามสั่ง 55 บาท', required: true, multi: false, choices: ch(['ไก่', 'หมู', ['หมูเปื่อย', 5], ['เนื้อ', 10], ['เนื้อเปื่อย', 15], ['เป็ดย่าง', 10], ['กุ้ง', 10], ['หมึก', 10], ['ทะเล', 10]])},
     {id: 'egg', name: 'ไข่', required: false, multi: true, choices: ch([['ไข่ดาวไม่สุก', 10], ['ไข่ดาวสุก', 10], ['ไข่เจียว', 12], ['ไข่เยี่ยวม้า', 20], ['ไข่ชะอม', 20]])},
-    {id: 'size', name: 'ขนาด', required: false, multi: false, choices: ch(['ธรรมดา', ['พิเศษ', 10], ['เปลี่ยนเป็นกับข้าว จานเล็ก', 10], ['เปลี่ยนเป็นกับข้าว จานกลาง', 20], ['เปลี่ยนเป็นกับข้าว จานใหญ่', 50]])}
+    {id: 'spicy2', name: 'ระดับความเผ็ด', note: 'อาหารตามสั่ง', required: false, multi: false, choices: ch(['ไม่พริก', 'เผ็ดน้อย', 'เผ็ดปกติ', 'เผ็ดมาก'])},
+    {id: 'cut', name: 'รูปแบบ', required: false, multi: false, choices: ch(['เนื้อ+หนัง', 'เนื้อล้วน', 'หนังล้วน'])},
+    {id: 'lineb', name: 'เส้น', note: 'เส้นลวก', required: true, multi: false, choices: ch(['เล็ก', 'ใหญ่', 'หมี่ขาว', 'วุ้นเส้น', ['บะหมี่เหลือง', 5], ['มาม่า', 10]])},
+    {id: 'meat65', name: 'เนื้อสัตว์', note: 'อาหารตามสั่ง 60 (ยังไม่ได้ผูกกับเมนู)', required: true, multi: false, choices: ch(['ไก่', 'หมู', ['หมูเปื่อย', 5], ['เนื้อ', 10], ['เนื้อเปื่อย', 15], ['เป็ดย่าง', 10], ['กุ้ง', 20], ['หมึก', 20], ['ทะเล', 20]])},
+    {id: 'ta40', name: 'กลับบ้าน', note: 'ก๋วยเตี๋ยวเรือ', required: false, multi: false, choices: ch([['กลับบ้าน', 15], ['กลับบ้าน (พิเศษ)', 25]])},
+    {id: 'size2', name: 'ขนาด', note: 'ธรรมดา/พิเศษ', required: false, multi: false, choices: ch(['ธรรมดา', ['พิเศษ', 10]])},
+    {id: 'line2', name: 'เส้น', note: 'ใหญ่/หมี่ขาว (ยังไม่ได้ผูกกับเมนู)', required: true, multi: false, choices: ch(['ใหญ่', 'หมี่ขาว'])},
+    {id: 'addline', name: 'เพิ่มเส้น', note: 'ก๋วยเตี๋ยวเรือ', pre: true, required: false, multi: true, choices: ch([['เล็ก', 10], ['ใหญ่', 10], ['หมี่ขาว', 10], ['วุ้นเส้น', 10], ['บะหมี่เหลือง', 15], ['มาม่า', 20]])},
+    {id: 'size', name: 'ขนาด', note: 'มีเปลี่ยนเป็นกับข้าว', required: false, multi: false, choices: ch(['ธรรมดา', ['พิเศษ', 10], ['เปลี่ยนเป็นกับข้าว จานเล็ก', 10], ['เปลี่ยนเป็นกับข้าว จานกลาง', 20], ['เปลี่ยนเป็นกับข้าว จานใหญ่', 50]])}
   ],
   menu: SEED_MENU.map((m, i) => ({id: 'm' + i, cat: m[0], name: m[1], price: m[2], opts: SEED_OPTS[m[1]] || [], out: false})),
   dict: Object.assign(Object.fromEntries(Object.entries(SEED_WORDS).map(([k, v]) => [k, v[0] ? {my: v[0], en: v[1]} : {en: v[1]}])), Object.fromEntries(SEED_MENU.slice().reverse().map(m => [m[1], {my: m[3], en: m[4]}])))
@@ -848,14 +858,14 @@ function saveCats() { const c = [...new Set($('#eCats').value.split('\n').map(s 
 function editGroup(id) {
   const g = M.groups.find(x => x.id === id) || {name: '', required: false, multi: false, choices: []};
   modal(`<h2>${id ? 'แก้ไข' : 'เพิ่ม'}กลุ่มตัวเลือก</h2><label>ชื่อกลุ่ม (ภาษาไทย)</label><input id="gN" value="${esc(g.name)}"><label>หมายเหตุ (เห็นเฉพาะหน้าจัดการ เช่น ใช้กับชาม 25)</label><input id="gO" value="${esc(g.note || '')}">
-  <label class="ck"><input type="checkbox" id="gR" ${g.required ? 'checked' : ''}><span>ต้องเลือก</span></label><label class="ck"><input type="checkbox" id="gM" ${g.multi ? 'checked' : ''}><span>เลือกได้หลายอย่าง</span></label>
+  <label class="ck"><input type="checkbox" id="gR" ${g.required ? 'checked' : ''}><span>ต้องเลือก</span></label><label class="ck"><input type="checkbox" id="gM" ${g.multi ? 'checked' : ''}><span>เลือกได้หลายอย่าง</span></label><label class="ck"><input type="checkbox" id="gP" ${g.pre ? 'checked' : ''}><span>แสดงชื่อกลุ่มนำหน้าตัวเลือกในออเดอร์ (เช่น เพิ่มเส้น: เล็ก)</span></label>
   <label>ตัวเลือก — บรรทัดละ 1 อย่าง, ใส่ราคาเพิ่มด้วย =  เช่น  พิเศษ=10</label><textarea id="gC" rows="7">${esc(g.choices.map(c => c.name + (c.price ? '=' + c.price : '')).join('\n'))}</textarea>
   <div class="row mt">${id ? `<button class="d" onclick="delGroup('${id}')">ลบ</button>` : ''}<button onclick="modal()">ยกเลิก</button><button class="p" onclick="saveGroup('${id || ''}')">บันทึก</button></div>`);
 }
 function saveGroup(id) {
   const name = $('#gN').value.trim(), choices = $('#gC').value.split('\n').map(l => l.trim()).filter(Boolean).map(l => { const [n, p] = l.split('='); return {name: n.trim(), price: +p || 0}; });
   if (!name || !choices.length) return toast('กรอกชื่อและตัวเลือก');
-  const v = {name, note: $('#gO').value.trim(), choices, required: $('#gR').checked, multi: $('#gM').checked};
+  const v = {name, note: $('#gO').value.trim(), pre: $('#gP').checked, choices, required: $('#gR').checked, multi: $('#gM').checked};
   if (id) Object.assign(M.groups.find(x => x.id === id), v); else M.groups.push({id: 'g' + uid(), ...v}); saveM(); modal(); draw();
 }
 function delGroup(id) { if (confirm('ลบกลุ่มนี้?')) { M.groups = M.groups.filter(g => g.id !== id); M.menu.forEach(m => m.opts = m.opts.filter(o => o !== id)); saveM(); modal(); draw(); } }
