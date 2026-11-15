@@ -338,30 +338,69 @@ function custInit() {
 /* ============================================================
    หน้าพนักงาน
    ============================================================ */
+/* เมนูตั้งต้นของร้าน — แถว: [หมวด, ชื่อไทย, ราคา, ชื่อพม่า, ชื่ออังกฤษ, กลุ่มตัวเลือก] */
+const SEED_MENU = [
+  ['ก๋วยเตี๋ยว', 'ก๋วยเตี๋ยวชาม 25', 25, 'ကွေ့တီယို ချမ် 25 +', 'Boat noodles, small bowl (25)', ['line']],
+  ['ก๋วยเตี๋ยว', 'ก๋วยเตี๋ยวเรือชาม 40', 40, 'ကွေ့တီယို ချမ် 40 ++', 'Boat noodles, large bowl (40)', ['line']],
+  ['ก๋วยเตี๋ยว', 'เกาเหลา', 40, 'ကောက်လော် - ခေါက်ဆွဲမပါ', 'Soup without noodles', []],
+  ['ก๋วยเตี๋ยว', 'ก๋วยเตี๋ยวเป็ดย่าง', 50, 'ကွေ့တီယိုပက်ယန်', 'Roast duck noodles', ['line']],
+  ['ก๋วยเตี๋ยว', 'ก๋วยเตี๋ยว (กลับบ้าน)', 55, 'တီယော်ကလပ်ဘန်', 'Noodles (takeaway)', ['line']],
+  ['ก๋วยเตี๋ยว', 'ลูกชิ้นลวก', 25, 'လုတ်ချင်လွတ်', 'Boiled meatballs', []],
+  ['ก๋วยเตี๋ยว', 'เนื้อลวก', 55, 'အသားပြုတ်', 'Boiled beef', []],
+  ['ก๋วยเตี๋ยว', 'เส้นลวก', 10, 'ဆိန်လွတ် - ခေါက်ဆွဲပြုတ်', 'Extra boiled noodles', ['line']],
+  ['ก๋วยเตี๋ยว', 'ผักบุ้งลวก', 10, 'ဖက်ဘုန်းလွတ်', 'Boiled morning glory', []],
+  ['ก๋วยเตี๋ยว', 'เตี๋ยวกลับบ้าน +', 55, 'တီယော်ကလပ်ဘန် +', 'Takeaway noodles (regular)', ['line']],
+  ['ก๋วยเตี๋ยว', 'เตี๋ยวกลับบ้าน ++', 65, 'တီယော်ကလပ်ဘန် ++', 'Takeaway noodles (large)', ['line']],
+  ['ก๋วยเตี๋ยว', 'หม้อไฟรสจนา', 129, 'ကောက်လော်အိုးကြီး', 'Rosjana hot pot', []],
+  ['เป็ดย่าง', 'ข้าวหน้าเป็ด', 50, 'ခေါက်နပေ', 'Roast duck on rice', []],
+  ['เป็ดย่าง', 'เป็ดย่าง (จาน)', 100, 'ပက်ယန် (ကျန်)', 'Roast duck (plate)', []],
+  ['เป็ดย่าง', 'เป็ดย่างครึ่งตัว', 250, 'ပက်ယန် ခရိုင်တူဝါ - ဘဲကင်တစ်ဝက်', 'Roast duck, half', []],
+  ['เป็ดย่าง', 'เป็ดย่างเต็มตัว', 480, 'ပက်ယန် တိမ်တူဝါ - ဘဲကင်တစ်ကောင်', 'Roast duck, whole', []],
+  ['อาหารตามสั่ง', 'ลูกชิ้นปิ้ง 3 ไม้', 30, 'လုတ်ချင်ပိန် 3 ချောင်း', 'Grilled meatballs, 3 skewers', []],
+  ['อาหารตามสั่ง', 'ข้าวผัดกระเพรา', 45, 'ကဖောင်', 'Basil stir-fry on rice', ['meat', 'spicy', 'more', 'egg', 'size']],
+  ['อาหารตามสั่ง', 'ข้าวกระเพราเป็ด', 50, 'ကဖရော်ပက်', 'Basil duck on rice', ['spicy', 'more', 'egg', 'size']],
+  ['อาหารตามสั่ง', 'ข้าวผัด', 55, 'ခေါက်ဖက်', 'Fried rice', ['meat', 'more', 'egg', 'size']],
+  ['อาหารตามสั่ง', 'ข้าวผัดน้ำมันหอย', 45, 'နာမာဟွဲ', 'Oyster sauce stir-fry on rice', ['meat', 'more', 'egg', 'size']],
+  ['อาหารตามสั่ง', 'ข้าวผัดพริกแกง', 45, 'ဖက်ဖီကိုင်', 'Curry paste stir-fry on rice', ['meat', 'spicy', 'more', 'egg', 'size']],
+  ['อาหารตามสั่ง', 'ข้าวขาหมู', 55, 'ခါမူ', 'Stewed pork leg on rice', ['egg', 'size']],
+  ['อาหารตามสั่ง', 'ข้าวไข่เจียว', 32, 'ခေါက်ခိုင်ကျော်', 'Omelette on rice', ['size']],
+  ['อาหารตามสั่ง', 'ข้าวเปล่า', 10, 'ခေါက်ပေါင်', 'Steamed rice', []],
+  ['อาหารตามสั่ง', 'ไข่ดาว', 10, 'ခိုင်ဒေါက်', 'Fried egg', []],
+  ['อาหารตามสั่ง', 'ไข่เจียว', 12, '(ကြက်ဥမွှေကြော်)ခိုင်ကျို', 'Omelette', []],
+  ['ส้มตำ', 'ตำปูปลาร้า', 55, 'တမ်ပူပါလ', 'Papaya salad with crab and fermented fish', ['spicy']],
+  ['ส้มตำ', 'ตำซั่ว', 55, 'တမ်စွ', 'Papaya salad with rice noodles (tam sua)', ['spicy']],
+  ['ส้มตำ', 'ตำถั่ว', 55, 'တမ်ထို', 'Long bean salad', ['spicy']],
+  ['ส้มตำ', 'ตำเส้นเล็ก', 55, 'တမ်စန်းလိတ်', 'Thin noodle salad', ['spicy']],
+  ['ส้มตำ', 'ตำไข่เยี่ยวม้า', 65, 'တမ်ခိုင်ယွတ်မား', 'Papaya salad with century egg', ['spicy']],
+  ['เครื่องเคียง', 'กากเจียว', 25, 'ခိုင်ကျော်', 'Crispy pork lard', []],
+  ['เครื่องเคียง', 'แคปหมู', 10, 'ခက်မူ', 'Pork crackling', []],
+  ['เครื่องเคียง', 'แคปหมูกระจก', 22, 'ခတ်မူကဆုတ်', 'Thin crispy pork rind', []],
+  ['เครื่องเคียง', 'แคปวัว', 20, '(ခဲ့ဘွ)(အမဲခေါက်ကြော်)', 'Beef crackling', []],
+  ['เครื่องเคียง', 'หนังปลากรอบ', 22, 'နန်ပါကော့', 'Crispy fish skin', []]
+];
+const SEED_WORDS = { /* ไทย: [พม่า, อังกฤษ] — หมวดและตัวเลือก */
+  'ก๋วยเตี๋ยว': ['ကွေ့တီယို', 'Noodles'], 'เป็ดย่าง': ['ဘဲကင်', 'Roast duck'], 'อาหารตามสั่ง': ['မီးဖိုချောင်အစားအစာ', 'Rice dishes'], 'ส้มตำ': ['သင်္ဘောသီးထောင်း', 'Papaya salad'], 'เครื่องเคียง': ['အကြော်စုံ', 'Sides'], 'เครื่องดื่ม': ['အချိုရည်များ', 'Drinks'],
+  'เส้น': ['ခေါက်ဆွဲအမျိုးအစား', 'Noodle type'], 'เส้นเล็ก': ['ဆန်ခေါက်ဆွဲအသေး', 'Thin rice noodles'], 'เส้นใหญ่': ['ဆန်ခေါက်ဆွဲအကြီး', 'Wide rice noodles'], 'เส้นหมี่': ['ကြာဆံ', 'Rice vermicelli'], 'บะหมี่เหลือง': ['စန်းမီလို - အဝါရောင်', 'Egg noodles'], 'วุ้นเส้น': ['ပဲကြာဆံ', 'Glass noodles'],
+  'เนื้อสัตว์': ['အမဲသားသေး', 'Meat'], 'ไก่': ['ကြက်သား', 'Chicken'], 'หมู': ['ဝက်သား', 'Pork'], 'หมูเปื่อย': ['ဝက်ပုတ်', 'Stewed pork'], 'เนื้อ': ['အမဲသား', 'Beef'], 'เนื้อเปื่อย': ['မဲပုတ်', 'Stewed beef'], 'กุ้ง': ['ပုစွန်', 'Shrimp'], 'หมึก': ['ပြည်ကြီးငါး', 'Squid'], 'ทะเล': ['ပင်လယ်စာ', 'Seafood'],
+  'ความเผ็ด': ['အစပ်', 'Spiciness'], 'ไม่เผ็ด': ['မစပ်', 'Not spicy'], 'เผ็ดปกติ': ['အစပ်ပုံမှန်', 'Medium spicy'], 'เผ็ดมาก': ['အရမ်းစပ်', 'Very spicy'],
+  'เพิ่มเติม': ['ထပ်ထည့်', 'Extras'], 'ผัก': ['အရွက်', 'Vegetables'],
+  'ไข่': ['ကြက်ဥ', 'Egg'], 'ไข่ดาวไม่สุก': ['ခိုင်ဒေါက်မိုင်စွတ်', 'Fried egg, runny'], 'ไข่เยี่ยวม้า': ['ခိုင်ယွတ်မား', 'Century egg'], 'ไข่ชะอม': ['ခိုင်ချာအို', 'Acacia omelette'],
+  'ขนาด': ['အနည်းအများ', 'Size'], 'ธรรมดา': ['ရိုးရိုး', 'Regular'], 'พิเศษ': ['အထူး', 'Large'], 'เปลี่ยนเป็นกับข้าว จานเล็ก': ['ကပ်ခေါ် ကျန်လက်', 'As a side dish, small plate'], 'เปลี่ยนเป็นกับข้าว จานกลาง': ['ကပခေါင် ချန်ကလန်', 'As a side dish, medium plate'], 'เปลี่ยนเป็นกับข้าว จานใหญ่': ['ကပ်ခေါင် ချန်ရှိုင်', 'As a side dish, large plate']
+};
+const ch = a => a.map(x => Array.isArray(x) ? {name: x[0], price: x[1]} : {name: x, price: 0});
 const DEF = {
   shop: 'ก๋วยเตี๋ยวเรือรสจนา', tables: 12, promptpay: '', footer: 'ขอบคุณที่อุดหนุนค่ะ', clangs: ['th', 'en', 'zh'], slangs: ['th', 'my', 'lo', 'en'],
-  cats: ['ก๋วยเตี๋ยว', 'อาหารตามสั่ง', 'ของทานเล่น', 'เครื่องดื่ม'],
+  cats: ['ก๋วยเตี๋ยว', 'เป็ดย่าง', 'อาหารตามสั่ง', 'ส้มตำ', 'เครื่องเคียง', 'เครื่องดื่ม'],
   groups: [
-    {id: 'line', name: 'เส้น', required: true, multi: false, choices: ['เส้นเล็ก', 'เส้นใหญ่', 'เส้นหมี่', 'บะหมี่เหลือง', 'วุ้นเส้น', 'เกาเหลา'].map(n => ({name: n, price: 0}))},
-    {id: 'size', name: 'ขนาด', required: true, multi: false, choices: [{name: 'ธรรมดา', price: 0}, {name: 'พิเศษ', price: 10}]},
-    {id: 'spicy', name: 'ความเผ็ด', required: false, multi: false, choices: ['ไม่เผ็ด', 'เผ็ดปกติ', 'เผ็ดมาก'].map(n => ({name: n, price: 0}))},
-    {id: 'add', name: 'เพิ่มเติม', required: false, multi: true, choices: [{name: 'ไม่ใส่ผัก', price: 0}, {name: 'ไข่ดาว', price: 10}, {name: 'เพิ่มลูกชิ้น', price: 10}]}
+    {id: 'line', name: 'เส้น', required: true, multi: false, choices: ch(['เส้นเล็ก', 'เส้นใหญ่', 'เส้นหมี่', 'บะหมี่เหลือง', 'วุ้นเส้น'])},
+    {id: 'meat', name: 'เนื้อสัตว์', required: true, multi: false, choices: ch(['ไก่', 'หมู', ['หมูเปื่อย', 5], ['เนื้อ', 10], ['เนื้อเปื่อย', 15], ['เป็ดย่าง', 10], ['กุ้ง', 10], ['หมึก', 10], ['ทะเล', 20]])},
+    {id: 'spicy', name: 'ความเผ็ด', required: false, multi: false, choices: ch(['ไม่เผ็ด', 'เผ็ดปกติ', 'เผ็ดมาก'])},
+    {id: 'more', name: 'เพิ่มเติม', required: false, multi: true, choices: ch(['ผัก'])},
+    {id: 'egg', name: 'ไข่', required: false, multi: true, choices: ch([['ไข่ดาวไม่สุก', 10], ['ไข่เจียว', 12], ['ไข่เยี่ยวม้า', 20], ['ไข่ชะอม', 20]])},
+    {id: 'size', name: 'ขนาด', required: false, multi: false, choices: ch(['ธรรมดา', ['พิเศษ', 10], ['เปลี่ยนเป็นกับข้าว จานเล็ก', 10], ['เปลี่ยนเป็นกับข้าว จานกลาง', 20], ['เปลี่ยนเป็นกับข้าว จานใหญ่', 50]])}
   ],
-  menu: [['ก๋วยเตี๋ยว', 'ก๋วยเตี๋ยวเรือหมู', 40, ['line', 'size', 'add']], ['ก๋วยเตี๋ยว', 'ก๋วยเตี๋ยวเรือเนื้อ', 40, ['line', 'size', 'add']], ['ก๋วยเตี๋ยว', 'ก๋วยเตี๋ยวต้มยำ', 45, ['line', 'size', 'spicy', 'add']],
-    ['อาหารตามสั่ง', 'ข้าวผัดกระเพรา', 50, ['size', 'spicy', 'add']], ['อาหารตามสั่ง', 'ข้าวผัด', 50, ['size', 'add']], ['อาหารตามสั่ง', 'ข้าวเปล่า', 10, []],
-    ['ของทานเล่น', 'แคบหมู', 20, []], ['ของทานเล่น', 'ลูกชิ้นลวก', 40, []],
-    ['เครื่องดื่ม', 'น้ำเปล่า', 10, []], ['เครื่องดื่ม', 'น้ำแข็ง', 2, []], ['เครื่องดื่ม', 'โค้ก', 20, []], ['เครื่องดื่ม', 'น้ำกระเจี๊ยบ', 20, []], ['เครื่องดื่ม', 'น้ำโอเลี้ยง', 20, []]
-  ].map((m, i) => ({id: 'm' + i, cat: m[0], name: m[1], price: m[2], opts: m[3], out: false})),
-  dict: Object.fromEntries(Object.entries({
-    'ก๋วยเตี๋ยว': ['Noodles', 'ကွေ့တီယို'], 'อาหารตามสั่ง': ['Rice dishes', 'ထမင်းဟင်း'], 'ของทานเล่น': ['Snacks', 'သရေစာ'], 'เครื่องดื่ม': ['Drinks', 'အချိုရည်များ'],
-    'เส้น': ['Noodle type', 'ခေါက်ဆွဲအမျိုးအစား'], 'ขนาด': ['Size', 'အရွယ်အစား'], 'ความเผ็ด': ['Spiciness', 'အစပ်'], 'เพิ่มเติม': ['Extras', 'ထပ်ထည့်'],
-    'เส้นเล็ก': ['Thin rice noodles', 'ဆန်ခေါက်ဆွဲအသေး'], 'เส้นใหญ่': ['Wide rice noodles', 'ဆန်ခေါက်ဆွဲအကြီး'], 'เส้นหมี่': ['Rice vermicelli', 'ကြာဆံ'], 'บะหมี่เหลือง': ['Egg noodles', 'ခေါက်ဆွဲအဝါ'], 'วุ้นเส้น': ['Glass noodles', 'ပဲကြာဆံ'], 'เกาเหลา': ['No noodles (soup only)', 'ခေါက်ဆွဲမပါ'],
-    'ธรรมดา': ['Regular', 'ရိုးရိုး'], 'พิเศษ': ['Large', 'အထူး'], 'ไม่เผ็ด': ['Not spicy', 'မစပ်'], 'เผ็ดปกติ': ['Medium spicy', 'အစပ်ပုံမှန်'], 'เผ็ดมาก': ['Very spicy', 'အရမ်းစပ်'],
-    'ไม่ใส่ผัก': ['No vegetables', 'အရွက်မထည့်'], 'ไข่ดาว': ['Fried egg', 'ကြက်ဥကြော်'], 'เพิ่มลูกชิ้น': ['Extra meatballs', 'အသားလုံးထပ်ထည့်'],
-    'ก๋วยเตี๋ยวเรือหมู': ['Boat noodles with pork', 'ဝက်သားကွေ့တီယို'], 'ก๋วยเตี๋ยวเรือเนื้อ': ['Boat noodles with beef', 'အမဲသားကွေ့တီယို'], 'ก๋วยเตี๋ยวต้มยำ': ['Tom yum noodles', 'တုံယမ်းကွေ့တီယို'],
-    'ข้าวผัดกระเพรา': ['Basil stir-fry with rice', 'ကဖောင်'], 'ข้าวผัด': ['Fried rice', 'ထမင်းကြော်'], 'ข้าวเปล่า': ['Steamed rice', 'ထမင်းဖြူ'], 'แคบหมู': ['Pork crackling', 'ဝက်ခေါက်ကြော်'], 'ลูกชิ้นลวก': ['Boiled meatballs', 'အသားလုံးပြုတ်'],
-    'น้ำเปล่า': ['Water', 'ရေသန့်'], 'น้ำแข็ง': ['Ice', 'ရေခဲ'], 'โค้ก': ['Coke', 'ကိုကာကိုလာ'], 'น้ำกระเจี๊ยบ': ['Roselle juice', 'ချဉ်ပေါင်ရည်'], 'น้ำโอเลี้ยง': ['Thai iced black coffee', 'အိုလျန်']
-  }).map(([k, v]) => [k, {en: v[0], my: v[1]}]))
+  menu: SEED_MENU.map((m, i) => ({id: 'm' + i, cat: m[0], name: m[1], price: m[2], opts: m[5], out: false})),
+  dict: Object.assign(Object.fromEntries(Object.entries(SEED_WORDS).map(([k, v]) => [k, {my: v[0], en: v[1]}])), Object.fromEntries(SEED_MENU.map(m => [m[1], {my: m[3], en: m[4]}])))
 };
 let D = Object.assign({id: 'd' + uid(), name: 'Staff', lang: 'th', db: '', voice: true, vlang: '', say: {order: 1, cooked: 1, served: 0, call: 1, paid: 1}, autoPrint: false, pcats: [], plang: '', pth: true, paper: 80, kcat: '', role: 'all', t1: 8, t2: 15}, (() => { try { return JSON.parse(localStorage.getItem('rj_dev')) || {}; } catch (e) { return {}; } })());
 const saveD = () => localStorage.setItem('rj_dev', JSON.stringify(D));
@@ -724,7 +763,8 @@ const custUrl = n => location.origin + location.pathname + '?t=' + n + (D.db ? '
 function sQr() { return `<div class="card"><div class="row" style="align-items:center"><h3>QR สั่งอาหารประจำโต๊ะ</h3><button class="sm" style="flex:0;white-space:nowrap" onclick="printQr()">🖨️ พิมพ์</button></div>${D.db ? '' : '<p class="mu">ยังไม่ได้เชื่อม Firebase — QR นี้ใช้ได้เฉพาะบนเครื่องนี้</p>'}
   <div class="qrs mt" id="qrs">${Array.from({length: M.tables}, (_, i) => i + 1).map(n => `<div class="qrc">${qrSvg(custUrl(n), 4)}<b>โต๊ะ ${n}</b><br><a href="${esc(custUrl(n))}" target="_blank" style="font-size:12px">เปิดหน้าลูกค้า</a></div>`).join('')}</div></div>`; }
 function printQr() { const el = $('#print'); el.className = ''; el.innerHTML = `<h2 style="text-align:center">${esc(M.shop)} — สแกนเพื่อสั่งอาหาร / Scan to order</h2><div class="qrs" style="grid-template-columns:repeat(3,1fr)">${$('#qrs').innerHTML.replace(/<a [^>]*>.*?<\/a>/g, '')}</div>`; setTimeout(() => window.print(), 50); }
-function sData() { return `<div class="card"><h3>สำรอง / กู้คืน</h3><div class="row mt"><button onclick="loadSales().then(()=>dl('pos-backup-'+dayKey(Date.now())+'.json',JSON.stringify({M,SALES}),'application/json'))">⬇️ สำรองข้อมูล (เมนู + ยอดขาย)</button><button onclick="$('#rf').click()">⬆️ กู้คืน</button><input id="rf" type="file" accept=".json" style="display:none" onchange="restore(this)"></div></div>`; }
+function seedMenu() { if (!confirm('แทนที่เมนู หมวด ตัวเลือก และคำแปลทั้งหมดด้วยเมนูตั้งต้นของร้าน?')) return; const d = clone(DEF); Object.assign(M, {cats: d.cats, groups: d.groups, menu: d.menu, dict: Object.assign(M.dict, d.dict)}); saveM(); toast('โหลดเมนูแล้ว'); draw(); }
+function sData() { return `<div class="card"><h3>เมนูตั้งต้นของร้าน</h3><p class="mu">ใช้เมื่ออยากเริ่มใหม่จากเมนูของร้านที่ใส่ไว้ในระบบ (${SEED_MENU.length} รายการ)</p><button onclick="seedMenu()">↻ โหลดเมนูตั้งต้นของร้าน</button></div><div class="card mt"><h3>สำรอง / กู้คืน</h3><div class="row mt"><button onclick="loadSales().then(()=>dl('pos-backup-'+dayKey(Date.now())+'.json',JSON.stringify({M,SALES}),'application/json'))">⬇️ สำรองข้อมูล (เมนู + ยอดขาย)</button><button onclick="$('#rf').click()">⬆️ กู้คืน</button><input id="rf" type="file" accept=".json" style="display:none" onchange="restore(this)"></div></div>`; }
 function restore(inp) { const f = inp.files[0]; if (!f) return; const r = new FileReader(); r.onload = () => { try { const d = JSON.parse(r.result); if (!d.M || !d.M.menu) throw 0; if (confirm('แทนที่เมนูและยอดขายด้วยไฟล์นี้?')) { M = normM(d.M); saveM(); (d.SALES || []).forEach(s => W(store.put('sales/' + s.id, JSON.stringify(s)))); SALES = d.SALES || []; draw(); } } catch (e) { toast('ไฟล์ไม่ถูกต้อง'); } }; r.readAsText(f); }
 
 /* ---------- จัดการเมนู (เขียนเป็นภาษาไทย แล้วไปแปลที่แท็บ "แปลภาษา") ---------- */
