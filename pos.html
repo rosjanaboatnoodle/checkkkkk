@@ -240,7 +240,9 @@ function unitPrice(id, opts) {
 }
 /* หมายเหตุ: เก็บข้อความต้นฉบับไว้เสมอ แล้วต่อท้ายคำแปลเป็นภาษาของเครื่องที่กำลังดู เช่น  no sugar - ไม่ใส่น้ำตาล */
 const NTC = {}, NTB = {}, GL = {zh: 'zh-CN'};
-function noteL(x, l) { if (!x.note) return ''; if (FB) return x.note; const t = (x.nt || {})[l] ?? NTC[x.note + '|' + l]; return x.note + (t && t !== '=' && t.toLowerCase() !== x.note.toLowerCase() ? ' - ' + t : ''); }
+function noteL(x, l) { if (!x.note) return ''; if (FB) return x.note; const out = [x.note]; [l, 'th'].forEach(g => { const t = (x.nt || {})[g] ?? NTC[x.note + '|' + g]; if (t && t !== '=' && !out.some(o => o.toLowerCase() === t.toLowerCase())) out.push(t); }); return out.join(' - '); }
+/* ชื่อ/ตัวเลือกบนเครื่องพนักงาน: ภาษาของเครื่อง + ภาษาไทยกำกับเสมอ */
+const bi = o => { const t = tr(o); return !FB && t !== o ? t + ' (' + o + ')' : t; };
 const noteS = x => noteL(x, UL);
 async function mt(text, to) {
   const key = text + '|' + to; if (NTC[key] != null) return NTC[key];
@@ -252,14 +254,14 @@ async function mt(text, to) {
     out = String(out || '').trim(); return NTC[key] = !out || out.toLowerCase() === text.toLowerCase() ? '=' : out;
   } catch (e) { return null; }
 }
-const optLine = x => [...(x.opts || []).map(tr), noteS(x)].filter(Boolean).join(', ');
+const optLine = x => [...(x.opts || []).map(bi), noteS(x)].filter(Boolean).join(', ');
 let PK = null;
 function pickItem(id, cb) {
   const m = M.menu.find(x => x.id === id); if (!m || m.out) return; PK = {m, cb, qty: 1};
   const gs = m.opts.map(g => M.groups.find(x => x.id === g)).filter(Boolean);
   modal(`${m.img ? `<img src="${m.img}" alt="" style="width:100%;max-height:220px;object-fit:cover;border-radius:14px;margin-bottom:8px">` : ''}<h2>${esc(tr(m.name))}</h2>${sub(m.name)}<div class="mu">${baht(m.price)}</div>
   ${gs.map(g => `<h3 class="mt">${esc(tr(g.name))} <small class="mu">${g.multi ? tx('pickMany') : tx('pick1')}${g.required ? ' • ' + tx('req') : ''}</small></h3>
-    ${g.choices.map((c, i) => `<label class="ck"><input type="${g.multi ? 'checkbox' : 'radio'}" name="g_${g.id}" value="${esc(c.name)}" ${!g.multi && g.required && i === 0 ? 'checked' : ''} onchange="pkUpd()"><span>${esc(tr(c.name))}</span><b class="mu">${c.price ? '+' + c.price : ''}</b></label>`).join('')}`).join('')}
+    ${g.choices.map((c, i) => `<label class="ck"><input type="${g.multi ? 'checkbox' : 'radio'}" name="g_${g.id}" value="${esc(c.name)}" ${!g.multi && g.required && i === 0 ? 'checked' : ''} onchange="pkUpd()"><span>${esc(bi(c.name))}</span><b class="mu">${c.price ? '+' + c.price : ''}</b></label>`).join('')}`).join('')}
   <label class="ck mt"><input type="checkbox" id="pkTA"><span>🛍️ ${tx('takeaway')}</span></label><label>${tx('note')}</label><input id="pkNote">
   <div class="row mt" style="align-items:center"><div class="qty" style="flex:0"><button onclick="pkQty(-1)">−</button><b id="pkQ" style="min-width:28px;text-align:center">1</b><button onclick="pkQty(1)">+</button></div><button class="p" id="pkOk" onclick="pkDone()"></button></div><div class="row mt">${[2, 3, 5, 10].map(n => `<button class="sm" onclick="PK.qty=${n};pkUpd()">×${n}</button>`).join('')}</div>`);
   pkUpd();
@@ -405,17 +407,23 @@ const inCats = (x, cats) => !cats || !cats.length || cats.includes(x.cat);
 function autoPrint() {
   if (!D.autoPrint) return; const jobs = [];
   Object.keys(L).forEach(tb => { const its = itemsOf(tb).filter(x => x.status === 'new' && !x.pr && inCats(x, D.pcats)); if (its.length) { its.forEach(x => { L[tb].items[x.k].pr = 1; W(store.put(`live/tables/${tb}/items/${x.k}/pr`, 1)); }); jobs.push([tb, its]); } });
-  if (jobs.length) { const pl = D.plang || D.lang; Promise.race([Promise.all(jobs.flatMap(j => j[1]).filter(x => x.note).map(x => mt(x.note, pl))), new Promise(r => setTimeout(r, 4000))]).then(() => printTickets(jobs)); }
+  if (jobs.length) { const pl = D.plang || D.lang; Promise.race([Promise.all(jobs.flatMap(j => j[1]).filter(x => x.note).flatMap(x => [mt(x.note, pl), mt(x.note, 'th')])), new Promise(r => setTimeout(r, 4000))]).then(() => printTickets(jobs)); }
 }
+function editNote(tb, k) { const x = L[tb].items[k], ls = [...new Set([UL, 'th'])], cur = l => { const t = (x.nt || {})[l]; return t && t !== '=' ? t : ''; };
+  modal(`<h2>✎ แก้คำแปลหมายเหตุ</h2><label>ข้อความเดิม</label><input readonly value="${esc(x.note)}">${ls.map(l => `<label>คำแปล — ${LANGS[l][0]}</label><input class="enT" data-l="${l}" value="${esc(cur(l))}">`).join('')}
+  <label class="ck mt"><input type="checkbox" id="enR" checked><span>จำคำแปลนี้ไว้ ใช้กับหมายเหตุเดียวกันครั้งต่อไป</span></label><div class="row mt"><button onclick="modal()">${tx('cancel')}</button><button class="p" onclick="saveNote('${tb}','${k}')">${tx('confirm')}</button></div>`); }
+function saveNote(tb, k) { const x = L[tb].items[k], rem = $('#enR').checked; x.nt = x.nt || {};
+  document.querySelectorAll('.enT').forEach(e => { const l = e.dataset.l, v = e.value.trim() || '='; x.nt[l] = v; NTC[x.note + '|' + l] = v; W(store.put(`live/tables/${tb}/items/${k}/nt/${l}`, v)); if (rem && v !== '=') (M.dict[x.note] = M.dict[x.note] || {})[l] = v; });
+  if (rem) saveM(); modal(); draw(); }
 function noteWork() {
-  const ls = [...new Set([D.lang, D.plang || D.lang, vl()])];
+  const ls = [...new Set([D.lang, D.plang || D.lang, vl(), 'th'])];
   Object.keys(L).forEach(tb => Object.entries(L[tb].items).forEach(([k, x]) => { if (!x.note) return; ls.forEach(l => { const bk = k + l; if ((x.nt || {})[l] != null || NTB[bk] > Date.now()) return; NTB[bk] = Date.now() + 60000;
     mt(x.note, l).then(out => { const it = L[tb] && L[tb].items[k]; if (out == null || !it) return; (it.nt = it.nt || {})[l] = out; W(store.put(`live/tables/${tb}/items/${k}/nt/${l}`, out)); if (!['set', 'sales', 'dash'].includes(V.tab)) draw(); }); }); }));
 }
 function printTickets(jobs) {
   const pl = D.plang || D.lang, el = $('#print'); el.className = 'tk';
   el.innerHTML = jobs.map(([tb, its]) => `<div class="pg" style="width:${D.paper - 8}mm;font-size:${D.paper >= 80 ? 15 : 13}px"><div style="font-size:1.9em;font-weight:700">${esc(tNameL(tb, pl))}</div><div>${new Date(its[0].at).toLocaleString('th-TH')} • ${esc(its[0].src === 'qr' ? TL('cust', pl) : its[0].by || '')}</div><hr>
-    ${its.map(x => `<div style="margin:6px 0"><div style="font-size:1.35em;font-weight:700">${x.qty} × ${esc(trL(x.name, pl))}</div>${pl !== 'th' && D.pth ? `<div>${esc(x.name)}</div>` : ''}${x.opts.length ? `<div style="font-size:1.1em">- ${x.opts.map(o => esc(trL(o, pl)) + (pl !== 'th' && D.pth && trL(o, pl) !== o ? ' (' + esc(o) + ')' : '')).join('<br>- ')}</div>` : ''}${x.note ? `<div style="font-weight:700">* ${esc(noteL(x, pl))}</div>` : ''}</div>`).join('<hr style="border-style:dashed">')}</div>`).join('');
+    ${its.map(x => `<div style="margin:6px 0"><div style="font-size:1.35em;font-weight:700">${x.qty} × ${esc(trL(x.name, pl))}</div>${pl !== 'th' ? `<div>${esc(x.name)}</div>` : ''}${x.opts.length ? `<div style="font-size:1.1em">- ${x.opts.map(o => esc(trL(o, pl)) + (pl !== 'th' && trL(o, pl) !== o ? ' (' + esc(o) + ')' : '')).join('<br>- ')}</div>` : ''}${x.note ? `<div style="font-weight:700">* ${esc(noteL(x, pl))}</div>` : ''}</div>`).join('<hr style="border-style:dashed">')}</div>`).join('');
   setTimeout(() => window.print(), 50);
 }
 function printQueue(tb, st) { const its = itemsOf(tb).filter(x => x.status === st && (st !== 'new' || inCats(x, D.kcat ? [D.kcat] : []))); if (its.length) printTickets([[tb, its]]); }
@@ -491,7 +499,7 @@ function vQueue(st) {
   (tbs.length ? `<div class="kq">${tbs.map(([tb, its]) => { const a = ageMin(its[0].at);
     return `<div class="card ${a >= D.t2 ? 'a2' : a >= D.t1 ? 'a1' : ''}"><div class="row" style="align-items:center"><h2 style="flex:3">${tName(tb)}</h2><span class="age" style="flex:0">⏱ ${a} ${tx('min')}</span>${kit ? `<button class="sm" style="flex:0" onclick="printQueue('${tb}','${st}')">🖨️</button>` : ''}</div>
     <div class="mu">${hm(its[0].at)} • ${its.length} ${tx('items')} • ${esc(its[0].src === 'qr' ? '📱 ' + tx('cust') : its[0].by)}</div>
-    ${its.map(x => `<div class="ki"><div class="n">${x.qty} × ${esc(tr(x.name))}<span class="spk" onclick="readItem('${tb}','${x.k}')">🔊</span>${sub(x.name)}<div class="ops">${x.opts.map(o => `<span>${esc(tr(o))}</span>`).join('')}${x.note ? `<span style="background:#fef08a">✎ ${esc(noteS(x))}</span>` : ''}</div></div><button onclick="adv('${tb}','${x.k}')">✔ ${tx('done')}</button></div>`).join('')}
+    ${its.map(x => `<div class="ki"><div class="n">${x.qty} × ${esc(tr(x.name))}<span class="spk" onclick="readItem('${tb}','${x.k}')">🔊</span>${sub(x.name)}<div class="ops">${x.opts.map(o => `<span>${esc(bi(o))}</span>`).join('')}${x.note ? `<span style="background:#fef08a;cursor:pointer" title="แก้คำแปล" onclick="editNote('${tb}','${x.k}')">✎ ${esc(noteS(x))}</span>` : ''}</div></div><button onclick="adv('${tb}','${x.k}')">✔ ${tx('done')}</button></div>`).join('')}
     ${its.length > 1 ? `<button class="big" style="background:#fff;border:1px solid var(--bd);font-size:16px;padding:10px" onclick="advAll('${tb}','${st}')">✔✔ ${tx('doneAll')}</button>` : ''}</div>`; }).join('')}</div>` : `<p class="mu c" style="padding:40px">${tx('empty')} 🎉</p>`);
 }
 const nextSt = s => s === 'new' ? 'cooked' : 'served';
@@ -507,7 +515,7 @@ function vCash() {
   return `<div class="hd"><button onclick="go('tables')">‹ ${tx('back')}</button><h2>${tName(tb)}</h2><button onclick="tblMore('${tb}')">⋯ ${tx('moreAct')}</button></div>
   <div class="acts"><button class="p" onclick="openOrder('${tb}')">＋ ${tx('orderMore')}</button><button onclick="splitPay('${tb}')">✂ ${tx('split')}</button><button onclick="billPreview('${tb}')">🧾 ${tx('quick')}</button></div>
   <div class="card mt" style="overflow-x:auto"><table class="t"><tr><th>${tx('itemH')}</th><th class="r">${tx('qtyH')}</th><th class="r">${tx('priceH')}</th><th class="r">${tx('statusH')}</th></tr>
-  ${its.map((x, i) => `<tr><td>${i + 1}. <b>${esc(tr(x.name))}</b><span class="spk" onclick="readItem('${tb}','${x.k}')">🔊</span>${x.src === 'qr' ? '📱' : ''}${sub(x.name)}<div class="ops">${x.opts.map(o => `<span>${esc(tr(o))}</span>`).join('')}${x.note ? `<span style="background:#fef08a">✎ ${esc(noteS(x))}</span>` : ''}</div></td>
+  ${its.map((x, i) => `<tr><td>${i + 1}. <b>${esc(tr(x.name))}</b><span class="spk" onclick="readItem('${tb}','${x.k}')">🔊</span>${x.src === 'qr' ? '📱' : ''}${sub(x.name)}<div class="ops">${x.opts.map(o => `<span>${esc(bi(o))}</span>`).join('')}${x.note ? `<span style="background:#fef08a;cursor:pointer" title="แก้คำแปล" onclick="editNote('${tb}','${x.k}')">✎ ${esc(noteS(x))}</span>` : ''}</div></td>
     <td class="r" style="white-space:nowrap">${x.qty} <button class="sm" onclick="editQty('${tb}','${x.k}')">✎</button> <button class="sm" title="${tx('again')}" onclick="again('${tb}','${x.k}')">＋${tx('again')}</button></td><td class="r" style="white-space:nowrap">${(x.price * x.qty).toLocaleString()} <button class="sm" onclick="editPrice('${tb}','${x.k}')">✎</button></td><td class="r"><span class="st ${x.status}">${tx(stKey[x.status])}</span></td></tr>`).join('')}
   <tr style="background:#f3f4f6;font-weight:700"><td>${tx('total')}</td><td class="r">${its.reduce((s, x) => s + x.qty, 0)}</td><td class="r" colspan="2" style="font-size:18px">${sum(its).toLocaleString('en-US', {minimumFractionDigits: 2})}</td></tr></table></div>
   <button class="g big" onclick="pay('${tb}')">💵 ${tx('pay')} ${baht(sum(its))}</button>`;
@@ -668,8 +676,8 @@ function sDev() {
   <div class="card"><h3>🖨️ ใบออเดอร์ครัว</h3>
   <label class="ck"><input type="checkbox" ${D.autoPrint ? 'checked' : ''} onchange="setD('autoPrint',this.checked)"><span>พิมพ์อัตโนมัติจากเครื่องนี้เมื่อมีออเดอร์ใหม่</span></label>
   <label>พิมพ์เฉพาะหมวด (ไม่ติ๊กเลย = ทุกหมวด)</label>${M.cats.map((c, i) => `<label class="ck"><input type="checkbox" ${D.pcats.includes(c) ? 'checked' : ''} onchange="togPcat(${i},this.checked)"><span>${esc(c)}</span></label>`).join('')}
-  <label>ภาษาบนใบครัว</label><select onchange="setD('plang',this.value)">${langOpts(M.slangs, D.plang, 'ตามภาษาของเครื่อง')}</select>
-  <label class="ck"><input type="checkbox" ${D.pth ? 'checked' : ''} onchange="setD('pth',this.checked)"><span>พิมพ์ภาษาไทยกำกับด้วย</span></label>
+  <label>ภาษาของใบครัวที่ออกจากเครื่องพิมพ์ของเครื่องนี้</label><select onchange="setD('plang',this.value)">${langOpts(M.slangs, D.plang, 'ตามภาษาของเครื่อง')}</select>
+  <p class="mu" style="font-size:14px;margin:6px 0">ใบครัวมีภาษาไทยกำกับชื่อเมนูและตัวเลือกเสมอ เพื่อให้เจ้าของตรวจได้</p>
   <label>ขนาดกระดาษ</label><select onchange="setD('paper',+this.value)"><option value="80" ${D.paper == 80 ? 'selected' : ''}>80 มม.</option><option value="58" ${D.paper == 58 ? 'selected' : ''}>58 มม.</option></select>
   <button class="mt" onclick="printTickets([['t1',[{name:M.menu[0].name,qty:1,opts:M.groups[0]?[M.groups[0].choices[0].name]:[],note:'ทดสอบ',at:Date.now(),by:D.name}]]])">🖨️ ทดสอบพิมพ์</button>
   <p class="mu" style="font-size:14px">เปิดพิมพ์อัตโนมัติเฉพาะเครื่องที่ต่อเครื่องพิมพ์ของครัวนั้น ๆ เครื่องเดียวต่อหนึ่งจุด</p></div></div>`;
@@ -698,8 +706,10 @@ function sTrl() {
   const sec = (title, arr) => `<h3 class="mt">${title}</h3><div class="card" style="padding:4px 14px">${[...new Set(arr)].map(x => `<div class="line" style="align-items:center"><div class="n">${esc(x)}</div><input style="flex:1.3" data-k="${esc(x)}" value="${esc(((M.dict[x] || {})[V.trl]) || '')}" onchange="setTr(this)"></div>`).join('')}</div>`;
   if (!V.trl) return '<p class="mu">ยังไม่ได้เลือกภาษาอื่นในหน้า "ร้าน"</p>';
   return `<p class="mu">พิมพ์ชื่อที่อยากให้แสดงในแต่ละภาษา เว้นว่าง = แสดงชื่อภาษาไทย</p><div class="chips">${langs.map(l => `<button class="${l === V.trl ? 'on' : ''}" onclick="V.trl='${l}';draw()">${LANGS[l][0]}${M.clangs.includes(l) ? ' 👤' : ''}${M.slangs.includes(l) ? ' 👩‍🍳' : ''}</button>`).join('')}</div><small class="mu">👤 ลูกค้าเห็น • 👩‍🍳 พนักงานเห็น</small>` +
-    sec('หมวดหมู่', M.cats) + sec('เมนู', M.menu.map(m => m.name)) + sec('ตัวเลือก', M.groups.flatMap(g => [g.name, ...g.choices.map(c => c.name)]));
+    sec('หมวดหมู่', M.cats) + sec('เมนู', M.menu.map(m => m.name)) + sec('ตัวเลือก', M.groups.flatMap(g => [g.name, ...g.choices.map(c => c.name)])) +
+    sec('คำในหมายเหตุที่จำไว้ (แก้คำที่แปลผิดได้ที่นี่)', phraseKeys()) + `<div class="row mt"><input id="phN" placeholder="เพิ่มคำ/ประโยคที่ลูกค้าเขียนบ่อย เช่น ไม่ใส่ผักชี"><button style="flex:0;white-space:nowrap" onclick="const v=$('#phN').value.trim();if(v){M.dict[v]=M.dict[v]||{'_p':1};saveM();draw()}">＋ เพิ่ม</button></div>`;
 }
+function phraseKeys() { const menu = new Set([...M.cats, ...M.menu.map(m => m.name), ...M.groups.flatMap(g => [g.name, ...g.choices.map(c => c.name)])]); return Object.keys(M.dict).filter(k => !menu.has(k) && Object.keys(M.dict[k]).length); }
 function setTr(el) { const k = el.dataset.k, v = el.value.trim(); M.dict[k] = M.dict[k] || {}; if (v) M.dict[k][V.trl] = v; else delete M.dict[k][V.trl]; saveM(); }
 const custUrl = n => location.origin + location.pathname + '?t=' + n + (D.db ? '&db=' + encodeURIComponent(D.db) : '');
 function sQr() { return `<div class="card"><div class="row" style="align-items:center"><h3>QR สั่งอาหารประจำโต๊ะ</h3><button class="sm" style="flex:0;white-space:nowrap" onclick="printQr()">🖨️ พิมพ์</button></div>${D.db ? '' : '<p class="mu">ยังไม่ได้เชื่อม Firebase — QR นี้ใช้ได้เฉพาะบนเครื่องนี้</p>'}
