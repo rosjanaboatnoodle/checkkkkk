@@ -407,7 +407,7 @@ const inCats = (x, cats) => !cats || !cats.length || cats.includes(x.cat);
 function autoPrint() {
   if (!D.autoPrint) return; const jobs = [];
   Object.keys(L).forEach(tb => { const its = itemsOf(tb).filter(x => x.status === 'new' && !x.pr && inCats(x, D.pcats)); if (its.length) { its.forEach(x => { L[tb].items[x.k].pr = 1; W(store.put(`live/tables/${tb}/items/${x.k}/pr`, 1)); }); jobs.push([tb, its]); } });
-  if (jobs.length) { const pl = D.plang || D.lang; Promise.race([Promise.all(jobs.flatMap(j => j[1]).filter(x => x.note).flatMap(x => [mt(x.note, pl), mt(x.note, 'th')])), new Promise(r => setTimeout(r, 4000))]).then(() => printTickets(jobs)); }
+  if (jobs.length) printTickets(jobs);
 }
 function editNote(tb, k) { const x = L[tb].items[k], ls = [...new Set([UL, 'th'])], cur = l => { const t = (x.nt || {})[l]; return t && t !== '=' ? t : ''; };
   modal(`<h2>✎ แก้คำแปลหมายเหตุ</h2><label>ข้อความเดิม</label><input readonly value="${esc(x.note)}">${ls.map(l => `<label>คำแปล — ${LANGS[l][0]}</label><input class="enT" data-l="${l}" value="${esc(cur(l))}">`).join('')}
@@ -420,8 +420,10 @@ function noteWork() {
   Object.keys(L).forEach(tb => Object.entries(L[tb].items).forEach(([k, x]) => { if (!x.note) return; ls.forEach(l => { const bk = k + l; if ((x.nt || {})[l] != null || NTB[bk] > Date.now()) return; NTB[bk] = Date.now() + 60000;
     mt(x.note, l).then(out => { const it = L[tb] && L[tb].items[k]; if (out == null || !it) return; (it.nt = it.nt || {})[l] = out; W(store.put(`live/tables/${tb}/items/${k}/nt/${l}`, out)); if (!['set', 'sales', 'dash'].includes(V.tab)) draw(); }); }); }));
 }
-function printTickets(jobs) {
-  const pl = D.plang || D.lang, el = $('#print'); el.className = 'tk';
+async function printTickets(jobs) {
+  const pl = D.plang || D.lang, el = $('#print');
+  await Promise.race([Promise.all(jobs.flatMap(j => j[1]).filter(x => x.note).flatMap(x => [mt(x.note, pl), mt(x.note, 'th')])), new Promise(r => setTimeout(r, 4000))]);
+  el.className = 'tk';
   el.innerHTML = jobs.map(([tb, its]) => `<div class="pg" style="width:${D.paper - 8}mm;font-size:${D.paper >= 80 ? 15 : 13}px"><div style="font-size:1.9em;font-weight:700">${esc(tNameL(tb, pl))}</div><div>${new Date(its[0].at).toLocaleString('th-TH')} • ${esc(its[0].src === 'qr' ? TL('cust', pl) : its[0].by || '')}</div><hr>
     ${its.map(x => `<div style="margin:6px 0"><div style="font-size:1.35em;font-weight:700">${x.qty} × ${esc(trL(x.name, pl))}</div>${pl !== 'th' ? `<div>${esc(x.name)}</div>` : ''}${x.opts.length ? `<div style="font-size:1.1em">- ${x.opts.map(o => esc(trL(o, pl)) + (pl !== 'th' && trL(o, pl) !== o ? ' (' + esc(o) + ')' : '')).join('<br>- ')}</div>` : ''}${x.note ? `<div style="font-weight:700">* ${esc(noteL(x, pl))}</div>` : ''}</div>`).join('<hr style="border-style:dashed">')}</div>`).join('');
   setTimeout(() => window.print(), 50);
