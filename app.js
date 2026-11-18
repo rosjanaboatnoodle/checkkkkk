@@ -33,6 +33,11 @@ Object.assign(I18N.th, {closeTb: 'ปิดโต๊ะ', closeQ: 'ปิดโ�
 Object.assign(I18N.en, {closeTb: 'Close table', closeQ: 'Close {0} and cancel all unpaid items?', voidItems: 'Cancel items', voidPick: 'Choose items to cancel', voidDo: 'Cancel {0}', sCancel: '{0} cancelled {1}', allMenu: 'Full menu', quickAdd: 'Quick add', quickEdit: 'Choose items', repeat: 'Repeat', listV: 'List', perRow: 'per row'});
 Object.assign(I18N.my, {closeTb: 'စားပွဲပိတ်', voidItems: 'ဟင်းပွဲဖျက်', voidPick: 'ဖျက်မည့်ပွဲ ရွေးပါ', sCancel: '{0} ဖျက်သည် {1}', allMenu: 'မီနူးအားလုံး', quickAdd: 'အမြန်ထပ်မှာ', repeat: 'ထပ်မှာ'});
 Object.assign(I18N.lo, {closeTb: 'ປິດໂຕະ', voidItems: 'ຍົກເລີກລາຍການ', voidPick: 'ເລືອກລາຍການທີ່ຈະຍົກເລີກ', sCancel: '{0} ຍົກເລີກ {1}', allMenu: 'ເມນູທັງໝົດ', quickAdd: 'ສັ່ງເພີ່ມດ່ວນ', repeat: 'ສັ່ງຊ້ຳ'});
+Object.assign(I18N.th, {added: 'เพิ่มลงตะกร้าแล้ว', yourCart: 'ตะกร้าของคุณ', confirmOrder: 'ยืนยันสั่งอาหาร', addMore: 'เลือกเมนูเพิ่ม', orderOk: 'ส่งออเดอร์แล้ว', orderOkSub: 'ร้านได้รับรายการแล้ว กำลังเตรียมอาหารให้ค่ะ', viewOrders: 'รายการที่สั่ง', viewCart: 'ดูตะกร้า', inCart: 'ในตะกร้า', results: 'ผลการค้นหา', needHelp: 'ต้องการความช่วยเหลือ', callStaffSub: 'ให้พนักงานมาที่โต๊ะ', billSub: 'พนักงานจะนำบิลมาให้', noOrders: 'ยังไม่ได้สั่งอาหาร', needPick: 'กรุณาเลือก'});
+Object.assign(I18N.en, {added: 'Added to cart', yourCart: 'Your cart', confirmOrder: 'Place order', addMore: 'Add more items', orderOk: 'Order sent', orderOkSub: 'The kitchen has your order and is preparing it.', viewOrders: 'My orders', viewCart: 'View cart', inCart: 'in cart', results: 'Results', needHelp: 'Need help?', callStaffSub: 'A staff member will come to your table', billSub: 'Staff will bring your bill', noOrders: 'No orders yet', needPick: 'Please choose'});
+Object.assign(I18N.zh, {added: '已加入购物车', yourCart: '购物车', confirmOrder: '确认下单', addMore: '继续点餐', orderOk: '已下单', orderOkSub: '厨房已收到您的订单', viewOrders: '我的订单', viewCart: '查看购物车', inCart: '已加入', results: '搜索结果', needHelp: '需要帮助？', callStaffSub: '服务员会到您的桌前', billSub: '服务员会送来账单', noOrders: '还没有点餐', needPick: '请选择'});
+Object.assign(I18N.my, {yourCart: 'ခြင်းတောင်း', confirmOrder: 'မှာမည်', viewOrders: 'မှာထားသည်', viewCart: 'ခြင်းကြည့်'});
+Object.assign(I18N.lo, {yourCart: 'ກະຕ່າຂອງທ່ານ', confirmOrder: 'ຢືນຢັນສັ່ງ', addMore: 'ເລືອກເມນູເພີ່ມ', orderOk: 'ສົ່ງອໍເດີແລ້ວ', viewOrders: 'ລາຍການທີ່ສັ່ງ', viewCart: 'ເບິ່ງກະຕ່າ'});
 I18N.th.dash = 'ภาพรวม'; I18N.en.dash = 'Overview'; I18N.my.dash = 'အနှစ်ချုပ်'; I18N.lo.dash = 'ພາບລວມ';
 const TA = 'กลับบ้าน';
 let UL = 'th', FB = false, M = null, store = null;
@@ -136,13 +141,13 @@ function pickItem(id, cb) {
   const m = M.menu.find(x => x.id === id); if (!m || m.out || !inTime(m)) return; PK = {m, cb, qty: 1};
   const gs = m.opts.map(g => M.groups.find(x => x.id === g)).filter(Boolean);
   if (m.imgL) bigImg(m).then(u => { if (u && PK && PK.m === m && $('#pkImg')) $('#pkImg').src = u; });
-  modal(`${m.img ? `<img id="pkImg" src="${m.img}" alt="" style="width:100%;aspect-ratio:4/3;max-height:340px;object-fit:cover;border-radius:14px;margin-bottom:8px;background:#eee">` : ''}<h2>${esc(tr(m.name))}</h2>${sub(m.name)}<div class="mu">${baht(m.price)}</div>
-  ${gs.map(g => `<h3 class="mt">${esc(tr(g.name))} <small class="mu">${g.multi ? tx('pickMany') + (g.max ? ' ≤ ' + g.max : '') : tx('pick1')}${g.required ? ' • ' + tx('req') : ''}</small></h3>
+ modal(`<button class="cx-x pk-x" onclick="modal()" aria-label="close">${IC.x}</button>${m.img ? `<img id="pkImg" src="${m.img}" alt="" style="width:100%;aspect-ratio:4/3;max-height:340px;object-fit:cover;border-radius:14px;margin-bottom:8px;background:#eee">` : ''}<h2>${esc(tr(m.name))}</h2>${sub(m.name)}<div class="mu">${baht(m.price)}</div>
+  ${gs.map(g => `<h3 class="mt pkg" id="pg_${g.id}">${esc(tr(g.name))} <small class="mu">${g.multi ? tx('pickMany') + (g.max ? ' ≤ ' + g.max : '') : tx('pick1')}</small>${g.required ? `<span class="req">${tx('req')}</span>` : ''}</h3>
     ${g.choices.map((c, i) => { if (c.out) return ''; const v = esc(g.pre ? g.name + ': ' + c.name : c.name), pr = `<b class="mu">${c.price ? '+' + c.price : ''}</b>`;
       return g.multi && g.rep ? `<div class="ck" style="display:flex;align-items:center;gap:10px;padding:6px 2px;border-bottom:1px solid #f3f4f6"><span style="flex:1">${esc(bi(c.name))}</span>${pr}<div class="qty"><button onclick="pkRep('${g.id}',${i},-1)">−</button><b class="rp" data-g="${g.id}" data-p="${Number(c.price) || 0}" data-v="${v}" id="rp_${g.id}_${i}" style="min-width:22px;text-align:center">0</b><button onclick="pkRep('${g.id}',${i},1)">+</button></div></div>`
         : `<label class="ck"><input type="${g.multi ? 'checkbox' : 'radio'}" name="g_${g.id}" data-p="${Number(c.price) || 0}" value="${v}" onchange="pkChk(this,'${g.id}')"><span>${esc(bi(c.name))}</span>${pr}</label>`; }).join('')}`).join('')}
-  ${gs.some(g => g.choices.some(c => c.name === TA)) ? '' : `<label class="ck mt"><input type="checkbox" id="pkTA"><span>🛍️ ${tx('takeaway')}</span></label>`}<label>${tx('note')}</label><input id="pkNote">
-  <div class="row mt" style="align-items:center"><div class="qty" style="flex:0"><button onclick="pkQty(-1)">−</button><b id="pkQ" style="min-width:28px;text-align:center">1</b><button onclick="pkQty(1)">+</button></div><button class="p" id="pkOk" onclick="pkDone()"></button></div><div class="row mt">${[2, 3, 5, 10].map(n => `<button class="sm" onclick="PK.qty=${n};pkUpd()">×${n}</button>`).join('')}</div>`);
+  ${gs.some(g => g.choices.some(c => c.name === TA)) ? '' : `<label class="ck mt"><input type="checkbox" id="pkTA"><span>${FB ? '' : '🛍️ '}${tx('takeaway')}</span></label>`}<label>${tx('note')}</label><input id="pkNote">
+  ${FB ? '' : `<div class="row mt">${[2, 3, 5, 10].map(n => `<button class="sm" onclick="PK.qty=${n};pkUpd()">×${n}</button>`).join('')}</div>`}<div class="pk-foot"><div class="cx-step"><button onclick="pkQty(-1)">${IC.minus}</button><b id="pkQ">1</b><button onclick="pkQty(1)">${IC.plus}</button></div><button class="cx-cta" id="pkOk" onclick="pkDone()"></button></div>`);
   pkUpd();
 }
 const pkReps = gid => [...document.querySelectorAll('#modal .rp')].filter(e => (!gid || e.dataset.g === gid) && +e.textContent > 0);
@@ -155,7 +160,7 @@ function pkUpd() { $('#pkOk').textContent = tx('add') + ' ' + baht(pkPrice() * P
 function pkQty(d) { PK.qty = Math.max(1, PK.qty + d); pkUpd(); }
 function pkDone() {
   const o = pkOpts(); if ($('#pkTA') && $('#pkTA').checked) o.push(TA);
-  for (const gid of PK.m.opts) { const g = M.groups.find(x => x.id === gid); if (g && g.required && !pkCount(g.id)) return toast(tx('choose') + ' ' + tr(g.name)); }
+  for (const gid of PK.m.opts) { const g = M.groups.find(x => x.id === gid); if (g && g.required && !pkCount(g.id)) { const h = $('#pg_' + g.id); if (h) { h.classList.remove('need'); void h.offsetWidth; h.classList.add('need'); h.scrollIntoView({behavior: 'smooth', block: 'center'}); } return toast(tx('needPick') + ' ' + tr(g.name)); } }
   const k = PK, m = k.m; const line = {id: m.id, name: m.name, cat: m.cat, price: pkPrice(), qty: k.qty, opts: o, note: $('#pkNote').value.trim().slice(0, 100)}; modal(); k.cb(line);
 }
 let MQ = '', MGC = '';
@@ -173,10 +178,10 @@ function mgItems(cat, fn) { const q = MQ.trim().toLowerCase();
   return list.map(cell).join(''); }
 /* จำนวนช่องต่อแถว: เลือกเองได้ต่อเครื่อง ('' = อัตโนมัติตามขนาดจอ, '1' = แบบรายการ) */
 const gCols = () => { try { return FB ? localStorage.getItem('rjc_cols') || '' : D.cols || ''; } catch (e) { return ''; } };
-function setCols(v) { v = gCols() === v ? '' : v; if (FB) { try { localStorage.setItem('rjc_cols', v); } catch (e) {} } else { D.cols = v; saveD(); } const g = $('#mg'); if (g) { g.className = gridCls(); g.style.cssText = gridSty(); } document.querySelectorAll('.seg button').forEach(b => b.classList.toggle('on', b.dataset.c === v)); }
+function setCols(v) { v = gCols() === v ? '' : v; if (FB) { try { localStorage.setItem('rjc_cols', v); } catch (e) {} document.querySelectorAll('.seg button').forEach(b => b.classList.toggle('on', b.dataset.c === v)); return cuList(); } if (FB) { try { localStorage.setItem('rjc_cols', v); } catch (e) {} } else { D.cols = v; saveD(); } const g = $('#mg'); if (g) { g.className = gridCls(); g.style.cssText = gridSty(); } document.querySelectorAll('.seg button').forEach(b => b.classList.toggle('on', b.dataset.c === v)); }
 const gridCls = () => 'grid' + (gCols() === '1' ? ' lst' : '');
 const gridSty = () => { const c = gCols(); return c && c !== '1' ? `grid-template-columns:repeat(${c},minmax(0,1fr))` : ''; };
-const colSeg = () => `<div class="seg">${['1', '2', '3', '4', '5'].map(c => `<button data-c="${c}" class="${gCols() === c ? 'on' : ''}" title="${c === '1' ? tx('listV') : c + ' ' + tx('perRow')}" onclick="setCols('${c}')">${c === '1' ? '☰' : c}</button>`).join('')}</div>`;
+const colSeg = () => `<div class="seg">${['1', '2', '3', '4', '5'].map(c => `<button data-c="${c}" class="${gCols() === c ? 'on' : ''}" title="${c === '1' ? tx('listV') : c + ' ' + tx('perRow')}" onclick="setCols('${c}')">${c === '1' ? IC.list : c}</button>`).join('')}</div>`;
 function menuGrid(cat, fn) { MGC = cat;
   return `<div class="mgbar"><input type="search" placeholder="🔍 ${tx('search')}" value="${esc(MQ)}" oninput="MQ=this.value;$('#mg').innerHTML=mgItems(MGC,'${fn}')">${colSeg()}</div>
   <div class="chips"><button class="${!cat ? 'on' : ''}" onclick="${fn}Cat(-1)">${tx('all')}</button>${hotIds().length ? `<button class="${cat === '*hot' ? 'on' : ''}" onclick="${fn}Cat(-3)">🔥 ${tx('hot')}</button>` : ''}${M.menu.some(m => m.rec) ? `<button class="${cat === '*rec' ? 'on' : ''}" onclick="${fn}Cat(-2)">⭐ ${tx('rec')}</button>` : ''}${M.cats.map((c, i) => FB && (M.hcats || []).includes(c) ? '' : `<button class="${c === cat ? 'on' : ''}" onclick="${fn}Cat(${i})">${esc(tr(c))}</button>`).join('')}</div>
@@ -189,34 +194,79 @@ function addLine(list, line) { const s = list.find(x => x.id === line.id && x.no
 /* ============================================================
    หน้าลูกค้า  (?t=เลขโต๊ะ)
    ============================================================ */
-const C = {cat: '', cart: [], mine: null, err: '', T: ''};
-function cuSave() { sessionStorage.setItem('rjc_cart_' + C.T, JSON.stringify(C.cart)); }
+/* ไอคอนเส้น (SVG) ใช้แทนอิโมจิในหน้าลูกค้า */
+const svg = (p, w) => `<svg class="svi" viewBox="0 0 24 24" width="${w || 20}" height="${w || 20}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${p}</svg>`;
+const IC = {
+  search: svg('<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>'),
+  globe: svg('<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/>', 16),
+  plus: svg('<path d="M12 5v14M5 12h14"/>', 18), minus: svg('<path d="M5 12h14"/>', 18),
+  bag: svg('<path d="M6 7h12l-1 13H7L6 7Z"/><path d="M9 7a3 3 0 0 1 6 0"/>'),
+  bell: svg('<path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4l2-2Z"/><path d="M10 21h4"/>'),
+  list: svg('<path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/>', 18),
+  check: svg('<path d="m5 12 5 5L20 7"/>', 40), x: svg('<path d="M18 6 6 18M6 6l12 12"/>'),
+  bill: svg('<path d="M6 3h12v18l-3-2-3 2-3-2-3 2V3Z"/><path d="M9 8h6M9 12h6"/>'),
+};
+const C = {cat: '', cart: [], mine: null, err: '', T: '', q: ''};
+function cuSave() { try { sessionStorage.setItem('rjc_cart_' + C.T, JSON.stringify(C.cart)); } catch (e) {} }
 function cuCat(i) { C.cat = catAt(i); cuDraw(); }
-function cuPick(id) { pickItem(id, line => { addLine(C.cart, line); cuSave(); cuDraw(); }); }
-function cuQty(i, d) { C.cart[i].qty += d; if (C.cart[i].qty <= 0) C.cart.splice(i, 1); cuSave(); cuDraw(); C.cart.length ? cuCart() : modal(); }
-function cuCart() { modal(`<h2>${tx('cart')} — ${tName(C.T)}</h2>${C.cart.map((x, i) => `<div class="line"><div class="n"><b>${esc(tr(x.name))}</b><small class="mu th">${esc(optLine(x))}</small><span class="mu">${baht(x.price * x.qty)}</span></div><div class="qty"><button onclick="cuQty(${i},-1)">−</button><b>${x.qty}</b><button onclick="cuQty(${i},1)">+</button></div></div>`).join('')}
-  <div class="tot"><span>${tx('total')}</span><span>${baht(sum(C.cart))}</span></div><div class="row"><button onclick="modal()">${tx('more')}</button><button class="p" id="cuSend" onclick="cuSend()">${tx('send')}</button></div>`); }
+function cuPick(id) { pickItem(id, line => { addLine(C.cart, line); cuSave(); cuRefresh(); toast(tx('added')); }); }
+/* เมนูที่ไม่มีตัวเลือก: กด + ใส่ตะกร้าทันที ไม่ต้องเปิดหน้าต่าง */
+function cuQuick(id) { const m = M.menu.find(x => x.id === id); if (!m || m.out || !inTime(m)) return; if (m.opts.length) return cuPick(id);
+  addLine(C.cart, {id, name: m.name, cat: m.cat, price: Number(m.price), qty: 1, opts: [], note: ''}); cuSave(); cuRefresh(); }
+function cuAdj(id, d) { const l = [...C.cart].reverse().find(x => x.id === id && !x.opts.length && !x.note) || [...C.cart].reverse().find(x => x.id === id); if (!l) return; l.qty += d; if (l.qty <= 0) C.cart.splice(C.cart.indexOf(l), 1); cuSave(); cuRefresh(); }
+const cuCnt = id => C.cart.filter(x => x.id === id).reduce((a, x) => a + x.qty, 0);
+function cuQty(i, d) { C.cart[i].qty += d; if (C.cart[i].qty <= 0) C.cart.splice(i, 1); cuSave(); cuRefresh(); C.cart.length ? cuCart() : modal(); }
+const shHead = t => `<div class="cx-sh"><h2>${t}</h2><button class="cx-x" onclick="modal()" aria-label="close">${IC.x}</button></div>`;
+function cuCart() { modal(`${shHead(tx('yourCart'))}<div class="mu" style="margin:-6px 0 6px">${esc(tName(C.T))}</div>
+  ${C.cart.map((x, i) => `<div class="cx-ln">${thumb(x.id)}<div class="n"><b>${esc(tr(x.name))}</b>${optLine(x) ? `<small class="mu th">${esc(optLine(x))}</small>` : ''}<span class="pr">${baht(x.price * x.qty)}</span></div><div class="cx-step"><button onclick="cuQty(${i},-1)">${IC.minus}</button><b>${x.qty}</b><button onclick="cuQty(${i},1)">${IC.plus}</button></div></div>`).join('')}
+  <div class="tot"><span>${tx('total')}</span><span>${baht(sum(C.cart))}</span></div>
+  <button class="cx-cta" id="cuSend" onclick="cuSend()">${tx('confirmOrder')} · ${baht(sum(C.cart))}</button><button class="cx-sec" onclick="modal()">${tx('addMore')}</button>`); }
 async function cuSend() {
   $('#cuSend').disabled = true; const now = Date.now(), base = 'live/tables/' + C.T;
   try {
     if (!(await store.get(base + '/openedAt'))) await store.put(base + '/openedAt', now);
     for (const x of C.cart) await store.put(base + '/items/i' + uid(), {...x, status: 'new', src: 'qr', by: '', at: now});
     await store.put('live/events/e' + uid(), {type: 'order', t: C.T, at: now, dev: 'cust', by: '', n: C.cart.length, items: C.cart.map(x => ({name: x.name, qty: x.qty}))});
-    C.cart = []; cuSave(); modal(); toast(tx('sentOk') + ' ✔'); cuDraw(); cuPull();
+    C.cart = []; cuSave(); cuRefresh(); cuPull();
+    modal(`<div class="cx-ok"><div class="ok">${IC.check}</div><h2>${tx('orderOk')}</h2><p class="mu">${tx('orderOkSub')}</p></div><button class="cx-cta" onclick="modal()">${tx('addMore')}</button><button class="cx-sec" onclick="cuMine()">${tx('viewOrders')}</button>`);
   } catch (e) { $('#cuSend').disabled = false; toast(tx('fail')); }
 }
 async function cuCall(kind) { try { await store.put('live/tables/' + C.T + '/call', kind); await store.put('live/events/e' + uid(), {type: 'call', call: kind, t: C.T, at: Date.now(), dev: 'cust', by: ''}); modal(); toast(tx('called')); } catch (e) { toast(tx('fail')); } }
+function cuHelp() { modal(`${shHead(tx('needHelp'))}<button class="cx-opt" onclick="cuCall('staff')">${IC.bell}<span><b>${tx('callStaff')}</b><small class="mu">${tx('callStaffSub')}</small></span></button><button class="cx-opt" onclick="cuCall('bill')">${IC.bill}<span><b>${tx('bill')}</b><small class="mu">${tx('billSub')}</small></span></button>`); }
 function cuMine() { const it = Object.values((C.mine || {}).items || {}).sort((a, b) => a.at - b.at); const sk = {new: 'stNew', cooked: 'stCooked', served: 'stServed'};
-  modal(`<h2>${tx('sent')}</h2>${it.map(x => `<div class="line"><div class="n"><b>${x.qty}× ${esc(tr(x.name))}</b><small class="mu th">${esc(optLine(x))}</small></div><span class="st ${x.status}">${tx(sk[x.status] || 'stNew')}</span><b>${baht(x.price * x.qty)}</b></div>`).join('') || `<p class="mu">${tx('empty')}</p>`}
-  <div class="tot"><span>${tx('total')}</span><span>${baht(sum(it))}</span></div><div class="row"><button onclick="cuCall('staff')">🔔 ${tx('callStaff')}</button><button class="p" onclick="cuCall('bill')">💵 ${tx('bill')}</button></div>`); }
-function cuLang() { modal(`<h2>🌐 ${tx('lang')}</h2>${M.clangs.map(l => `<button class="big" style="background:${l === UL ? '#fed7aa' : '#fff'}" onclick="cuSetLang('${l}')">${LANGS[l][0]}</button>`).join('')}`); }
-function cuSetLang(l) { UL = l; localStorage.setItem('rjc_lang', l); document.documentElement.lang = l; modal(); cuDraw(); }
+  modal(`${shHead(tx('viewOrders'))}${it.map(x => `<div class="cx-ln">${thumb(x.id)}<div class="n"><b>${x.qty} × ${esc(tr(x.name))}</b>${optLine(x) ? `<small class="mu th">${esc(optLine(x))}</small>` : ''}<span class="pr">${baht(x.price * x.qty)}</span></div><span class="st ${x.status}">${tx(sk[x.status] || 'stNew')}</span></div>`).join('') || `<p class="mu c" style="padding:24px 0">${tx('noOrders')}</p>`}
+  ${it.length ? `<div class="tot"><span>${tx('total')}</span><span>${baht(sum(it))}</span></div>` : ''}<div class="row mt"><button class="cx-sec" style="margin:0" onclick="cuCall('staff')">${tx('callStaff')}</button><button class="cx-cta" style="margin:0" onclick="cuCall('bill')">${tx('bill')}</button></div>`); }
+function cuLang() { modal(`${shHead(tx('lang'))}${M.clangs.map(l => `<button class="cx-opt ${l === UL ? 'on' : ''}" onclick="cuSetLang('${l}')"><span><b>${LANGS[l][0]}</b></span>${l === UL ? svg('<path d="m5 12 5 5L20 7"/>') : ''}</button>`).join('')}`); }
+function cuSetLang(l) { UL = l; try { localStorage.setItem('rjc_lang', l); } catch (e) {} document.documentElement.lang = l; modal(); cuDraw(); }
+/* หมวดของหน้าลูกค้า: แนะนำ (ถ้ามี) + หมวดที่มีเมนูให้ลูกค้าเห็น */
+function cuSecs() { const vis = M.menu.filter(shown), out = []; if (vis.some(m => m.rec)) out.push([tx('rec'), vis.filter(m => m.rec)]);
+  M.cats.forEach(c => { const ms = vis.filter(m => m.cat === c); if (ms.length) out.push([tr(c), ms]); }); return out; }
+function cuCard(m) { const cnt = cuCnt(m.id), off = m.out || !inTime(m), simple = !m.opts.length;
+  const ctl = off ? '' : simple && cnt ? `<div class="cx-step" onclick="event.stopPropagation()"><button onclick="cuAdj('${m.id}',-1)" aria-label="-">${IC.minus}</button><b>${cnt}</b><button onclick="cuAdj('${m.id}',1)" aria-label="+">${IC.plus}</button></div>` : `<button class="cx-add" onclick="event.stopPropagation();cuQuick('${m.id}')" aria-label="+">${IC.plus}</button>`;
+  return `<div class="cx-it ${off ? 'off' : ''} ${cnt ? 'in' : ''}" onclick="cuPick('${m.id}')">${m.img && !D.noImg ? `<div class="ph"><img src="${m.img}" alt="" loading="lazy">${cnt && !simple ? `<i>${cnt}</i>` : ''}</div>` : ''}
+    <div class="bd"><div class="nm">${esc(tr(m.name))}</div>${sub(m.name)}${cnt && !simple && !(m.img && !D.noImg) ? `<small class="incart">${cnt} ${tx('inCart')}</small>` : ''}<div class="ft"><span class="pr">${m.out ? tx('out') : !inTime(m) ? m.t1 + '–' + m.t2 : baht(m.price)}</span>${ctl}</div></div></div>`; }
+function cuList() { const el = $('#cxMain'); if (!el) return; const q = C.q.trim().toLowerCase(), cls = gCols() === '1' ? 'cx-grid lst' : 'cx-grid', sty = gridSty();
+  if (q) { const r = M.menu.filter(m => shown(m) && (m.name.toLowerCase().includes(q) || tr(m.name).toLowerCase().includes(q) || String(m.price) === q));
+    el.innerHTML = `<h3 class="cx-h">${tx('results')} <small class="mu">${r.length}</small></h3>` + (r.length ? `<div class="${cls}" style="${sty}">${r.map(cuCard).join('')}</div>` : `<p class="mu c" style="padding:30px 0">${tx('empty')}</p>`); return; }
+  el.innerHTML = cuSecs().map(([n, ms], i) => `<section id="cs${i}" class="cx-sec-b"><h3 class="cx-h">${esc(n)} <small class="mu">${ms.length}</small></h3><div class="${cls}" style="${sty}">${ms.map(cuCard).join('')}</div></section>`).join(''); }
+function cuBar() { const el = $('#cxBar'); if (!el) return; const n = C.cart.reduce((s, x) => s + x.qty, 0), mn = Object.keys((C.mine || {}).items || {}).length;
+  el.innerHTML = n ? `<button class="cx-mini" onclick="cuMine()" aria-label="orders">${IC.bill}${mn ? `<i>${mn}</i>` : ''}</button><button class="cx-cart" onclick="cuCart()"><span class="b">${n}</span><span>${tx('viewCart')}</span><b>${baht(sum(C.cart))}</b></button>`
+    : `<button class="cx-sec2" onclick="cuMine()">${IC.bill}<span>${tx('viewOrders')}${mn ? ` (${mn})` : ''}</span></button><button class="cx-sec2" onclick="cuHelp()">${IC.bell}<span>${tx('callStaff')}</span></button>`; }
+function cuRefresh() { cuList(); cuBar(); }
+function cuGo(i) { if (C.q) { C.q = ''; $('#cxQ').value = ''; cuList(); } const s = $('#cs' + i), h = $('.cx-stick'); if (!s) return; CSPY = i; cuSpyMark(i);
+  window.scrollTo({top: s.getBoundingClientRect().top + scrollY - h.getBoundingClientRect().bottom + 2, behavior: 'smooth'}); setTimeout(() => CSPY = -1, 700); }
+let CSPY = -1;
+function cuSpyMark(i) { const nav = $('#cxCats'); if (!nav) return; nav.querySelectorAll('button').forEach((b, k) => b.classList.toggle('on', k === i)); const b = nav.children[i]; if (b) nav.scrollTo({left: b.offsetLeft - 12, behavior: 'smooth'}); }
+function cuSpy() { if (CSPY >= 0 || C.q || !$('.cx-stick')) return; const top = $('.cx-stick').getBoundingClientRect().bottom + 8; let cur = 0; document.querySelectorAll('.cx-sec-b').forEach((s, i) => { if (s.getBoundingClientRect().top <= top) cur = i; }); if (cur !== C.sec) { C.sec = cur; cuSpyMark(cur); } }
+function cuSearch(v) { C.q = v; $('#cxClr').style.display = v ? '' : 'none'; cuList(); if (!v) cuSpy(); }
 function cuDraw() {
-  if (!M) { $('#app').innerHTML = `<div class="wrap c mu" style="padding-top:80px">${C.err || tx('loading')}</div>`; return; }
-  const n = C.cart.reduce((s, x) => s + x.qty, 0), mn = Object.keys((C.mine || {}).items || {}).length;
-  $('#app').innerHTML = `<div class="cu-top"><h1>🍜 ${esc(M.shop)}</h1><b>${tName(C.T)}</b>${M.clangs.length > 1 ? `<button class="sm" onclick="cuLang()">🌐 ${LANGS[UL][0]}</button>` : ''}</div>
-    <div class="wrap" style="padding-bottom:90px">${menuGrid(C.cat, 'cu')}</div>
-    <div class="cartbar"><button onclick="cuMine()">📋 ${tx('sent')}${mn ? ' (' + mn + ')' : ''}</button><button class="p" ${n ? '' : 'disabled'} onclick="cuCart()">🛒 ${tx('cart')} ${n ? n + ' • ' + baht(sum(C.cart)) : ''}</button></div>`;
+  if (!M) { $('#app').innerHTML = `<div class="cx-empty"><div class="mu">${C.err || tx('loading')}</div></div>`; return; }
+  C.sec = 0;
+  $('#app').innerHTML = `<div class="cx-stick"><header class="cx-top"><div class="t"><b>${esc(M.shop)}</b><span>${esc(tName(C.T))}</span></div>${M.clangs.length > 1 ? `<button class="cx-lang" onclick="cuLang()">${IC.globe}<span>${LANGS[UL][0]}</span></button>` : ''}</header>
+    <div class="cx-tools"><label class="cx-q">${IC.search}<input id="cxQ" type="search" enterkeyhint="search" placeholder="${tx('search')}" value="${esc(C.q)}" oninput="cuSearch(this.value)"><button id="cxClr" type="button" style="${C.q ? '' : 'display:none'}" onclick="$('#cxQ').value='';cuSearch('')" aria-label="clear">${IC.x}</button></label>${colSeg()}</div>
+    <nav class="cx-cats" id="cxCats">${cuSecs().map(([n], i) => `<button class="${i ? '' : 'on'}" onclick="cuGo(${i})">${esc(n)}</button>`).join('')}</nav></div>
+    <main class="cx-main" id="cxMain"></main><div class="cx-bar" id="cxBar"></div>`;
+  cuRefresh();
 }
 let cuMv = 0;
 async function cuPull() {
@@ -225,14 +275,14 @@ async function cuPull() {
     if (M && M.qrOpen === false) { M = null; C.err = tx('closed'); }
     if (!M || mv !== cuMv) { const raw = await store.get('menu'); if (raw) { M = normM(JSON.parse(raw)); cuMv = mv; if (M.qrOpen === false) { M = null; C.err = tx('closed'); cuMv = 0; cuDraw(); return; } if (!localStorage.getItem('rjc_lang') || !M.clangs.includes(UL)) UL = M.cdef; if (!$('#modal').innerHTML) cuDraw(); } else C.err = tx('closed'); }
     if (M && (C.T !== 't0' && !(+C.T.slice(1) >= 1 && +C.T.slice(1) <= M.tables))) { M = null; C.err = tx('closed'); }
-    const m = normT({x: await store.get('live/tables/' + C.T)}).x || null; if (JSON.stringify(m) !== JSON.stringify(C.mine)) { C.mine = m; if (!$('#modal').innerHTML) cuDraw(); }
+    const m = normT({x: await store.get('live/tables/' + C.T)}).x || null; if (JSON.stringify(m) !== JSON.stringify(C.mine)) { C.mine = m; cuBar(); }
   } catch (e) { if (!M) C.err = tx('fail'); }
   if (!M) cuDraw();
 }
 function custInit() {
   C.T = 't' + (parseInt(Q.get('t')) || 0); FB = true; UL = localStorage.getItem('rjc_lang') || 'th'; if (!LANGS[UL]) UL = 'th';
   store = makeStore(Q.get('db')); try { C.cart = JSON.parse(sessionStorage.getItem('rjc_cart_' + C.T)) || []; } catch (e) {}
-  cuDraw(); cuPull(); setInterval(cuPull, 5000);
+  cuDraw(); cuPull(); setInterval(cuPull, 5000); window.addEventListener('scroll', () => requestAnimationFrame(cuSpy), {passive: true});
 }
 
 /* ============================================================
