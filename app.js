@@ -29,6 +29,10 @@ Object.assign(I18N.th, {stWait: 'รอชำระ', min: 'นาที', again
 Object.assign(I18N.en, {stWait: 'To pay', min: 'min', again: '1 more', moreAct: 'More'});
 Object.assign(I18N.my, {stWait: 'ငွေရှင်းရန်', min: 'မိနစ်', again: 'နောက် ၁', moreAct: 'နောက်ထပ်'});
 Object.assign(I18N.lo, {stWait: 'ລໍຖ້າຈ່າຍ', min: 'ນາທີ', again: 'ອີກ 1', moreAct: 'ເພີ່ມເຕີມ'});
+Object.assign(I18N.th, {closeTb: 'ปิดโต๊ะ', closeQ: 'ปิดโต๊ะ {0} และยกเลิกรายการที่ยังไม่จ่ายทั้งหมด?', voidItems: 'ยกเลิกรายการ', voidPick: 'เลือกรายการที่จะยกเลิก', voidDo: 'ยกเลิก {0} หน่วย', sCancel: '{0} ยกเลิก {1}', allMenu: 'เมนูทั้งหมด', quickAdd: 'สั่งเพิ่มด่วน', quickEdit: 'เลือกเมนู', repeat: 'สั่งซ้ำ', listV: 'แบบรายการ', perRow: 'ต่อแถว'});
+Object.assign(I18N.en, {closeTb: 'Close table', closeQ: 'Close {0} and cancel all unpaid items?', voidItems: 'Cancel items', voidPick: 'Choose items to cancel', voidDo: 'Cancel {0}', sCancel: '{0} cancelled {1}', allMenu: 'Full menu', quickAdd: 'Quick add', quickEdit: 'Choose items', repeat: 'Repeat', listV: 'List', perRow: 'per row'});
+Object.assign(I18N.my, {closeTb: 'စားပွဲပိတ်', voidItems: 'ဟင်းပွဲဖျက်', voidPick: 'ဖျက်မည့်ပွဲ ရွေးပါ', sCancel: '{0} ဖျက်သည် {1}', allMenu: 'မီနူးအားလုံး', quickAdd: 'အမြန်ထပ်မှာ', repeat: 'ထပ်မှာ'});
+Object.assign(I18N.lo, {closeTb: 'ປິດໂຕະ', voidItems: 'ຍົກເລີກລາຍການ', voidPick: 'ເລືອກລາຍການທີ່ຈະຍົກເລີກ', sCancel: '{0} ຍົກເລີກ {1}', allMenu: 'ເມນູທັງໝົດ', quickAdd: 'ສັ່ງເພີ່ມດ່ວນ', repeat: 'ສັ່ງຊ້ຳ'});
 I18N.th.dash = 'ภาพรวม'; I18N.en.dash = 'Overview'; I18N.my.dash = 'အနှစ်ချုပ်'; I18N.lo.dash = 'ພາບລວມ';
 const TA = 'กลับบ้าน';
 let UL = 'th', FB = false, M = null, store = null;
@@ -161,11 +165,17 @@ function inTime(m) { if (!m.t1 || !m.t2) return true; const n = hhmm(); return m
 const shown = m => !FB || (!m.hide && !(M.hcats || []).includes(m.cat));
 function mgItems(cat, fn) { const q = MQ.trim().toLowerCase();
   const hot = cat === '*hot' ? hotIds() : [];
-  return M.menu.filter(m => shown(m) && (!cat || (cat === '*rec' ? m.rec : cat === '*hot' ? hot.includes(m.id) : m.cat === cat)) && (!q || m.name.toLowerCase().includes(q) || tr(m.name).toLowerCase().includes(q) || String(m.price) === q)).map(m => `<div class="item ${m.out || !inTime(m) ? 'out' : ''}" onclick="${fn}Pick('${m.id}')"><div>${m.img && !D.noImg ? `<img src="${m.img}" alt="" loading="lazy">` : ''}<b>${m.rec ? '⭐ ' : ''}${esc(tr(m.name))}</b>${sub(m.name)}</div><span class="pr">${m.out ? tx('out') : !inTime(m) ? m.t1 + '–' + m.t2 : baht(m.price)}</span></div>`).join('') || `<p class="mu">${tx('empty')}</p>`; }
+  return M.menu.filter(m => shown(m) && (!cat || (cat === '*rec' ? m.rec : cat === '*hot' ? hot.includes(m.id) : m.cat === cat)) && (!q || m.name.toLowerCase().includes(q) || tr(m.name).toLowerCase().includes(q) || String(m.price) === q)).map(m => `<div class="item ${m.out || !inTime(m) ? 'out' : ''}" onclick="${fn}Pick('${m.id}')"><div>${m.img && !D.noImg ? `<img src="${m.img}" alt="" loading="lazy">` : ''}<div class="tx"><b>${m.rec ? '⭐ ' : ''}${esc(tr(m.name))}</b>${sub(m.name)}</div></div><span class="pr">${m.out ? tx('out') : !inTime(m) ? m.t1 + '–' + m.t2 : baht(m.price)}</span></div>`).join('') || `<p class="mu">${tx('empty')}</p>`; }
+/* จำนวนช่องต่อแถว: เลือกเองได้ต่อเครื่อง ('' = อัตโนมัติตามขนาดจอ, '1' = แบบรายการ) */
+const gCols = () => { try { return FB ? localStorage.getItem('rjc_cols') || '' : D.cols || ''; } catch (e) { return ''; } };
+function setCols(v) { v = gCols() === v ? '' : v; if (FB) { try { localStorage.setItem('rjc_cols', v); } catch (e) {} } else { D.cols = v; saveD(); } const g = $('#mg'); if (g) { g.className = gridCls(); g.style.cssText = gridSty(); } document.querySelectorAll('.seg button').forEach(b => b.classList.toggle('on', b.dataset.c === v)); }
+const gridCls = () => 'grid' + (gCols() === '1' ? ' lst' : '');
+const gridSty = () => { const c = gCols(); return c && c !== '1' ? `grid-template-columns:repeat(${c},minmax(0,1fr))` : ''; };
+const colSeg = () => `<div class="seg">${['1', '2', '3', '4', '5'].map(c => `<button data-c="${c}" class="${gCols() === c ? 'on' : ''}" title="${c === '1' ? tx('listV') : c + ' ' + tx('perRow')}" onclick="setCols('${c}')">${c === '1' ? '☰' : c}</button>`).join('')}</div>`;
 function menuGrid(cat, fn) { MGC = cat;
-  return `<input type="search" placeholder="🔍 ${tx('search')}" value="${esc(MQ)}" oninput="MQ=this.value;$('#mg').innerHTML=mgItems(MGC,'${fn}')" style="margin-bottom:8px">
+  return `<div class="mgbar"><input type="search" placeholder="🔍 ${tx('search')}" value="${esc(MQ)}" oninput="MQ=this.value;$('#mg').innerHTML=mgItems(MGC,'${fn}')">${colSeg()}</div>
   <div class="chips"><button class="${!cat ? 'on' : ''}" onclick="${fn}Cat(-1)">${tx('all')}</button>${hotIds().length ? `<button class="${cat === '*hot' ? 'on' : ''}" onclick="${fn}Cat(-3)">🔥 ${tx('hot')}</button>` : ''}${M.menu.some(m => m.rec) ? `<button class="${cat === '*rec' ? 'on' : ''}" onclick="${fn}Cat(-2)">⭐ ${tx('rec')}</button>` : ''}${M.cats.map((c, i) => FB && (M.hcats || []).includes(c) ? '' : `<button class="${c === cat ? 'on' : ''}" onclick="${fn}Cat(${i})">${esc(tr(c))}</button>`).join('')}</div>
-  <div class="grid" id="mg">${mgItems(cat, fn)}</div>`;
+  <div class="${gridCls()}" id="mg" style="${gridSty()}">${mgItems(cat, fn)}</div>`;
 }
 const catAt = i => i === -2 ? '*rec' : i === -3 ? '*hot' : i < 0 ? '' : M.cats[i];
 function hotIds() { if (typeof SALES === 'undefined' || !SALES.length) return []; const q = {}; SALES.forEach(s => s.items.forEach(i => q[i.name] = (q[i.name] || 0) + i.qty)); return Object.keys(q).sort((a, b) => q[b] - q[a]).slice(0, 12).map(n => (M.menu.find(m => m.name === n) || {}).id).filter(Boolean); }
@@ -390,11 +400,12 @@ function evText(e, l) {
   if (e.type === 'order') return fmt(TL('sOrder', l), [tn, e.n]) + ' ' + names;
   if (e.type === 'cooked') return e.all ? fmt(TL('sCookedAll', l), [tn]) : fmt(TL('sCooked', l), [tn, names]);
   if (e.type === 'served') return e.all ? fmt(TL('sServedAll', l), [tn]) : fmt(TL('sServed', l), [tn, names]);
+  if (e.type === 'cancel') return fmt(TL('sCancel', l), [tn, names]);
   if (e.type === 'call') return fmt(TL(e.call === 'bill' ? 'sBill' : 'sStaff', l), [tn]);
   if (e.type === 'paid') return e.method === 'cash' ? fmt(TL('sCash', l), [tn, e.net, e.recv, e.chg]) : fmt(TL('sQr', l), [tn, e.net]);
   return '';
 }
-function announce(e) { if (document.hidden && D.notif && window.Notification && Notification.permission === 'granted') { try { new Notification(M.shop, {body: evText(e, UL)}); } catch (x) {} } V.log.unshift(e); V.log.length = Math.min(V.log.length, 40); if (D.voice && D.say[e.type]) { if (e.dev !== D.id) beep(); const l = vl(); speak(evText(e, l), l); } }
+function announce(e) { if (document.hidden && D.notif && window.Notification && Notification.permission === 'granted') { try { new Notification(M.shop, {body: evText(e, UL)}); } catch (x) {} } V.log.unshift(e); V.log.length = Math.min(V.log.length, 40); if (D.voice && (D.say[e.type] ?? (e.type === 'cancel' ? 1 : 0))) { if (e.dev !== D.id) beep(); const l = vl(); speak(evText(e, l), l); } }
 function emit(e) { e = {...e, at: Date.now(), dev: D.id, by: D.name}; const k = 'e' + uid(); if (seen) seen.add(k); announce(e); W(store.put('live/events/' + k, e)); }
 function handleEvents(evs) {
   const ks = Object.keys(evs).sort();
@@ -473,7 +484,7 @@ function tblTap(tb) {
   itemsOf(tb).length ? openCash(tb) : openOrder(tb);
 }
 function tblMore(tb) { const has = itemsOf(tb).length;
-  modal(`<h2 class="c">${tName(tb)}</h2>${tb !== 't0' ? `<button class="big" style="background:#fff" onclick="modal();printOneQr('${tb}')">🔳 ${tx('printQr')}</button>` : ''}<button class="big" style="background:#fff" onclick="tblHistory('${tb}')">🕘 ${tx('history')}</button>${has ? `<button class="big" style="background:#fff" onclick="moveTable('${tb}')">⇄ ${tx('move')}</button><button class="big" style="background:#fff;color:var(--r)" onclick="modal();cancelTable('${tb}')">✕ ${tx('cancel')}</button>` : ''}`); }
+  modal(`<h2 class="c">${tName(tb)}</h2>${tb !== 't0' ? `<button class="big" style="background:#fff" onclick="modal();printOneQr('${tb}')">🔳 ${tx('printQr')}</button>` : ''}${has ? `<button class="big" style="background:#fff" onclick="moveTable('${tb}')">⇄ ${tx('move')}</button><button class="big" style="background:#fff;color:var(--r)" onclick="modal();cancelTable('${tb}')">🔒 ${tx('closeTb')}</button>` : ''}`); }
 function printOneQr(tb) { const el = $('#print'); el.className = ''; el.innerHTML = `<div style="text-align:center;width:72mm;margin:0 auto"><h2>${esc(M.shop)}</h2>${qrSvg(custUrl(tb.slice(1)), 5)}<h1 style="margin:0">${tNameL(tb, 'th')}</h1><p>สแกนเพื่อสั่งอาหาร / Scan to order</p></div>`; setTimeout(() => window.print(), 50); }
 async function tblHistory(tb) { await loadSales(); const its = itemsOf(tb), bills = SALES.filter(s => s.table === tb && dayKey(s.at) === dayKey(Date.now())).reverse();
   modal(`<h2>${tx('history')} — ${tName(tb)}</h2>${its.map(x => `<div class="line"><div class="n"><b>${x.qty}× ${esc(tr(x.name))}</b><small class="mu th">${esc(optLine(x))} • ${hm(x.at)} • ${esc(x.src === 'qr' ? tx('cust') : x.by)}</small></div><span class="st ${x.status}">${tx(stKey[x.status])}</span></div>`).join('') || `<p class="mu">${tx('empty')}</p>`}
@@ -534,7 +545,7 @@ const stKey = {new: 'stNew', cooked: 'stCooked', served: 'stServed'};
 function vCash() {
   const tb = V.table, its = itemsOf(tb); if (!tb || !its.length) { V.tab = 'tables'; return vTables(); }
   return `<div class="hd"><button onclick="go('tables')">‹ ${tx('back')}</button><h2>${tName(tb)}</h2><button onclick="tblMore('${tb}')">⋯ ${tx('moreAct')}</button></div>
-  <div class="acts"><button class="p" onclick="openOrder('${tb}')">＋ ${tx('orderMore')}</button><button onclick="splitPay('${tb}')">✂ ${tx('split')}</button><button onclick="billPreview('${tb}')">🧾 ${tx('quick')}</button></div>
+  <div class="acts"><button class="p" onclick="quickAdd('${tb}')">＋ ${tx('orderMore')}</button><button onclick="splitPay('${tb}')">✂ ${tx('split')}</button><button onclick="billPreview('${tb}')">🧾 ${tx('quick')}</button><button class="d" onclick="voidPick('${tb}')">✕ ${tx('voidItems')}</button></div>
   <div class="card mt">${its.map((x, i) => `<div class="bl">${thumb(x.id)}<div class="n"><b>${i + 1}. ${esc(tr(x.name))}</b><span class="spk" onclick="readItem('${tb}','${x.k}')">🔊</span>${x.src === 'qr' ? '📱' : ''} <span class="st ${x.status}">${tx(stKey[x.status])}</span>${sub(x.name)}<div class="ops">${x.opts.map(o => `<span>${esc(bi(o))}</span>`).join('')}${x.note ? `<span style="background:#fef08a;cursor:pointer" title="แก้คำแปล" onclick="editNote('${tb}','${x.k}')">✎ ${esc(noteS(x))}</span>` : ''}</div>
     <div class="ctl"><span class="mu">${tx('qtyH')}</span> <b>${x.qty}</b> <button class="sm" onclick="editQty('${tb}','${x.k}')">✎</button><button class="sm" onclick="again('${tb}','${x.k}')">＋${tx('again')}</button><button class="sm" onclick="editPrice('${tb}','${x.k}')">✎ ${tx('priceH')}</button></div></div><div class="am">${(x.price * x.qty).toLocaleString()}</div></div>`).join('')}
   <div class="tot"><span>${tx('total')} (${its.reduce((s, x) => s + x.qty, 0)})</span><span>${sum(its).toLocaleString('en-US', {minimumFractionDigits: 2})}</span></div></div>
@@ -543,7 +554,35 @@ function vCash() {
 function again(tb, k) { const x = L[tb].items[k], nk = 'i' + uid(), it = {id: x.id, name: x.name, cat: x.cat, price: x.price, qty: 1, opts: x.opts, note: x.note, status: 'new', src: 'staff', by: D.name, at: Date.now()}; L[tb].items[nk] = it; W(store.put(`live/tables/${tb}/items/${nk}`, it)); emit({type: 'order', t: tb, n: 1, items: [{name: x.name, qty: 1}]}); autoPrint(); draw(); }
 function editQty(tb, k) { const x = L[tb].items[k], v = prompt(tx('qtyH') + ' — ' + tr(x.name), x.qty); if (v === null) return; const n = parseInt(v); if (!(n >= 0)) return; if (n === 0) return delItem(tb, k); x.qty = Math.min(999, n); W(store.put(`live/tables/${tb}/items/${k}/qty`, x.qty)); draw(); }
 function editPrice(tb, k) { const x = L[tb].items[k], v = prompt(tx('priceH') + ' / 1 — ' + tr(x.name), x.price); if (v === null) return; const n = parseFloat(v); if (!(n >= 0)) return; x.price = n; W(store.put(`live/tables/${tb}/items/${k}/price`, n)); draw(); }
-function cancelTable(tb) { if (!confirm(tx('cancelTb') + ' ' + tName(tb))) return; delete L[tb]; delete V.draft[tb]; W(store.del('live/tables/' + tb)); V.table = null; go('tables'); }
+function cancelTable(tb) { if (!confirm(tx('closeQ', tName(tb)))) return; const its = itemsOf(tb); if (its.length) emit({type: 'cancel', t: tb, items: its.map(x => ({name: x.name, qty: x.qty}))}); delete L[tb]; delete V.draft[tb]; W(store.del('live/tables/' + tb)); V.table = null; go('tables'); }
+/* ยกเลิกบางรายการ: เลือกจำนวนที่จะยกเลิกได้ทีละรายการ แจ้งครัวด้วยเสียง/ประวัติ */
+let VD = {};
+function voidPick(tb) { VD = {}; voidDraw(tb); }
+function voidDraw(tb) { const its = itemsOf(tb), n = Object.values(VD).reduce((a, b) => a + b, 0);
+  modal(`<h2>✕ ${tx('voidPick')} — ${tName(tb)}</h2>${its.map(x => { const v = VD[x.k] || 0; return `<div class="line" style="align-items:center;${v ? 'background:#fef2f2' : ''}">${thumb(x.id)}<div class="n"><b>${esc(tr(x.name))}</b> <span class="st ${x.status}">${tx(stKey[x.status])}</span><small class="mu th">${esc(optLine(x))}</small><span class="mu">${x.qty} × ${baht(x.price)}</span></div>
+    <div class="qty" style="flex:none">${x.qty > 1 ? `<button onclick="VD['${x.k}']=Math.max(0,${v}-1);voidDraw('${tb}')">−</button><b style="min-width:22px;text-align:center;color:var(--r)">${v}</b><button onclick="VD['${x.k}']=Math.min(${x.qty},${v}+1);voidDraw('${tb}')">+</button>` : `<button style="width:auto;padding:0 12px;${v ? 'background:var(--r);color:#fff' : ''}" onclick="VD['${x.k}']=${v ? 0 : 1};voidDraw('${tb}')">${v ? '✓' : '✕'}</button>`}</div></div>`; }).join('')}
+  <div class="row mt"><button onclick="modal()">${tx('back')}</button><button class="p" style="background:var(--r);border-color:var(--r)" ${n ? '' : 'disabled'} onclick="voidDo('${tb}')">${tx('voidDo', n)}</button></div>`); }
+function voidDo(tb) { const its = itemsOf(tb).filter(x => VD[x.k]); if (!its.length) return;
+  its.forEach(x => { const c = Math.min(x.qty, VD[x.k]); if (c >= x.qty) { delete L[tb].items[x.k]; W(store.del(`live/tables/${tb}/items/${x.k}`)); } else { L[tb].items[x.k].qty = x.qty - c; W(store.put(`live/tables/${tb}/items/${x.k}/qty`, x.qty - c)); } });
+  emit({type: 'cancel', t: tb, items: its.map(x => ({name: x.name, qty: Math.min(x.qty, VD[x.k])}))});
+  if (!Object.keys(L[tb].items).length) { delete L[tb]; W(store.del('live/tables/' + tb)); V.table = null; V.tab = 'tables'; } VD = {}; modal(); draw(); }
+/* สั่งเพิ่มด่วน: เมนูที่ร้านเลือกไว้ (⚡) กดทีเดียวเพิ่ม 1 ไม่ต้องเลือกตัวเลือก + สั่งซ้ำของที่โต๊ะสั่งไปแล้ว (ตัวเลือกเดิม) */
+let QA = {tb: '', q: {}, r: {}, edit: false};
+function quickAdd(tb) { QA = {tb, q: {}, r: {}, edit: false}; qaDraw(); }
+function qaDraw() { const tb = QA.tb, qm = M.menu.filter(m => m.quick && !m.out && inTime(m)), seen = {}, rep = itemsOf(tb).filter(x => { const k = x.id + '|' + x.opts.join() + '|' + x.note; if (seen[k]) return false; return seen[k] = 1; });
+  const n = Object.values(QA.q).reduce((a, b) => a + b, 0) + Object.values(QA.r).reduce((a, b) => a + b, 0);
+  const cell = (key, img, name, sub2, price, v) => `<div class="item qa ${v ? 'on' : ''}" onclick="${key}=(${key}||0)+1;qaDraw()">${img}<div class="tx"><b>${name}</b>${sub2}</div><div class="row" style="align-items:center;flex-wrap:nowrap"><span class="pr" style="flex:1">${price}</span>${v ? `<button class="sm" style="flex:none" onclick="event.stopPropagation();${key}=Math.max(0,${v}-1);qaDraw()">−</button><b style="flex:none;min-width:20px;text-align:center">${v}</b>` : ''}</div></div>`;
+  if (QA.edit) return modal(`<h2>⚡ ${tx('quickEdit')}</h2><p class="mu" style="margin:4px 0 8px">เมนูที่ติ๊กจะขึ้นในปุ่ม "สั่งเพิ่ม" กดทีเดียวเพิ่ม 1 ไม่ต้องเลือกตัวเลือก</p>${M.cats.map(c => { const ms = M.menu.filter(m => m.cat === c); return ms.length ? `<h3 class="mt">${esc(c)}</h3>${ms.map(m => `<label class="ck"><input type="checkbox" ${m.quick ? 'checked' : ''} onchange="M.menu.find(x=>x.id==='${m.id}').quick=this.checked"><span>${esc(m.name)}</span><b class="mu">${baht(m.price)}</b></label>`).join('')}` : ''; }).join('')}
+    <button class="p big" onclick="saveM();QA.edit=false;qaDraw()">${tx('confirm')}</button>`, true);
+  modal(`<div class="row" style="align-items:center"><h2 style="flex:4">＋ ${tx('orderMore')} — ${tName(tb)}</h2><button class="sm" style="flex:none" onclick="QA.edit=true;qaDraw()">⚡ ${tx('quickEdit')}</button></div>
+  ${rep.length ? `<h3 class="mt">🔁 ${tx('repeat')}</h3><div class="grid qag">${rep.map((x, i) => cell(`QA.r['${x.k}']`, thumb(x.id), esc(tr(x.name)), `<small class="mu th">${esc(optLine(x))}</small>`, baht(x.price), QA.r[x.k] || 0)).join('')}</div>` : ''}
+  <h3 class="mt">⚡ ${tx('quickAdd')}</h3>${qm.length ? `<div class="grid qag">${qm.map(m => cell(`QA.q['${m.id}']`, thumb(m.id), esc(tr(m.name)), '', baht(m.price), QA.q[m.id] || 0)).join('')}</div>` : `<p class="mu">ยังไม่ได้เลือกเมนูสั่งเพิ่มด่วน — กด "⚡ ${tx('quickEdit')}" ด้านบน</p>`}
+  <div class="row mt" style="position:sticky;bottom:-18px;background:#f8f9fb;padding:10px 0"><button onclick="modal();openOrder('${tb}')">📖 ${tx('allMenu')}</button><button class="p" ${n ? '' : 'disabled'} onclick="qaSend()">${tx('send')}${n ? ' (' + n + ')' : ''}</button></div>`, true);
+}
+function qaSend() { const tb = QA.tb, d = [];
+  Object.entries(QA.r).forEach(([k, q]) => { const x = L[tb] && L[tb].items[k]; if (q && x) d.push({id: x.id, name: x.name, cat: x.cat, price: x.price, qty: q, opts: x.opts, note: x.note}); });
+  Object.entries(QA.q).forEach(([id, q]) => { const m = M.menu.find(x => x.id === id); if (q && m) d.push({id, name: m.name, cat: m.cat, price: Number(m.price), qty: q, opts: [], note: ''}); });
+  if (!d.length) return; V.table = tb; V.draft[tb] = [...(V.draft[tb] || []), ...d]; modal(); sendDraft(); }
 function splitPay(tb) { modal(`<h2>${tx('selPay')}</h2>${itemsOf(tb).map(x => `<label class="ck"><input type="checkbox" class="spC" value="${x.k}"><span><b>${esc(tr(x.name))}</b> x ${x.qty}<small class="mu th">${esc(optLine(x))}</small></span><b>${(x.price * x.qty).toLocaleString()}</b></label>`).join('')}
   <div class="row mt"><button onclick="modal()">${tx('cancel')}</button><button class="p" onclick="const k=[...document.querySelectorAll('.spC:checked')].map(e=>e.value);if(k.length)pay('${tb}',k)">${tx('confirm')}</button></div>`); }
 function billPreview(tb) { const its = itemsOf(tb), t = sum(its), pp = M.showPP !== false ? promptpay(M.promptpay, t) : ''; loadPayQr().then(() => { if ($('#bpq') && M.showPP !== false) $('#bpq').innerHTML = payQrHtml(pp, t); });
@@ -791,7 +830,7 @@ function editItem(id) {
   const m = M.menu.find(x => x.id === id) || {name: '', price: '', cat: M.cats[0], opts: []}; EIMG = m.img || ''; EIMGL = undefined; EOPTS = m.opts.filter(g => M.groups.some(x => x.id === g));
   modal(`<h2>${id ? 'แก้ไขเมนู' : 'เพิ่มเมนู'}</h2><label>ชื่อ (ภาษาไทย)</label><input id="eN" value="${esc(m.name)}"><label>ราคา</label><input id="eP" type="number" inputmode="decimal" value="${m.price}">
   <label>หมวด</label><select id="eC">${M.cats.map(c => `<option ${c === m.cat ? 'selected' : ''}>${esc(c)}</option>`).join('')}</select>
-  <label class="ck"><input type="checkbox" id="eR" ${m.rec ? 'checked' : ''}><span>⭐ เมนูแนะนำ</span></label><label class="ck"><input type="checkbox" id="eH" ${m.hide ? 'checked' : ''}><span>เห็นและสั่งได้เฉพาะพนักงาน (ไม่แสดงให้ลูกค้าที่สแกน QR)</span></label><label>ขายเฉพาะช่วงเวลา (เว้นว่าง = ทั้งวัน)</label><div class="row"><input type="time" id="eT1" value="${m.t1 || ''}"><input type="time" id="eT2" value="${m.t2 || ''}"></div><label>รูปอาหาร</label><div class="row" style="align-items:center"><div id="eImg" style="flex:0 0 110px">${EIMG ? `<img src="${EIMG}" style="width:110px;border-radius:10px">` : '<span class="mu">ไม่มีรูป</span>'}</div><input type="file" accept="image/*" onchange="pickImg(this)"><button class="sm d" style="flex:0" onclick="EIMG='';EIMGL=undefined;$('#eImg').innerHTML=''">ลบรูป</button></div>
+  <label class="ck"><input type="checkbox" id="eR" ${m.rec ? 'checked' : ''}><span>⭐ เมนูแนะนำ</span></label><label class="ck"><input type="checkbox" id="eQ" ${m.quick ? 'checked' : ''}><span>⚡ แสดงในปุ่ม "สั่งเพิ่ม" (กดทีเดียว ไม่ต้องเลือกตัวเลือก)</span></label><label class="ck"><input type="checkbox" id="eH" ${m.hide ? 'checked' : ''}><span>เห็นและสั่งได้เฉพาะพนักงาน (ไม่แสดงให้ลูกค้าที่สแกน QR)</span></label><label>ขายเฉพาะช่วงเวลา (เว้นว่าง = ทั้งวัน)</label><div class="row"><input type="time" id="eT1" value="${m.t1 || ''}"><input type="time" id="eT2" value="${m.t2 || ''}"></div><label>รูปอาหาร</label><div class="row" style="align-items:center"><div id="eImg" style="flex:0 0 110px">${EIMG ? `<img src="${EIMG}" style="width:110px;border-radius:10px">` : '<span class="mu">ไม่มีรูป</span>'}</div><input type="file" accept="image/*" onchange="pickImg(this)"><button class="sm d" style="flex:0" onclick="EIMG='';EIMGL=undefined;$('#eImg').innerHTML=''">ลบรูป</button></div>
   <label>ตัวเลือกของเมนูนี้ — เรียงตามลำดับที่ลูกค้าและพนักงานเห็น (กด ↑ ↓ เพื่อย้าย)</label><div id="eOpts"></div>
   <div class="row mt">${id ? `<button class="d" onclick="delMenu('${id}')">ลบ</button>` : ''}<button onclick="modal()">ยกเลิก</button><button class="p" onclick="saveItem('${id || ''}')">บันทึก</button></div>`); eoDraw();
 }
@@ -818,7 +857,7 @@ const IMGL = {};
 async function bigImg(m) { if (!m.imgL) return null; const k = m.id + m.imgL; if (IMGL[k] === undefined) { try { IMGL[k] = await store.get('img/' + m.id); } catch (e) { return null; } } return IMGL[k]; }
 function saveItem(id) {
   const name = $('#eN').value.trim(), price = +$('#eP').value; if (!name || !(price >= 0)) return toast('กรอกชื่อและราคา');
-  const v = {name, price, img: EIMG, rec: $('#eR').checked, hide: $('#eH').checked, t1: $('#eT1').value, t2: $('#eT2').value, cat: $('#eC').value, opts: EOPTS.slice()};
+  const v = {name, price, img: EIMG, rec: $('#eR').checked, hide: $('#eH').checked, quick: $('#eQ').checked, t1: $('#eT1').value, t2: $('#eT2').value, cat: $('#eC').value, opts: EOPTS.slice()};
   if (!id) { id = 'm' + uid(); M.menu.push({id, out: false}); }
   if (!EIMG) { v.imgL = 0; W(store.del('img/' + id)); } else if (EIMGL) { v.imgL = Date.now(); W(store.put('img/' + id, EIMGL)); }
   EIMGL = undefined; Object.assign(M.menu.find(x => x.id === id), v); saveM(); modal(); draw();
