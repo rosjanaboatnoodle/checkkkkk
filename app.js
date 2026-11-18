@@ -165,7 +165,12 @@ function inTime(m) { if (!m.t1 || !m.t2) return true; const n = hhmm(); return m
 const shown = m => !FB || (!m.hide && !(M.hcats || []).includes(m.cat));
 function mgItems(cat, fn) { const q = MQ.trim().toLowerCase();
   const hot = cat === '*hot' ? hotIds() : [];
-  return M.menu.filter(m => shown(m) && (!cat || (cat === '*rec' ? m.rec : cat === '*hot' ? hot.includes(m.id) : m.cat === cat)) && (!q || m.name.toLowerCase().includes(q) || tr(m.name).toLowerCase().includes(q) || String(m.price) === q)).map(m => `<div class="item ${m.out || !inTime(m) ? 'out' : ''}" onclick="${fn}Pick('${m.id}')"><div>${m.img && !D.noImg ? `<img src="${m.img}" alt="" loading="lazy">` : ''}<div class="tx"><b>${m.rec ? '⭐ ' : ''}${esc(tr(m.name))}</b>${sub(m.name)}</div></div><span class="pr">${m.out ? tx('out') : !inTime(m) ? m.t1 + '–' + m.t2 : baht(m.price)}</span></div>`).join('') || `<p class="mu">${tx('empty')}</p>`; }
+  const list = M.menu.filter(m => shown(m) && (!cat || (cat === '*rec' ? m.rec : cat === '*hot' ? hot.includes(m.id) : m.cat === cat)) && (!q || m.name.toLowerCase().includes(q) || tr(m.name).toLowerCase().includes(q) || String(m.price) === q));
+  const cell = m => `<div class="item ${m.out || !inTime(m) ? 'out' : ''}" onclick="${fn}Pick('${m.id}')"><div>${m.img && !D.noImg ? `<img src="${m.img}" alt="" loading="lazy">` : ''}<div class="tx"><b>${m.rec ? '⭐ ' : ''}${esc(tr(m.name))}</b>${sub(m.name)}</div></div><span class="pr">${m.out ? tx('out') : !inTime(m) ? m.t1 + '–' + m.t2 : baht(m.price)}</span></div>`;
+  if (!list.length) return `<p class="mu">${tx('empty')}</p>`;
+  /* หมวด "ทั้งหมด": แบ่งเป็นหัวข้อตามหมวด ลูกค้าเห็นว่าร้านขายอะไรบ้าง */
+  if (!cat && !q) return [...M.cats, ...new Set(list.map(m => m.cat).filter(c => !M.cats.includes(c)))].map(c => { const ms = list.filter(m => m.cat === c); return ms.length ? `<h3 class="gh">${esc(tr(c))}<small class="mu"> ${ms.length}</small></h3>` + ms.map(cell).join('') : ''; }).join('');
+  return list.map(cell).join(''); }
 /* จำนวนช่องต่อแถว: เลือกเองได้ต่อเครื่อง ('' = อัตโนมัติตามขนาดจอ, '1' = แบบรายการ) */
 const gCols = () => { try { return FB ? localStorage.getItem('rjc_cols') || '' : D.cols || ''; } catch (e) { return ''; } };
 function setCols(v) { v = gCols() === v ? '' : v; if (FB) { try { localStorage.setItem('rjc_cols', v); } catch (e) {} } else { D.cols = v; saveD(); } const g = $('#mg'); if (g) { g.className = gridCls(); g.style.cssText = gridSty(); } document.querySelectorAll('.seg button').forEach(b => b.classList.toggle('on', b.dataset.c === v)); }

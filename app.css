@@ -168,3 +168,5 @@ img{max-width:100%}
 .item.qa .th64{width:100%;height:auto;aspect-ratio:4/3}
 .acts button.d{color:var(--r);border-color:#fecaca}
 @media(max-width:700px){.acts{grid-template-columns:1fr 1fr}}
+.grid .gh{grid-column:1/-1;font-size:18px;margin:10px 2px 0;padding-bottom:4px;border-bottom:2px solid var(--bd)}
+.grid .gh:first-child{margin-top:0}
