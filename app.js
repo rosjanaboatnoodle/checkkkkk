@@ -788,13 +788,22 @@ function vMenu() {
 }
 function togOut(id) { const m = M.menu.find(x => x.id === id); m.out = !m.out; saveM(); draw(); }
 function editItem(id) {
-  const m = M.menu.find(x => x.id === id) || {name: '', price: '', cat: M.cats[0], opts: []}; EIMG = m.img || ''; EIMGL = undefined;
+  const m = M.menu.find(x => x.id === id) || {name: '', price: '', cat: M.cats[0], opts: []}; EIMG = m.img || ''; EIMGL = undefined; EOPTS = m.opts.filter(g => M.groups.some(x => x.id === g));
   modal(`<h2>${id ? 'แก้ไขเมนู' : 'เพิ่มเมนู'}</h2><label>ชื่อ (ภาษาไทย)</label><input id="eN" value="${esc(m.name)}"><label>ราคา</label><input id="eP" type="number" inputmode="decimal" value="${m.price}">
   <label>หมวด</label><select id="eC">${M.cats.map(c => `<option ${c === m.cat ? 'selected' : ''}>${esc(c)}</option>`).join('')}</select>
   <label class="ck"><input type="checkbox" id="eR" ${m.rec ? 'checked' : ''}><span>⭐ เมนูแนะนำ</span></label><label class="ck"><input type="checkbox" id="eH" ${m.hide ? 'checked' : ''}><span>เห็นและสั่งได้เฉพาะพนักงาน (ไม่แสดงให้ลูกค้าที่สแกน QR)</span></label><label>ขายเฉพาะช่วงเวลา (เว้นว่าง = ทั้งวัน)</label><div class="row"><input type="time" id="eT1" value="${m.t1 || ''}"><input type="time" id="eT2" value="${m.t2 || ''}"></div><label>รูปอาหาร</label><div class="row" style="align-items:center"><div id="eImg" style="flex:0 0 110px">${EIMG ? `<img src="${EIMG}" style="width:110px;border-radius:10px">` : '<span class="mu">ไม่มีรูป</span>'}</div><input type="file" accept="image/*" onchange="pickImg(this)"><button class="sm d" style="flex:0" onclick="EIMG='';EIMGL=undefined;$('#eImg').innerHTML=''">ลบรูป</button></div>
-  <label>ตัวเลือก</label>${M.groups.map(g => `<label class="ck"><input type="checkbox" class="eO" value="${g.id}" ${m.opts.includes(g.id) ? 'checked' : ''}><span>${esc(g.name)}${g.note ? ' <small class="mu">(' + esc(g.note) + ')</small>' : ''}</span></label>`).join('')}
-  <div class="row mt">${id ? `<button class="d" onclick="delMenu('${id}')">ลบ</button>` : ''}<button onclick="modal()">ยกเลิก</button><button class="p" onclick="saveItem('${id || ''}')">บันทึก</button></div>`);
+  <label>ตัวเลือกของเมนูนี้ — เรียงตามลำดับที่ลูกค้าและพนักงานเห็น (กด ↑ ↓ เพื่อย้าย)</label><div id="eOpts"></div>
+  <div class="row mt">${id ? `<button class="d" onclick="delMenu('${id}')">ลบ</button>` : ''}<button onclick="modal()">ยกเลิก</button><button class="p" onclick="saveItem('${id || ''}')">บันทึก</button></div>`); eoDraw();
 }
+/* ลำดับกลุ่มตัวเลือกของแต่ละเมนู */
+let EOPTS = [];
+const gLabel = g => esc(g.name) + (g.note ? ' <small class="mu">(' + esc(g.note) + ')</small>' : '');
+function eoDraw() { const el = $('#eOpts'); if (!el) return; const n = EOPTS.length;
+  el.innerHTML = (n ? EOPTS.map((gid, i) => { const g = M.groups.find(x => x.id === gid);
+    return `<div class="line" style="align-items:center"><b style="min-width:22px">${i + 1}.</b><div class="n">${gLabel(g)}<small class="mu th">${esc(g.choices.slice(0, 5).map(c => c.name).join(', '))}${g.choices.length > 5 ? ' …' : ''}</small></div>
+      <div class="qty" style="flex:none"><button title="ไว้บนสุด" onclick="eoMv(${i},'top')" ${i ? '' : 'disabled'}>⤒</button><button onclick="eoMv(${i},-1)" ${i ? '' : 'disabled'}>↑</button><button onclick="eoMv(${i},1)" ${i < n - 1 ? '' : 'disabled'}>↓</button><button class="d" onclick="EOPTS.splice(${i},1);eoDraw()">✕</button></div></div>`; }).join('') : '<p class="mu" style="margin:4px 0">ยังไม่มีตัวเลือก</p>')
+  + `<select class="mt" onchange="if(this.value){EOPTS.push(this.value);eoDraw()}"><option value="">＋ เพิ่มตัวเลือก…</option>${M.groups.filter(g => !EOPTS.includes(g.id)).map(g => `<option value="${g.id}">${esc(g.name)}${g.note ? ' (' + esc(g.note) + ')' : ''}</option>`).join('')}</select>`; }
+function eoMv(i, d) { const [g] = EOPTS.splice(i, 1); EOPTS.splice(d === 'top' ? 0 : i + d, 0, g); eoDraw(); }
 let EIMG = '';
 /* ย่อรูปแบบคมชัด: ลดขนาดทีละครึ่งก่อน แล้วค่อยย่อครั้งสุดท้าย (ย่อทีเดียวจากรูปใหญ่มากจะแตก/เป็นรอยหยัก) */
 function shrink(im, max, type, q) { let w = im.width, h = im.height, src = im; const sc = Math.min(1, max / Math.max(w, h)), tw = Math.round(w * sc), th = Math.round(h * sc);
@@ -809,7 +818,7 @@ const IMGL = {};
 async function bigImg(m) { if (!m.imgL) return null; const k = m.id + m.imgL; if (IMGL[k] === undefined) { try { IMGL[k] = await store.get('img/' + m.id); } catch (e) { return null; } } return IMGL[k]; }
 function saveItem(id) {
   const name = $('#eN').value.trim(), price = +$('#eP').value; if (!name || !(price >= 0)) return toast('กรอกชื่อและราคา');
-  const v = {name, price, img: EIMG, rec: $('#eR').checked, hide: $('#eH').checked, t1: $('#eT1').value, t2: $('#eT2').value, cat: $('#eC').value, opts: [...document.querySelectorAll('.eO:checked')].map(e => e.value)};
+  const v = {name, price, img: EIMG, rec: $('#eR').checked, hide: $('#eH').checked, t1: $('#eT1').value, t2: $('#eT2').value, cat: $('#eC').value, opts: EOPTS.slice()};
   if (!id) { id = 'm' + uid(); M.menu.push({id, out: false}); }
   if (!EIMG) { v.imgL = 0; W(store.del('img/' + id)); } else if (EIMGL) { v.imgL = Date.now(); W(store.put('img/' + id, EIMGL)); }
   EIMGL = undefined; Object.assign(M.menu.find(x => x.id === id), v); saveM(); modal(); draw();
