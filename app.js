@@ -108,13 +108,21 @@ function noteL(x, l) { if (!x.note) return ''; if (FB) return x.note; const out 
 /* ชื่อ/ตัวเลือกบนเครื่องพนักงาน: ภาษาของเครื่อง + ภาษาไทยกำกับเสมอ */
 const bi = o => { const t = tr(o); return !FB && t !== o ? t + ' (' + o + ')' : t; };
 const noteS = x => noteL(x, UL);
+/* API key ของ Google Cloud Translation เก็บแยกที่ cfg/mtKey (ไม่อยู่ในเมนู ลูกค้าที่สแกน QR จึงไม่ได้รับ key ไปด้วย) */
+let MTK = '', MTKV = null, MTERR = '';
+async function loadMtKey() { if (M.mtKey) { MTK = M.mtKey; delete M.mtKey; M.mtKv = Date.now(); W(store.put('cfg/mtKey', MTK)); saveM(); }
+  if (MTKV === (M.mtKv || 0)) return; try { MTK = (await store.get('cfg/mtKey')) || ''; MTKV = M.mtKv || 0; } catch (e) {} }
+async function mtTest() { const k = $('#sMtK').value.trim(), old = MTK; MTK = k; MTERR = ''; Object.keys(NTC).forEach(x => delete NTC[x]); $('#mtRes').textContent = '…';
+  const r = await mt('no bean sprouts, less spicy', 'th'); $('#mtRes').textContent = r && r !== '=' ? (k && !MTERR ? '✔ ใช้ API key ได้: ' : (k ? '✕ key ใช้ไม่ได้ (' + MTERR + ') — ใช้แบบฟรีแทน: ' : 'แบบฟรี: ')) + 'no bean sprouts, less spicy → ' + r : '✕ แปลไม่ได้ ' + MTERR; MTK = old; }
 async function mt(text, to) {
   const key = text + '|' + to; if (NTC[key] != null) return NTC[key];
   const d = (M.dict[text] || {})[to]; if (d) return NTC[key] = d;
   if (M.mt === 'off') return null;
   try { let out;
-    if (M.mtKey) { const r = await fetch('https://translation.googleapis.com/language/translate/v2?key=' + encodeURIComponent(M.mtKey), {method: 'POST', body: JSON.stringify({q: text, target: GL[to] || to, format: 'text'})}); out = (await r.json()).data.translations[0].translatedText; }
-    else { const r = await fetch('https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=' + (GL[to] || to) + '&dt=t&q=' + encodeURIComponent(text)); out = (await r.json())[0].map(a => a[0]).join(''); }
+    if (MTK) { try { const j = await (await fetch('https://translation.googleapis.com/language/translate/v2?key=' + encodeURIComponent(MTK), {method: 'POST', body: JSON.stringify({q: text, target: GL[to] || to, format: 'text'})})).json();
+        if (j.error) throw new Error(j.error.message); out = j.data.translations[0].translatedText; MTERR = ''; }
+      catch (e) { if (MTERR !== e.message) { MTERR = e.message; toast('⚠️ Google Translate API: ' + e.message); } } }
+    if (out == null) { const r = await fetch('https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=' + (GL[to] || to) + '&dt=t&q=' + encodeURIComponent(text)); out = (await r.json())[0].map(a => a[0]).join(''); }
     out = String(out || '').trim(); return NTC[key] = !out || out.toLowerCase() === text.toLowerCase() ? '=' : out;
   } catch (e) { return null; }
 }
@@ -398,7 +406,7 @@ async function poll() {
   const s = seq; let lv; try { lv = await store.get('live') || {}; syncErr = ''; } catch (e) { syncErr = e.message; return; }
   if (pending || s !== seq) return;
   let ch = false;
-  if (lv.mv && lv.mv !== M.v) { try { const raw = await store.get('menu'); if (raw) { M = normM(JSON.parse(raw)); ch = true; } } catch (e) {} }
+  if (lv.mv && lv.mv !== M.v) { try { const raw = await store.get('menu'); if (raw) { M = normM(JSON.parse(raw)); ch = true; loadMtKey(); } } catch (e) {} }
   const nt = normT(lv.tables); if (JSON.stringify(nt) !== JSON.stringify(L)) { L = nt; ch = true; }
   const sh = lv.shift || ''; if (sh !== JSON.stringify(SHIFT || '').replace(/^""$/, '')) { try { SHIFT = sh ? JSON.parse(sh) : null; } catch (e) {} if (['sales', 'dash'].includes(V.tab) && !$('#modal').innerHTML) draw(); }
   if (!OWN) { handleEvents(lv.events || {}); autoPrint(); noteWork(); }
@@ -419,7 +427,7 @@ function saveNote(tb, k) { const x = L[tb].items[k], rem = $('#enR').checked; x.
   document.querySelectorAll('.enT').forEach(e => { const l = e.dataset.l, v = e.value.trim() || '='; x.nt[l] = v; NTC[x.note + '|' + l] = v; W(store.put(`live/tables/${tb}/items/${k}/nt/${l}`, v)); if (rem && v !== '=') (M.dict[x.note] = M.dict[x.note] || {})[l] = v; });
   if (rem) saveM(); modal(); draw(); }
 function noteWork() {
-  const ls = [...new Set([D.lang, D.plang || D.lang, vl(), 'th'])];
+  const ls = [...new Set(['th', D.lang, D.plang || D.lang, vl(), ...(M.slangs || [])])];
   Object.keys(L).forEach(tb => Object.entries(L[tb].items).forEach(([k, x]) => { if (!x.note) return; ls.forEach(l => { const bk = k + l; if ((x.nt || {})[l] != null || NTB[bk] > Date.now()) return; NTB[bk] = Date.now() + 60000;
     mt(x.note, l).then(out => { const it = L[tb] && L[tb].items[k]; if (out == null || !it) return; (it.nt = it.nt || {})[l] = out; W(store.put(`live/tables/${tb}/items/${k}/nt/${l}`, out)); if (!['set', 'sales', 'dash'].includes(V.tab)) draw(); }); }); }));
 }
@@ -734,7 +742,7 @@ function sShop() {
   <label>ข้อความท้ายใบเสร็จ</label><input id="sFoot" value="${esc(M.footer)}">
   <label class="ck"><input type="checkbox" ${M.showPP !== false ? 'checked' : ''} onchange="M.showPP=this.checked;saveM()"><span>แสดง QR พร้อมเพย์ (ล็อกยอดเงิน) บนใบแจ้งรายการ</span></label>
   <label>แปลหมายเหตุของลูกค้า/พนักงานเป็นภาษาของแต่ละเครื่องอัตโนมัติ</label><select id="sMt"><option value="on" ${M.mt !== 'off' ? 'selected' : ''}>เปิด — ใช้ Google Translate</option><option value="off" ${M.mt === 'off' ? 'selected' : ''}>ปิด</option></select>
-  <label>Google Cloud Translation API key (ไม่บังคับ — ใส่เมื่อต้องการใช้บริการแบบทางการ)</label><input id="sMtK" value="${esc(M.mtKey || '')}">
+  <label>Google Cloud Translation API key (ใส่แล้วจะแปลด้วยบริการแบบเสียเงินของ Google — ไม่ใส่ = ใช้แบบฟรี)</label><div class="row"><input id="sMtK" style="flex:4" autocomplete="off" value="${esc(MTK)}" placeholder="AIza..."><button type="button" style="flex:1" onclick="mtTest()">ทดสอบ</button></div><div id="mtRes" class="mu" style="font-size:14px;margin-top:4px">${MTERR ? '⚠️ ' + esc(MTERR) : ''}</div>
   <label>รหัส PIN เจ้าของร้าน (กันพนักงานเข้าหน้ารายงานและตั้งค่า — เว้นว่าง = ไม่ใช้)</label><input id="sPin" inputmode="numeric" value="${esc(M.pin || '')}">
   <label>ช่องทางชำระ/ขายอื่น ๆ (คั่นด้วย , )</label><input id="sCh" value="${esc(M.channels.join(', '))}">
   <button class="p mt" style="width:100%" onclick="saveShop()">บันทึก</button>
@@ -751,7 +759,7 @@ function setPayQr(inp) { const f = inp && inp.files[0];
   if (!f) { if (!inp && confirm('ลบรูป QR รับเงิน?')) { PQR = null; M.payQrV = 0; W(store.del('payqr')); saveM(); draw(); } return; }
   loadImg(f, im => { PQR = shrink(im, 1000, f.type === 'image/png' ? 'image/png' : 'image/jpeg', .92); M.payQrV = PQRV = Date.now(); W(store.put('payqr', PQR)); saveM(); draw(); toast('บันทึก QR รับเงินแล้ว ✔'); }); }
 function setLogo(inp) { const f = inp.files[0]; if (!f) return; const im = new Image(); im.onload = () => { M.logo = shrink(im, 300, 'image/png'); saveM(); draw(); }; im.src = URL.createObjectURL(f); }
-function saveShop() { Object.assign(M, {shop: $('#sShop').value.trim() || DEF.shop, tables: Math.max(1, Math.min(200, parseInt($('#sTables').value) || 1)), promptpay: $('#sPP').value.trim(), footer: $('#sFoot').value.trim(), addr: $('#sAddr').value.trim(), tel: $('#sTel').value.trim(), tax: $('#sTax').value.trim(), pin: $('#sPin').value.trim(), mt: $('#sMt').value, mtKey: $('#sMtK').value.trim(), channels: [...new Set($('#sCh').value.split(',').map(x => x.trim()).filter(Boolean))]}); saveM(); toast('บันทึกแล้ว'); draw(); }
+function saveShop() { Object.assign(M, {shop: $('#sShop').value.trim() || DEF.shop, tables: Math.max(1, Math.min(200, parseInt($('#sTables').value) || 1)), promptpay: $('#sPP').value.trim(), footer: $('#sFoot').value.trim(), addr: $('#sAddr').value.trim(), tel: $('#sTel').value.trim(), tax: $('#sTax').value.trim(), pin: $('#sPin').value.trim(), mt: $('#sMt').value, channels: [...new Set($('#sCh').value.split(',').map(x => x.trim()).filter(Boolean))]}); const k = $('#sMtK').value.trim(); if (k !== MTK) { MTK = k; MTERR = ''; M.mtKv = MTKV = Date.now(); Object.keys(NTC).forEach(x => delete NTC[x]); W(store.put('cfg/mtKey', k)); } saveM(); toast('บันทึกแล้ว'); draw(); }
 function setDb() { D.db = $('#sDb').value.trim(); saveD(); location.reload(); }
 function sTrl() {
   const langs = [...new Set([...M.clangs, ...M.slangs])].filter(l => l !== 'th'); if (!langs.includes(V.trl)) V.trl = langs[0] || '';
@@ -831,6 +839,7 @@ async function staffInit() {
   try { const raw = await store.get('menu'); if (raw) M = normM(JSON.parse(raw)); }
   catch (e) { syncErr = e.message; M = normM(clone(DEF)); }
   if (!M) { M = normM(clone(DEF)); saveM(); }
+  await loadMtKey();
   if (OWN && M.pin && !ownerUnlock()) return;
   V.tab = (ROLES[D.role] || ROLES.all)[0]; draw(); await poll(); loadSales().then(draw);
   setInterval(() => { if (['tables', 'kitchen', 'serve'].includes(V.tab)) draw(); else if (V.tab === 'dash') loadSales().then(() => V.tab === 'dash' && draw()); }, 30000); setInterval(poll, store.live ? 2500 : 1500);
