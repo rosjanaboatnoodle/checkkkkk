@@ -123,7 +123,8 @@ let PK = null;
 function pickItem(id, cb) {
   const m = M.menu.find(x => x.id === id); if (!m || m.out || !inTime(m)) return; PK = {m, cb, qty: 1};
   const gs = m.opts.map(g => M.groups.find(x => x.id === g)).filter(Boolean);
-  modal(`${m.img ? `<img src="${m.img}" alt="" style="width:100%;max-height:220px;object-fit:cover;border-radius:14px;margin-bottom:8px">` : ''}<h2>${esc(tr(m.name))}</h2>${sub(m.name)}<div class="mu">${baht(m.price)}</div>
+  if (m.imgL) bigImg(m).then(u => { if (u && PK && PK.m === m && $('#pkImg')) $('#pkImg').src = u; });
+  modal(`${m.img ? `<img id="pkImg" src="${m.img}" alt="" style="width:100%;aspect-ratio:4/3;max-height:340px;object-fit:cover;border-radius:14px;margin-bottom:8px;background:#eee">` : ''}<h2>${esc(tr(m.name))}</h2>${sub(m.name)}<div class="mu">${baht(m.price)}</div>
   ${gs.map(g => `<h3 class="mt">${esc(tr(g.name))} <small class="mu">${g.multi ? tx('pickMany') + (g.max ? ' ≤ ' + g.max : '') : tx('pick1')}${g.required ? ' • ' + tx('req') : ''}</small></h3>
     ${g.choices.map((c, i) => { if (c.out) return ''; const v = esc(g.pre ? g.name + ': ' + c.name : c.name), pr = `<b class="mu">${c.price ? '+' + c.price : ''}</b>`;
       return g.multi && g.rep ? `<div class="ck" style="display:flex;align-items:center;gap:10px;padding:6px 2px;border-bottom:1px solid #f3f4f6"><span style="flex:1">${esc(bi(c.name))}</span>${pr}<div class="qty"><button onclick="pkRep('${g.id}',${i},-1)">−</button><b class="rp" data-g="${g.id}" data-p="${Number(c.price) || 0}" data-v="${v}" id="rp_${g.id}_${i}" style="min-width:22px;text-align:center">0</b><button onclick="pkRep('${g.id}',${i},1)">+</button></div></div>`
@@ -146,6 +147,7 @@ function pkDone() {
   const k = PK, m = k.m; const line = {id: m.id, name: m.name, cat: m.cat, price: pkPrice(), qty: k.qty, opts: o, note: $('#pkNote').value.trim().slice(0, 100)}; modal(); k.cb(line);
 }
 let MQ = '', MGC = '';
+const thumb = id => { const m = M.menu.find(x => x.id === id); return m && m.img && !D.noImg ? `<img class="th64" src="${m.img}" alt="" loading="lazy">` : ''; };
 const hhmm = () => new Date().toTimeString().slice(0, 5);
 function inTime(m) { if (!m.t1 || !m.t2) return true; const n = hhmm(); return m.t1 <= m.t2 ? n >= m.t1 && n < m.t2 : n >= m.t1 || n < m.t2; }
 const shown = m => !FB || (!m.hide && !(M.hcats || []).includes(m.cat));
@@ -443,7 +445,7 @@ function draw() {
   $('#app').innerHTML = `<div class="top"><span class="brand">🍜 ${esc(M.shop)}${OWN ? ' — หลังบ้าน' : ''}</span><div class="nav">${(ROLES[role] || ROLES.all).map(t => `<button data-t="${t}" class="${cur === t ? 'on' : ''}" onclick="go('${t}')"><span>${TABI[t]}</span><small>${tx(t)}</small>${badge[t] ? `<i>${badge[t]}</i>` : ''}</button>`).join('')}</div>
     <button class="ic" title="ภาษา" onclick="langSheet()" style="font-size:15px;font-weight:700;border:1px solid var(--bd);border-radius:99px;padding:6px 12px;background:#fff;white-space:nowrap">🌐 ${LANGS[UL][0]}</button>${OWN ? '' : `<button class="ic" title="เสียง" onclick="D.voice=!D.voice;saveD();draw()">${D.voice ? '🔊' : '🔇'}</button>${all ? `<button class="ic" title="กะ" onclick="go('sales')">🧾</button>` : ''}<button class="ic" title="${tx('log')}" onclick="showLog()">🔔</button>`}<button class="ic" title="ตั้งค่า" onclick="go('set')">⚙️</button></div>
   ${syncErr ? '<div class="c" style="background:#fee2e2;color:#991b1b;padding:4px">⚠️ เชื่อมต่อข้อมูลกลางไม่ได้ (' + esc(syncErr) + ')</div>' : ''}
-  <div class="wrap">${({tables: vTables, order: vOrder, kitchen: () => vQueue('new'), serve: () => vQueue('cooked'), bill: vBill, cash: vCash, sales: vSales, dash: vDash, set: vSet}[V.tab])()}</div>`;
+  <div class="wrap${V.tab === 'order' ? ' ord' : ''}">${({tables: vTables, order: vOrder, kitchen: () => vQueue('new'), serve: () => vQueue('cooked'), bill: vBill, cash: vCash, sales: vSales, dash: vDash, set: vSet}[V.tab])()}</div>`;
 }
 function go(t) { V.tab = t; if (t === 'sales' || t === 'dash') loadSales().then(draw); draw(); window.scrollTo(0, 0); }
 function showLog() { modal(`<h2>🔔 ${tx('log')}</h2>${V.log.map(e => `<div class="line"><div class="n">${esc(evText(e, UL))}<small class="mu th">${hm(e.at)} • ${esc(e.dev === 'cust' ? tx('cust') : e.by)}</small></div><span class="spk" onclick="speak(evText(V.log[${V.log.indexOf(e)}],vl()),vl())">🔊</span></div>`).join('') || `<p class="mu">${tx('empty')}</p>`}`); }
@@ -474,7 +476,7 @@ function openOrder(tb) { V.table = tb; V.cat = ''; go('order'); }
 /* ---------- 2 ออเดอร์ ---------- */
 function poCat(i) { V.cat = catAt(i); draw(); }
 function poPick(id) { const m = M.menu.find(x => x.id === id), d = V.draft[V.table] = V.draft[V.table] || []; if (!m.opts.length) { addLine(d, {id, name: m.name, cat: m.cat, price: Number(m.price), qty: 1, opts: [], note: ''}); draw(); } else pickItem(id, line => { addLine(d, line); draw(); }); }
-function drQty(i, n) { const d = V.draft[V.table]; d[i].qty += n; if (d[i].qty <= 0) d.splice(i, 1); draw(); }
+function drQty(i, n) { const d = V.draft[V.table]; d[i].qty += n; if (d[i].qty <= 0) d.splice(i, 1); draw(); if ($('#ocm')) d.length ? $('#ocm').innerHTML = orderCart(V.table) : modal(); }
 function ensureTable(tb) { if (!L[tb]) { L[tb] = {openedAt: Date.now(), call: '', items: {}}; W(store.put(`live/tables/${tb}/openedAt`, L[tb].openedAt)); } }
 function sendDraft() {
   const tb = V.table, d = V.draft[tb] || []; if (!d.length) return; const now = Date.now(); ensureTable(tb);
@@ -482,16 +484,20 @@ function sendDraft() {
   emit({type: 'order', t: tb, n: d.length, items: d.map(x => ({name: x.name, qty: x.qty}))}); V.draft[tb] = []; toast(tx('sentOk') + ' ✔'); autoPrint(); noteWork(); draw();
 }
 function delItem(tb, k) { if (!confirm(tx('del'))) return; delete L[tb].items[k]; if (Object.keys(L[tb].items).length) W(store.del(`live/tables/${tb}/items/${k}`)); else { delete L[tb]; W(store.del('live/tables/' + tb)); } draw(); }
+function orderCart(tb) { const d = V.draft[tb] || [], its = itemsOf(tb);
+  return `<div class="row" style="align-items:center"><h3 style="flex:5">${tx('draft')}</h3>${d.length ? `<button class="sm d" style="flex:0" onclick="if(confirm(tx('clearQ'))){V.draft['${tb}']=[];modal();draw()}">🗑️</button>` : ''}</div>
+    ${d.length ? `${d.map((x, i) => `<div class="line" style="align-items:center">${thumb(x.id)}<div class="n"><b>${esc(tr(x.name))}</b>${sub(x.name)}<small class="mu th">${esc(optLine(x))}</small></div><div class="qty"><button onclick="drQty(${i},-1)">−</button><b>${x.qty}</b><button onclick="drQty(${i},1)">+</button></div><b style="min-width:52px;text-align:right">${baht(x.price * x.qty)}</b></div>`).join('')}
+    <div class="mu mt">${d.length} ${tx('items')} • ${d.reduce((a, x) => a + x.qty, 0)} ${tx('units')}</div>
+    <button class="p big" style="margin-top:6px" onclick="modal();sendDraft()">${tx('send')} ${baht(sum(d))}</button><button class="big" style="background:#fff;border:1px solid var(--bd);font-size:16px;padding:12px" onclick="modal();sendDraft();openCash('${tb}')">${tx('send')} + ${tx('pay')}</button>` : `<p class="mu">${tx('empty')}</p>`}
+    ${its.length ? `<div class="mt"><b class="mu">${tx('sent')}</b></div>${its.map(x => `<div class="line"><div class="n"><b>${x.qty}× ${esc(tr(x.name))}</b><small class="mu th">${esc(optLine(x))}</small><span class="st ${x.status}">${tx(stKey[x.status])}</span>${x.src === 'qr' ? ' 📱' : ''}</div><b>${baht(x.price * x.qty)}</b></div>`).join('')}
+    <div class="tot"><span>${tx('total')}</span><span>${baht(sum(its))}</span></div>` : ''}`; }
+function openOrderCart() { modal(`<div id="ocm">${orderCart(V.table)}</div>`); }
 function vOrder() {
   const tb = V.table; if (!tb) { V.tab = 'tables'; return vTables(); }
-  const d = V.draft[tb] || [], its = itemsOf(tb);
+  const d = V.draft[tb] || [], its = itemsOf(tb), n = d.reduce((a, x) => a + x.qty, 0);
   return `<div class="hd"><button onclick="${its.length ? `openCash('${tb}')` : `go('tables')`}">‹ ${tx('back')}</button><h2>${tName(tb)}</h2><button title="รูป" onclick="D.noImg=!D.noImg;saveD();draw()">${D.noImg ? '🚫' : '🖼️'}</button><button onclick="tblMore('${tb}')">⋯</button></div>
-  <div class="split"><div>${menuGrid(V.cat, 'po')}</div><div class="card" style="position:sticky;top:70px"><div class="row" style="align-items:center"><h3 style="flex:5">${tx('draft')}</h3>${d.length ? `<button class="sm d" style="flex:0" onclick="if(confirm(tx('clearQ'))){V.draft['${tb}']=[];draw()}">🗑️</button>` : ''}</div>
-    ${d.length ? `${d.map((x, i) => `<div class="line"><div class="n"><b>${esc(tr(x.name))}</b>${sub(x.name)}<small class="mu th">${esc(optLine(x))}</small></div><div class="qty"><button onclick="drQty(${i},-1)">−</button><b>${x.qty}</b><button onclick="drQty(${i},1)">+</button></div><b style="min-width:52px;text-align:right">${baht(x.price * x.qty)}</b></div>`).join('')}
-    <div class="mu mt" id="dsum">${d.length} ${tx('items')} • ${d.reduce((a, x) => a + x.qty, 0)} ${tx('units')}</div>
-    <button class="p big" style="margin-top:6px" onclick="sendDraft()">${tx('send')} ${baht(sum(d))}</button><button class="big" style="background:#fff;border:1px solid var(--bd);font-size:16px;padding:12px" onclick="sendDraft();openCash('${tb}')">${tx('send')} + ${tx('pay')}</button>` : `<p class="mu">${tx('empty')}</p>`}
-    ${its.length ? `<div class="mt"><b class="mu">${tx('sent')}</b></div>${its.map(x => `<div class="line"><div class="n"><b>${x.qty}× ${esc(tr(x.name))}</b><small class="mu th">${esc(optLine(x))}</small><span class="st ${x.status}">${tx(stKey[x.status])}</span>${x.src === 'qr' ? ' 📱' : ''}</div><b>${baht(x.price * x.qty)}</b></div>`).join('')}
-    <div class="tot"><span>${tx('total')}</span><span>${baht(sum(its))}</span></div>` : ''}</div></div>`;
+  <div class="split"><div>${menuGrid(V.cat, 'po')}</div><div class="card ocart" style="position:sticky;top:70px;max-height:calc(100vh - 84px);overflow:auto">${orderCart(tb)}</div></div>
+  <div class="obar"><button class="cnt" onclick="openOrderCart()">🧺 ${n ? n + ' ' + tx('units') + ' • ' + baht(sum(d)) : its.length ? tx('sent') + ' ' + baht(sum(its)) : tx('empty')}</button>${d.length ? `<button class="p" onclick="sendDraft()">${tx('send')}</button>` : its.length ? `<button class="g" onclick="openCash('${tb}')">💵 ${tx('pay')}</button>` : ''}</div>`;
 }
 function readItem(tb, k) { const x = L[tb].items[k], l = vl(); const nt = (x.nt || {})[l]; speak([x.qty, trL(x.name, l), ...x.opts.map(o => trL(o, l)), nt && nt !== '=' ? nt : x.note].filter(Boolean).join(' '), l); }
 function moveTable(from) { modal(`<h2>${tx('move')} — ${tName(from)}</h2><div class="grid mt">${tableIds().filter(t => t !== from).map(t => `<button onclick="doMove('${from}','${t}')">${tName(t)}${itemsOf(t).length ? ' •' : ''}</button>`).join('')}</div>`); }
@@ -506,7 +512,7 @@ function vQueue(st) {
   (tbs.length ? `<div class="kq">${tbs.map(([tb, its]) => { const a = ageMin(its[0].at);
     return `<div class="card ${a >= D.t2 ? 'a2' : a >= D.t1 ? 'a1' : ''}"><div class="row" style="align-items:center"><h2 style="flex:3">${tName(tb)}</h2><span class="age" style="flex:0">⏱ ${a} ${tx('min')}</span>${kit ? `<button class="sm" style="flex:0" onclick="printQueue('${tb}','${st}')">🖨️</button>` : ''}</div>
     <div class="mu">${hm(its[0].at)} • ${its.length} ${tx('items')} • ${esc(its[0].src === 'qr' ? '📱 ' + tx('cust') : its[0].by)}</div>
-    ${its.map(x => `<div class="ki"><div class="n">${x.qty} × ${esc(tr(x.name))}<span class="spk" onclick="readItem('${tb}','${x.k}')">🔊</span>${sub(x.name)}<div class="ops">${x.opts.map(o => `<span>${esc(bi(o))}</span>`).join('')}${x.note ? `<span style="background:#fef08a;cursor:pointer" title="แก้คำแปล" onclick="editNote('${tb}','${x.k}')">✎ ${esc(noteS(x))}</span>` : ''}</div></div><button onclick="adv('${tb}','${x.k}')">✔ ${tx('done')}</button></div>`).join('')}
+    ${its.map(x => `<div class="ki">${thumb(x.id)}<div class="n">${x.qty} × ${esc(tr(x.name))}<span class="spk" onclick="readItem('${tb}','${x.k}')">🔊</span>${sub(x.name)}<div class="ops">${x.opts.map(o => `<span>${esc(bi(o))}</span>`).join('')}${x.note ? `<span style="background:#fef08a;cursor:pointer" title="แก้คำแปล" onclick="editNote('${tb}','${x.k}')">✎ ${esc(noteS(x))}</span>` : ''}</div></div><button onclick="adv('${tb}','${x.k}')">✔ ${tx('done')}</button></div>`).join('')}
     ${its.length > 1 ? `<button class="big" style="background:#fff;border:1px solid var(--bd);font-size:16px;padding:10px" onclick="advAll('${tb}','${st}')">✔✔ ${tx('doneAll')}</button>` : ''}</div>`; }).join('')}</div>` : `<p class="mu c" style="padding:40px">${tx('empty')} 🎉</p>`);
 }
 const nextSt = s => s === 'new' ? 'cooked' : 'served';
@@ -521,10 +527,9 @@ function vCash() {
   const tb = V.table, its = itemsOf(tb); if (!tb || !its.length) { V.tab = 'tables'; return vTables(); }
   return `<div class="hd"><button onclick="go('tables')">‹ ${tx('back')}</button><h2>${tName(tb)}</h2><button onclick="tblMore('${tb}')">⋯ ${tx('moreAct')}</button></div>
   <div class="acts"><button class="p" onclick="openOrder('${tb}')">＋ ${tx('orderMore')}</button><button onclick="splitPay('${tb}')">✂ ${tx('split')}</button><button onclick="billPreview('${tb}')">🧾 ${tx('quick')}</button></div>
-  <div class="card mt" style="overflow-x:auto"><table class="t"><tr><th>${tx('itemH')}</th><th class="r">${tx('qtyH')}</th><th class="r">${tx('priceH')}</th><th class="r">${tx('statusH')}</th></tr>
-  ${its.map((x, i) => `<tr><td>${i + 1}. <b>${esc(tr(x.name))}</b><span class="spk" onclick="readItem('${tb}','${x.k}')">🔊</span>${x.src === 'qr' ? '📱' : ''}${sub(x.name)}<div class="ops">${x.opts.map(o => `<span>${esc(bi(o))}</span>`).join('')}${x.note ? `<span style="background:#fef08a;cursor:pointer" title="แก้คำแปล" onclick="editNote('${tb}','${x.k}')">✎ ${esc(noteS(x))}</span>` : ''}</div></td>
-    <td class="r" style="white-space:nowrap">${x.qty} <button class="sm" onclick="editQty('${tb}','${x.k}')">✎</button> <button class="sm" title="${tx('again')}" onclick="again('${tb}','${x.k}')">＋${tx('again')}</button></td><td class="r" style="white-space:nowrap">${(x.price * x.qty).toLocaleString()} <button class="sm" onclick="editPrice('${tb}','${x.k}')">✎</button></td><td class="r"><span class="st ${x.status}">${tx(stKey[x.status])}</span></td></tr>`).join('')}
-  <tr style="background:#f3f4f6;font-weight:700"><td>${tx('total')}</td><td class="r">${its.reduce((s, x) => s + x.qty, 0)}</td><td class="r" colspan="2" style="font-size:18px">${sum(its).toLocaleString('en-US', {minimumFractionDigits: 2})}</td></tr></table></div>
+  <div class="card mt">${its.map((x, i) => `<div class="bl">${thumb(x.id)}<div class="n"><b>${i + 1}. ${esc(tr(x.name))}</b><span class="spk" onclick="readItem('${tb}','${x.k}')">🔊</span>${x.src === 'qr' ? '📱' : ''} <span class="st ${x.status}">${tx(stKey[x.status])}</span>${sub(x.name)}<div class="ops">${x.opts.map(o => `<span>${esc(bi(o))}</span>`).join('')}${x.note ? `<span style="background:#fef08a;cursor:pointer" title="แก้คำแปล" onclick="editNote('${tb}','${x.k}')">✎ ${esc(noteS(x))}</span>` : ''}</div>
+    <div class="ctl"><span class="mu">${tx('qtyH')}</span> <b>${x.qty}</b> <button class="sm" onclick="editQty('${tb}','${x.k}')">✎</button><button class="sm" onclick="again('${tb}','${x.k}')">＋${tx('again')}</button><button class="sm" onclick="editPrice('${tb}','${x.k}')">✎ ${tx('priceH')}</button></div></div><div class="am">${(x.price * x.qty).toLocaleString()}</div></div>`).join('')}
+  <div class="tot"><span>${tx('total')} (${its.reduce((s, x) => s + x.qty, 0)})</span><span>${sum(its).toLocaleString('en-US', {minimumFractionDigits: 2})}</span></div></div>
   <button class="g big" onclick="pay('${tb}')">💵 ${tx('pay')} ${baht(sum(its))}</button>`;
 }
 function again(tb, k) { const x = L[tb].items[k], nk = 'i' + uid(), it = {id: x.id, name: x.name, cat: x.cat, price: x.price, qty: 1, opts: x.opts, note: x.note, status: 'new', src: 'staff', by: D.name, at: Date.now()}; L[tb].items[nk] = it; W(store.put(`live/tables/${tb}/items/${nk}`, it)); emit({type: 'order', t: tb, n: 1, items: [{name: x.name, qty: 1}]}); autoPrint(); draw(); }
@@ -533,12 +538,20 @@ function editPrice(tb, k) { const x = L[tb].items[k], v = prompt(tx('priceH') + 
 function cancelTable(tb) { if (!confirm(tx('cancelTb') + ' ' + tName(tb))) return; delete L[tb]; delete V.draft[tb]; W(store.del('live/tables/' + tb)); V.table = null; go('tables'); }
 function splitPay(tb) { modal(`<h2>${tx('selPay')}</h2>${itemsOf(tb).map(x => `<label class="ck"><input type="checkbox" class="spC" value="${x.k}"><span><b>${esc(tr(x.name))}</b> x ${x.qty}<small class="mu th">${esc(optLine(x))}</small></span><b>${(x.price * x.qty).toLocaleString()}</b></label>`).join('')}
   <div class="row mt"><button onclick="modal()">${tx('cancel')}</button><button class="p" onclick="const k=[...document.querySelectorAll('.spC:checked')].map(e=>e.value);if(k.length)pay('${tb}',k)">${tx('confirm')}</button></div>`); }
-function billPreview(tb) { const its = itemsOf(tb), t = sum(its), pp = M.showPP !== false ? promptpay(M.promptpay, t) : '';
+function billPreview(tb) { const its = itemsOf(tb), t = sum(its), pp = M.showPP !== false ? promptpay(M.promptpay, t) : ''; loadPayQr().then(() => { if ($('#bpq') && M.showPP !== false) $('#bpq').innerHTML = payQrHtml(pp, t); });
   modal(`<div class="c"><div class="mu">${tx('invoice')}</div><h2>${esc(M.shop)}</h2></div><div>${tName(tb)}<br>${new Date().toLocaleString('th-TH')}</div><hr>
   ${its.map(x => `<div class="row"><span style="flex:4">${x.qty}× ${esc(tr(x.name))}</span><b style="text-align:right">${(x.price * x.qty).toLocaleString()}</b></div>`).join('')}<hr>
-  <div class="tot"><span>${tx('total')}</span><span>${t.toLocaleString('en-US', {minimumFractionDigits: 2})}</span></div>${pp ? `<div style="max-width:220px;margin:0 auto">${qrSvg(pp)}</div><p class="c mu">PromptPay</p>` : ''}
+  <div class="tot"><span>${tx('total')}</span><span>${t.toLocaleString('en-US', {minimumFractionDigits: 2})}</span></div><div id="bpq">${M.showPP !== false ? payQrHtml(pp, t) : ''}</div>
   <div class="row mt"><button onclick="modal()">${tx('cancel')}</button><button class="p" onclick="modal();printBill('${tb}')">🖨️ ${tx('print')}</button></div>`); }
-function pay(tb, keys) { P = {tb, keys: keys || null, disc: 0, fee: 0, recv: '', method: 'cash'}; payDraw(); }
+function pay(tb, keys) { P = {tb, keys: keys || null, disc: 0, fee: 0, recv: '', method: 'cash'}; payDraw(); loadPayQr().then(() => { if (P && P.method === 'qr' && $('#modal').innerHTML) payDraw(); }); }
+/* รูป QR รับเงินที่ร้านอัปโหลด (เช่น QR ร้านค้าของธนาคาร) — เก็บแยกจากเมนู ลูกค้าจึงไม่ต้องโหลด */
+let PQR = null, PQRV = null;
+async function loadPayQr() { if (!M.payQrV) { PQR = null; return; } if (PQRV === M.payQrV) return; try { PQR = await store.get('payqr'); PQRV = M.payQrV; } catch (e) {} }
+function payQrHtml(pp, net) {
+  const big = `<div class="c" style="font-size:30px;font-weight:700;color:#047857">${baht(net)}</div>`;
+  if (!PQR && !pp) return big + `<p class="c mu" style="padding:16px">ยังไม่มี QR รับเงิน — ใส่รูป QR หรือเบอร์พร้อมเพย์ได้ที่ ⚙️ ตั้งค่า › ข้อมูลร้าน</p>`;
+  return big + (PQR ? `<img class="pqr" src="${PQR}" alt="QR">${M.payQrName ? `<p class="c" style="margin:2px 0;font-weight:600">${esc(M.payQrName)}</p>` : ''}` : '') + (pp ? `<div class="c" style="max-width:260px;margin:${PQR ? '14px' : '0'} auto 0">${qrSvg(pp)}</div><p class="c mu">PromptPay ${esc(M.promptpay)} • ${baht(net)}</p>` : '');
+}
 const payItems = () => itemsOf(P.tb).filter(x => !P.keys || P.keys.includes(x.k));
 const payNet = () => Math.max(0, sum(payItems()) - P.disc + P.fee);
 const mLabel = m => m === 'cash' ? tx('cash') : m === 'qr' ? tx('qr') : m;
@@ -551,12 +564,12 @@ function payDraw() {
     <div class="row mt" style="align-items:center"><span>${tx('fee')}</span><input type="number" inputmode="decimal" min="0" value="${P.fee || ''}" onchange="P.fee=Math.max(0,+this.value||0);payDraw()"></div>
     <div class="tot" style="color:#047857;font-size:24px"><span>${tx('net')}</span><span>${baht(net)}</span></div><div id="chg" style="font-size:20px;font-weight:700;text-align:right;min-height:30px"></div>
     <button class="g big" id="payOk" onclick="payDone(false)">${tx('confirm')}</button><button class="big" id="payOk2" style="background:#d1fae5" onclick="payDone(true)">🖨️ ${tx('confirmPrint')}</button><button class="big" style="background:#fff" onclick="modal()">${tx('cancel')}</button></div>
-  <div><div class="chips" style="flex-wrap:wrap">${ms.map((m, i) => `<button class="${P.method === m ? 'on' : ''}" onclick="P.method=['cash','qr',...M.channels][${i}];payDraw()">${esc(mLabel(m))}</button>`).join('')}</div>
+  <div><div class="chips pm">${ms.map((m, i) => `<button class="${P.method === m ? 'on' : ''}" onclick="P.method=['cash','qr',...M.channels][${i}];payDraw()">${esc(mLabel(m))}</button>`).join('')}</div>
     ${P.method === 'cash' ? `<div id="pRecv" style="font-size:38px;font-weight:700;padding:4px 8px"></div><div class="pad">
       <button style="grid-column:span 2;background:#fde047" onclick="payKey('C')">${tx('clear')}</button>${kb('<', '⌫', 'background:#e5e7eb')}${kb('+1000', '1,000', 'background:#d1d5db')}
       ${kb('7')}${kb('8')}${kb('9')}${kb('+500', '500', 'background:#e9d5ff')}${kb('4')}${kb('5')}${kb('6')}${kb('+100', '100', 'background:#fca5a5')}
       ${kb('1')}${kb('2')}${kb('3')}${kb('+50', '50', 'background:#bfdbfe')}${kb('0')}${kb('.')}${kb('=', tx('exact'), 'background:#34d399;font-size:15px;font-weight:700')}${kb('+20', '20', 'background:#bbf7d0')}</div>`
-    : P.method === 'qr' && pp ? `<div class="c" style="max-width:240px;margin:0 auto">${qrSvg(pp)}</div><p class="c mu">PromptPay ${esc(M.promptpay)} • ${baht(net)}</p>` : `<p class="c mu" style="padding:30px 0;font-size:20px">${esc(mLabel(P.method))} • ${baht(net)}</p>`}</div></div>`, true);
+    : P.method === 'qr' ? payQrHtml(pp, net) : `<p class="c mu" style="padding:30px 0;font-size:20px">${esc(mLabel(P.method))} • ${baht(net)}</p>`}</div></div>`, true);
   payUpd();
 }
 function payKey(k) { if (k === 'C') P.recv = ''; else if (k === '<') P.recv = P.recv.slice(0, -1); else if (k === '=') P.recv = String(payNet()); else if (k[0] === '+') P.recv = String((+P.recv || 0) + +k.slice(1)); else if (!(k === '.' && P.recv.includes('.')) && P.recv.length < 9) P.recv += k; payUpd(); }
@@ -711,10 +724,13 @@ function sDev() {
   <p class="mu" style="font-size:14px">เปิดพิมพ์อัตโนมัติเฉพาะเครื่องที่ต่อเครื่องพิมพ์ของครัวนั้น ๆ เครื่องเดียวต่อหนึ่งจุด</p></div></div><div class="mt" style="max-width:520px">${sConn()}</div>`;
 }
 function sShop() {
+  if (M.payQrV) loadPayQr().then(() => { if ($('#sPqr')) $('#sPqr').innerHTML = PQR ? `<img src="${PQR}" style="width:84px;border-radius:8px">` : ''; });
   return `<div class="split"><div class="card"><h3>ร้าน (ใช้ร่วมกันทุกเครื่อง)</h3>
   <label>ชื่อร้าน</label><input id="sShop" value="${esc(M.shop)}"><label>จำนวนโต๊ะ</label><input id="sTables" type="number" min="1" max="200" value="${M.tables}">
   <label>พร้อมเพย์ (เบอร์มือถือ หรือเลขบัตร 13 หลัก)</label><input id="sPP" inputmode="numeric" value="${esc(M.promptpay)}"><label>ที่อยู่ร้าน (พิมพ์บนใบเสร็จ)</label><input id="sAddr" value="${esc(M.addr || '')}"><div class="row"><div><label>เบอร์โทร</label><input id="sTel" value="${esc(M.tel || '')}"></div><div><label>เลขประจำตัวผู้เสียภาษี</label><input id="sTax" value="${esc(M.tax || '')}"></div></div>
   <label>โลโก้บนใบเสร็จ</label><div class="row" style="align-items:center"><div style="flex:0 0 70px">${M.logo ? `<img src="${M.logo}" style="width:64px">` : '<span class="mu">ไม่มี</span>'}</div><input type="file" accept="image/*" onchange="setLogo(this)"><button class="sm d" style="flex:0" onclick="M.logo='';saveM();draw()">ลบ</button></div>
+  <label>รูป QR รับเงิน (แสดงในหน้าคิดเงินเมื่อเลือก "โอน / QR" เช่น QR ร้านค้าจากแอปธนาคาร)</label><div class="row" style="align-items:center"><div id="sPqr" style="flex:0 0 90px">${M.payQrV ? '<span class="mu">กำลังโหลด…</span>' : '<span class="mu">ไม่มี</span>'}</div><input type="file" accept="image/*" onchange="setPayQr(this)"><button class="sm d" style="flex:0" onclick="setPayQr(null)">ลบ</button></div>
+  <label>ชื่อบัญชีใต้ QR (ไม่บังคับ)</label><input value="${esc(M.payQrName || '')}" placeholder="เช่น กสิกร • ร้านรสจนา" onchange="M.payQrName=this.value.trim();saveM()">
   <label>ข้อความท้ายใบเสร็จ</label><input id="sFoot" value="${esc(M.footer)}">
   <label class="ck"><input type="checkbox" ${M.showPP !== false ? 'checked' : ''} onchange="M.showPP=this.checked;saveM()"><span>แสดง QR พร้อมเพย์ (ล็อกยอดเงิน) บนใบแจ้งรายการ</span></label>
   <label>แปลหมายเหตุของลูกค้า/พนักงานเป็นภาษาของแต่ละเครื่องอัตโนมัติ</label><select id="sMt"><option value="on" ${M.mt !== 'off' ? 'selected' : ''}>เปิด — ใช้ Google Translate</option><option value="off" ${M.mt === 'off' ? 'selected' : ''}>ปิด</option></select>
@@ -731,7 +747,10 @@ function sConn() { const pl = BASE + 'pos.html' + (D.db ? '?db=' + encodeURIComp
   <button class="mt" onclick="setDb()">บันทึกและโหลดใหม่</button>
   <p class="mu" style="font-size:14px">เว้นว่าง = ใช้ได้เฉพาะเครื่องนี้ • ใส่ URL = ทุกเครื่องและมือถือลูกค้าเห็นข้อมูลเดียวกัน</p>
   ${D.db ? `<h3 class="mt">ลิงก์สำหรับเครื่องพนักงานเครื่องอื่น</h3><div class="c" style="max-width:200px;margin:0 auto">${qrSvg(pl, 4)}</div><input readonly value="${esc(pl)}" onclick="this.select()">${OWN ? `<h3 class="mt">ลิงก์หน้าเจ้าของร้าน (อย่าให้พนักงาน)</h3><input readonly value="${esc(ol)}" onclick="this.select()">` : ''}` : ''}</div>`; }
-function setLogo(inp) { const f = inp.files[0]; if (!f) return; const im = new Image(); im.onload = () => { const sc = Math.min(1, 200 / Math.max(im.width, im.height)), c = document.createElement('canvas'); c.width = Math.round(im.width * sc); c.height = Math.round(im.height * sc); c.getContext('2d').drawImage(im, 0, 0, c.width, c.height); M.logo = c.toDataURL('image/png'); saveM(); draw(); }; im.src = URL.createObjectURL(f); }
+function setPayQr(inp) { const f = inp && inp.files[0];
+  if (!f) { if (!inp && confirm('ลบรูป QR รับเงิน?')) { PQR = null; M.payQrV = 0; W(store.del('payqr')); saveM(); draw(); } return; }
+  loadImg(f, im => { PQR = shrink(im, 1000, f.type === 'image/png' ? 'image/png' : 'image/jpeg', .92); M.payQrV = PQRV = Date.now(); W(store.put('payqr', PQR)); saveM(); draw(); toast('บันทึก QR รับเงินแล้ว ✔'); }); }
+function setLogo(inp) { const f = inp.files[0]; if (!f) return; const im = new Image(); im.onload = () => { M.logo = shrink(im, 300, 'image/png'); saveM(); draw(); }; im.src = URL.createObjectURL(f); }
 function saveShop() { Object.assign(M, {shop: $('#sShop').value.trim() || DEF.shop, tables: Math.max(1, Math.min(200, parseInt($('#sTables').value) || 1)), promptpay: $('#sPP').value.trim(), footer: $('#sFoot').value.trim(), addr: $('#sAddr').value.trim(), tel: $('#sTel').value.trim(), tax: $('#sTax').value.trim(), pin: $('#sPin').value.trim(), mt: $('#sMt').value, mtKey: $('#sMtK').value.trim(), channels: [...new Set($('#sCh').value.split(',').map(x => x.trim()).filter(Boolean))]}); saveM(); toast('บันทึกแล้ว'); draw(); }
 function setDb() { D.db = $('#sDb').value.trim(); saveD(); location.reload(); }
 function sTrl() {
@@ -761,19 +780,31 @@ function vMenu() {
 }
 function togOut(id) { const m = M.menu.find(x => x.id === id); m.out = !m.out; saveM(); draw(); }
 function editItem(id) {
-  const m = M.menu.find(x => x.id === id) || {name: '', price: '', cat: M.cats[0], opts: []}; EIMG = m.img || '';
+  const m = M.menu.find(x => x.id === id) || {name: '', price: '', cat: M.cats[0], opts: []}; EIMG = m.img || ''; EIMGL = undefined;
   modal(`<h2>${id ? 'แก้ไขเมนู' : 'เพิ่มเมนู'}</h2><label>ชื่อ (ภาษาไทย)</label><input id="eN" value="${esc(m.name)}"><label>ราคา</label><input id="eP" type="number" inputmode="decimal" value="${m.price}">
   <label>หมวด</label><select id="eC">${M.cats.map(c => `<option ${c === m.cat ? 'selected' : ''}>${esc(c)}</option>`).join('')}</select>
-  <label class="ck"><input type="checkbox" id="eR" ${m.rec ? 'checked' : ''}><span>⭐ เมนูแนะนำ</span></label><label class="ck"><input type="checkbox" id="eH" ${m.hide ? 'checked' : ''}><span>เห็นและสั่งได้เฉพาะพนักงาน (ไม่แสดงให้ลูกค้าที่สแกน QR)</span></label><label>ขายเฉพาะช่วงเวลา (เว้นว่าง = ทั้งวัน)</label><div class="row"><input type="time" id="eT1" value="${m.t1 || ''}"><input type="time" id="eT2" value="${m.t2 || ''}"></div><label>รูปอาหาร</label><div class="row" style="align-items:center"><div id="eImg" style="flex:0 0 110px">${EIMG ? `<img src="${EIMG}" style="width:110px;border-radius:10px">` : '<span class="mu">ไม่มีรูป</span>'}</div><input type="file" accept="image/*" onchange="pickImg(this)"><button class="sm d" style="flex:0" onclick="EIMG='';$('#eImg').innerHTML=''">ลบรูป</button></div>
+  <label class="ck"><input type="checkbox" id="eR" ${m.rec ? 'checked' : ''}><span>⭐ เมนูแนะนำ</span></label><label class="ck"><input type="checkbox" id="eH" ${m.hide ? 'checked' : ''}><span>เห็นและสั่งได้เฉพาะพนักงาน (ไม่แสดงให้ลูกค้าที่สแกน QR)</span></label><label>ขายเฉพาะช่วงเวลา (เว้นว่าง = ทั้งวัน)</label><div class="row"><input type="time" id="eT1" value="${m.t1 || ''}"><input type="time" id="eT2" value="${m.t2 || ''}"></div><label>รูปอาหาร</label><div class="row" style="align-items:center"><div id="eImg" style="flex:0 0 110px">${EIMG ? `<img src="${EIMG}" style="width:110px;border-radius:10px">` : '<span class="mu">ไม่มีรูป</span>'}</div><input type="file" accept="image/*" onchange="pickImg(this)"><button class="sm d" style="flex:0" onclick="EIMG='';EIMGL=undefined;$('#eImg').innerHTML=''">ลบรูป</button></div>
   <label>ตัวเลือก</label>${M.groups.map(g => `<label class="ck"><input type="checkbox" class="eO" value="${g.id}" ${m.opts.includes(g.id) ? 'checked' : ''}><span>${esc(g.name)}${g.note ? ' <small class="mu">(' + esc(g.note) + ')</small>' : ''}</span></label>`).join('')}
   <div class="row mt">${id ? `<button class="d" onclick="delMenu('${id}')">ลบ</button>` : ''}<button onclick="modal()">ยกเลิก</button><button class="p" onclick="saveItem('${id || ''}')">บันทึก</button></div>`);
 }
 let EIMG = '';
-function pickImg(inp) { const f = inp.files[0]; if (!f) return; const im = new Image(); im.onload = () => { const sc = Math.min(1, 240 / Math.max(im.width, im.height)), c = document.createElement('canvas'); c.width = Math.round(im.width * sc); c.height = Math.round(im.height * sc); c.getContext('2d').drawImage(im, 0, 0, c.width, c.height); EIMG = c.toDataURL('image/jpeg', .72); $('#eImg').innerHTML = `<img src="${EIMG}" style="width:110px;border-radius:10px">`; URL.revokeObjectURL(im.src); }; im.src = URL.createObjectURL(f); }
+/* ย่อรูปแบบคมชัด: ลดขนาดทีละครึ่งก่อน แล้วค่อยย่อครั้งสุดท้าย (ย่อทีเดียวจากรูปใหญ่มากจะแตก/เป็นรอยหยัก) */
+function shrink(im, max, type, q) { let w = im.width, h = im.height, src = im; const sc = Math.min(1, max / Math.max(w, h)), tw = Math.round(w * sc), th = Math.round(h * sc);
+  const cv = (cw, ch) => { const c = document.createElement('canvas'); c.width = cw; c.height = ch; const g = c.getContext('2d'); g.imageSmoothingEnabled = true; g.imageSmoothingQuality = 'high'; if (type === 'image/jpeg') { g.fillStyle = '#fff'; g.fillRect(0, 0, cw, ch); } return [c, g]; };
+  while (w / 2 > tw) { w = Math.round(w / 2); h = Math.round(h / 2); const [c, g] = cv(w, h); g.drawImage(src, 0, 0, w, h); src = c; }
+  const [c, g] = cv(tw, th); g.drawImage(src, 0, 0, tw, th); return c.toDataURL(type, q); }
+function loadImg(f, cb) { const im = new Image(); im.onload = () => { cb(im); URL.revokeObjectURL(im.src); }; im.onerror = () => toast('เปิดรูปนี้ไม่ได้'); im.src = URL.createObjectURL(f); }
+let EIMGL;
+/* รูปเล็ก (ในเมนู/ครัว) เก็บในเมนู • รูปใหญ่ (ตอนกดดูรายละเอียด) เก็บแยกที่ img/<id> ลูกค้าโหลดเฉพาะรูปที่กดดู */
+function pickImg(inp) { const f = inp.files[0]; if (!f) return; loadImg(f, im => { EIMG = shrink(im, 480, 'image/jpeg', .82); EIMGL = shrink(im, 1200, 'image/jpeg', .85); $('#eImg').innerHTML = `<img src="${EIMG}" style="width:110px;border-radius:10px">`; }); }
+const IMGL = {};
+async function bigImg(m) { if (!m.imgL) return null; const k = m.id + m.imgL; if (IMGL[k] === undefined) { try { IMGL[k] = await store.get('img/' + m.id); } catch (e) { return null; } } return IMGL[k]; }
 function saveItem(id) {
   const name = $('#eN').value.trim(), price = +$('#eP').value; if (!name || !(price >= 0)) return toast('กรอกชื่อและราคา');
   const v = {name, price, img: EIMG, rec: $('#eR').checked, hide: $('#eH').checked, t1: $('#eT1').value, t2: $('#eT2').value, cat: $('#eC').value, opts: [...document.querySelectorAll('.eO:checked')].map(e => e.value)};
-  if (id) Object.assign(M.menu.find(x => x.id === id), v); else M.menu.push({id: 'm' + uid(), out: false, ...v}); saveM(); modal(); draw();
+  if (!id) { id = 'm' + uid(); M.menu.push({id, out: false}); }
+  if (!EIMG) { v.imgL = 0; W(store.del('img/' + id)); } else if (EIMGL) { v.imgL = Date.now(); W(store.put('img/' + id, EIMGL)); }
+  EIMGL = undefined; Object.assign(M.menu.find(x => x.id === id), v); saveM(); modal(); draw();
 }
 function delMenu(id) { if (confirm('ลบเมนูนี้?')) { M.menu = M.menu.filter(x => x.id !== id); saveM(); modal(); draw(); } }
 function editCats() { modal(`<h2>หมวดหมู่</h2><label>หนึ่งบรรทัดต่อหนึ่งหมวด (เรียงตามลำดับที่แสดง)</label><textarea id="eCats" rows="7">${esc(M.cats.join('\n'))}</textarea><div class="row mt"><button onclick="modal()">ยกเลิก</button><button class="p" onclick="saveCats()">บันทึก</button></div>`); }
