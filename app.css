@@ -273,3 +273,15 @@ img{max-width:100%}
 .kctl .seg button{width:auto;min-width:32px;padding:6px 8px}
 .kop{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px;color:inherit}
 .kop span{background:#fee2e2;color:#7f1d1d;border-radius:8px;padding:1px 9px;font-size:15px;font-weight:600;line-height:1.5}
+/* staff line icons */
+.si{display:inline-block;vertical-align:-.2em}
+.ic{display:inline-flex;align-items:center;justify-content:center;color:var(--tx)}
+.ic .si{display:block}
+.nav button span{display:flex;align-items:center;justify-content:center;height:26px}
+.nav button span .si{display:block}
+h2 .si,h3 .si{color:var(--o);vertical-align:-.15em}
+.ist{color:#d97706;font-style:normal}
+.spk{color:var(--mu)}.spk .si{vertical-align:-.25em}
+.ki button .si,.kall .si{vertical-align:middle}
+.ki button{display:flex;align-items:center;justify-content:center}
+.age .si{vertical-align:-.2em}
