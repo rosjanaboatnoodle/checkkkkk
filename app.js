@@ -29,6 +29,8 @@ Object.assign(I18N.th, {stWait: 'รอชำระ', min: 'นาที', again
 Object.assign(I18N.en, {stWait: 'To pay', min: 'min', again: '1 more', moreAct: 'More'});
 Object.assign(I18N.my, {stWait: 'ငွေရှင်းရန်', min: 'မိနစ်', again: 'နောက် ၁', moreAct: 'နောက်ထပ်'});
 Object.assign(I18N.lo, {stWait: 'ລໍຖ້າຈ່າຍ', min: 'ນາທີ', again: 'ອີກ 1', moreAct: 'ເພີ່ມເຕີມ'});
+Object.assign(I18N.th, {round: 'รอบ', more2: 'สั่งเพิ่ม', toMake: 'ต้องทำรวม'});
+Object.assign(I18N.en, {round: 'Round', more2: 'added', toMake: 'To make'});
 Object.assign(I18N.th, {closeTb: 'ปิดโต๊ะ', closeQ: 'ปิดโต๊ะ {0} และยกเลิกรายการที่ยังไม่จ่ายทั้งหมด?', voidItems: 'ยกเลิกรายการ', voidPick: 'เลือกรายการที่จะยกเลิก', voidDo: 'ยกเลิก {0} หน่วย', sCancel: '{0} ยกเลิก {1}', allMenu: 'เมนูทั้งหมด', quickAdd: 'สั่งเพิ่มด่วน', quickEdit: 'เลือกเมนู', repeat: 'สั่งซ้ำ', listV: 'แบบรายการ', perRow: 'ต่อแถว'});
 Object.assign(I18N.en, {closeTb: 'Close table', closeQ: 'Close {0} and cancel all unpaid items?', voidItems: 'Cancel items', voidPick: 'Choose items to cancel', voidDo: 'Cancel {0}', sCancel: '{0} cancelled {1}', allMenu: 'Full menu', quickAdd: 'Quick add', quickEdit: 'Choose items', repeat: 'Repeat', listV: 'List', perRow: 'per row'});
 Object.assign(I18N.my, {closeTb: 'စားပွဲပိတ်', voidItems: 'ဟင်းပွဲဖျက်', voidPick: 'ဖျက်မည့်ပွဲ ရွေးပါ', sCancel: '{0} ဖျက်သည် {1}', allMenu: 'မီနူးအားလုံး', quickAdd: 'အမြန်ထပ်မှာ', repeat: 'ထပ်မှာ'});
@@ -583,12 +585,17 @@ function vQueue(st) {
   const kit = st === 'new', f = x => x.status === st && (!kit || inCats(x, D.kcat ? [D.kcat] : []));
   const tbs = Object.keys(L).map(tb => [tb, itemsOf(tb).filter(f)]).filter(x => x[1].length).sort((a, b) => a[1][0].at - b[1][0].at);
   return (kit ? `<div class="chips"><button class="${!D.kcat ? 'on' : ''}" onclick="setKcat(-1)">${tx('all')}</button>${M.cats.map((c, i) => `<button class="${c === D.kcat ? 'on' : ''}" onclick="setKcat(${i})">${esc(tr(c))}</button>`).join('')}</div>` : '') +
-  (tbs.length ? `<div class="kq">${tbs.map(([tb, its]) => { const a = ageMin(its[0].at);
-    return `<div class="card ${a >= D.t2 ? 'a2' : a >= D.t1 ? 'a1' : ''}"><div class="row" style="align-items:center"><h2 style="flex:3">${tName(tb)}</h2><span class="age" style="flex:0">⏱ ${a} ${tx('min')}</span>${kit ? `<button class="sm" style="flex:0" onclick="printQueue('${tb}','${st}')">🖨️</button>` : ''}</div>
-    <div class="mu">${hm(its[0].at)} • ${its.length} ${tx('items')} • ${esc(its[0].src === 'qr' ? '📱 ' + tx('cust') : its[0].by)}</div>
-    ${its.map(x => `<div class="ki">${thumb(x.id)}<div class="n">${x.qty} × ${esc(tr(x.name))}<span class="spk" onclick="readItem('${tb}','${x.k}')">🔊</span>${sub(x.name)}<div class="ops">${x.opts.map(o => `<span>${esc(bi(o))}</span>`).join('')}${x.note ? `<span style="background:#fef08a;cursor:pointer" title="แก้คำแปล" onclick="editNote('${tb}','${x.k}')">✎ ${esc(noteS(x))}</span>` : ''}</div></div><button onclick="adv('${tb}','${x.k}')">✔ ${tx('done')}</button></div>`).join('')}
-    ${its.length > 1 ? `<button class="big" style="background:#fff;border:1px solid var(--bd);font-size:16px;padding:10px" onclick="advAll('${tb}','${st}')">✔✔ ${tx('doneAll')}</button>` : ''}</div>`; }).join('')}</div>` : `<p class="mu c" style="padding:40px">${tx('empty')} 🎉</p>`);
+  (kit && tbs.length ? kSum(tbs) : '') +
+  (tbs.length ? `<div class="kq">${tbs.map(([tb, its]) => { const a = ageMin(its[0].at), rs = [];
+    its.forEach(x => { const r = rs[rs.length - 1]; if (r && x.at - r.at < 60000) r.its.push(x); else rs.push({at: x.at, its: [x]}); });
+    return `<div class="card ${a >= D.t2 ? 'a2' : a >= D.t1 ? 'a1' : ''}"><div class="kh"><h2>${tName(tb)}</h2><span class="age">⏱ ${a} ${tx('min')}</span>${kit ? `<button class="sm" onclick="printQueue('${tb}','${st}')">🖨️</button>` : ''}</div>
+    <div class="mu">${hm(its[0].at)} • ${its.reduce((n, x) => n + x.qty, 0)} ${tx('items')} • ${esc(its[0].src === 'qr' ? '📱 ' + tx('cust') : its[0].by)}</div>
+    ${rs.map((r, i) => (rs.length > 1 ? `<div class="krd">${tx('round')} ${i + 1} · ${hm(r.at)}${i ? ' · ' + tx('more2') : ''}</div>` : '') + r.its.map(x => kRow(tb, x)).join('')).join('')}
+    ${its.length > 1 ? `<button class="kall" onclick="advAll('${tb}','${st}')">✔ ${tx('doneAll')} (${its.length})</button>` : ''}</div>`; }).join('')}</div>` : `<p class="mu c" style="padding:40px">${tx('empty')} 🎉</p>`);
 }
+const kRow = (tb, x) => `<div class="ki">${thumb(x.id)}<div class="n"><div class="kn"><b class="kqn">${x.qty}</b><span>${esc(tr(x.name))}</span><span class="spk" onclick="readItem('${tb}','${x.k}')">🔊</span></div>${sub(x.name)}${x.opts.length ? `<div class="kop">${x.opts.map(o => esc(bi(o))).join('<i> · </i>')}</div>` : ''}${x.note ? `<div class="knt" title="แก้คำแปล" onclick="editNote('${tb}','${x.k}')">✎ ${esc(noteS(x))}</div>` : ''}</div><button onclick="adv('${tb}','${x.k}')" aria-label="${tx('done')}">✔</button></div>`;
+function kSum(tbs) { const c = {}; tbs.forEach(([, its]) => its.forEach(x => { c[x.name] = (c[x.name] || 0) + x.qty; })); const e = Object.entries(c).sort((a, b) => b[1] - a[1]);
+  return e.length > 1 ? `<div class="ksum"><span class="mu">${tx('toMake')}</span>${e.map(([n, q]) => `<span><b>${q}</b> ${esc(tr(n))}</span>`).join('')}</div>` : ''; }
 const nextSt = s => s === 'new' ? 'cooked' : 'served';
 function setSt(tb, k, s) { L[tb].items[k].status = s; W(store.put(`live/tables/${tb}/items/${k}/status`, s)); }
 function adv(tb, k) { const x = L[tb].items[k], n = nextSt(x.status); setSt(tb, k, n); emit({type: n, t: tb, items: [{name: x.name, qty: x.qty}]}); draw(); }
