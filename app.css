@@ -271,3 +271,5 @@ img{max-width:100%}
 @media(max-width:700px){.kq[style]{grid-template-columns:1fr!important}}
 @media(max-width:700px){.kctl .seg{display:none}}
 .kctl .seg button{width:auto;min-width:32px;padding:6px 8px}
+.kop{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px;color:inherit}
+.kop span{background:#fee2e2;color:#7f1d1d;border-radius:8px;padding:1px 9px;font-size:15px;font-weight:600;line-height:1.5}
