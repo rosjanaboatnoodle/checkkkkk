@@ -264,3 +264,10 @@ img{max-width:100%}
 .ksum span{background:#fff;border:1px solid var(--bd);border-radius:999px;padding:4px 12px;font-size:15px}.ksum span.mu{border:0;background:none;padding-left:0}
 .ksum b{color:var(--o)}
 @media(max-width:700px){.ki .th64{width:40px;height:40px}.ki button{min-width:46px;width:46px;height:46px}}
+.kbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:8px}.kbar>.chips{flex:1 1 300px;min-width:0;margin:0}
+.kctl{display:flex;gap:8px;align-items:center;flex:0 0 auto}
+.kimg{border:1px solid var(--bd);background:#fff;border-radius:10px;padding:6px 12px;font-weight:600;color:var(--mu)}.kimg.on{color:var(--o);border-color:var(--o)}
+.kadd{font-size:14px;background:#fef3c7;color:#92400e;border-radius:8px;padding:2px 8px;vertical-align:middle;font-weight:700}
+@media(max-width:700px){.kq[style]{grid-template-columns:1fr!important}}
+@media(max-width:700px){.kctl .seg{display:none}}
+.kctl .seg button{width:auto;min-width:32px;padding:6px 8px}
