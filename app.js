@@ -446,7 +446,19 @@ const saveD = () => localStorage.setItem('rj_dev', JSON.stringify(D));
 let L = {}, SALES = [], pending = 0, seq = 0, syncErr = '', seen = null, P = null;
 const V = {tab: 'tables', table: null, cat: '', day: dayKey(Date.now()), draft: {}, log: [], set: '', trl: ''};
 async function W(p) { pending++; seq++; try { await p; syncErr = ''; } catch (e) { syncErr = e.message; toast('⚠️ ' + tx('fail')); } finally { pending--; } }
-function saveM() { M.v = Date.now(); W(store.put('menu', JSON.stringify(M))); W(store.put('live/mv', M.v)); }
+function saveM() { M.v = Date.now(); W(store.put('menu', JSON.stringify(M))); W(store.put('live/mv', M.v)); if (!FB) { clearTimeout(ADT); ADT = setTimeout(() => autoDict(), 1500); } }
+/* แปลชื่อเมนู หมวด ตัวเลือก ที่ยังไม่มีคำแปล ให้ครบทุกภาษาที่เปิดไว้ */
+let ADT = 0, ADRUN = false;
+const dictKeys = () => [...new Set([...M.cats, ...M.menu.map(m => m.name), ...M.groups.flatMap(g => [g.name, ...g.choices.map(c => c.name)])])].filter(Boolean);
+function dictMissing() { const ls = [...new Set([...M.clangs, ...M.slangs])].filter(l => l !== 'th' && LANGS[l]); return dictKeys().flatMap(k => ls.filter(l => !((M.dict[k] || {})[l])).map(l => [k, l])); }
+async function autoDict(loud) {
+  if (ADRUN || !M || M.mt === 'off') return; const todo = dictMissing(); if (!todo.length) { if (loud) toast('แปลครบทุกคำแล้ว'); return; }
+  ADRUN = true; let n = 0, i = 0; if (loud) toast('กำลังแปล ' + todo.length + ' คำ…');
+  const work = async () => { while (i < todo.length) { const [k, l] = todo[i++]; const out = await mt(k, l); if (out && out !== '=' && !((M.dict[k] || {})[l])) { (M.dict[k] = M.dict[k] || {})[l] = out; n++; } } };
+  try { await Promise.all([work(), work(), work(), work()]); } finally { ADRUN = false; }
+  if (n) { M.v = Date.now(); W(store.put('menu', JSON.stringify(M))); W(store.put('live/mv', M.v)); }
+  if (loud) toast('แปลเพิ่ม ' + n + ' คำแล้ว ตรวจและแก้ได้ในหน้านี้'); if (n && V.tab === 'set') draw();
+}
 const tableIds = () => [...Array.from({length: M.tables}, (_, i) => 't' + (i + 1)), 't0'];
 const itemsOf = tb => Object.entries((L[tb] || {}).items || {}).map(([k, x]) => ({k, ...x})).sort((a, b) => a.at - b.at);
 const vl = () => speakLang(D.vlang || D.lang);
@@ -884,7 +896,8 @@ function sTrl() {
   const langs = [...new Set([...M.clangs, ...M.slangs])].filter(l => l !== 'th'); if (!langs.includes(V.trl)) V.trl = langs[0] || '';
   const sec = (title, arr) => `<h3 class="mt">${title}</h3><div class="card" style="padding:4px 14px">${[...new Set(arr)].map(x => `<div class="line" style="align-items:center"><div class="n">${esc(x)}</div><input style="flex:1.3" data-k="${esc(x)}" value="${esc(((M.dict[x] || {})[V.trl]) || '')}" onchange="setTr(this)"></div>`).join('')}</div>`;
   if (!V.trl) return '<p class="mu">ยังไม่ได้เลือกภาษาอื่นในหน้า "ร้าน"</p>';
-  return `<p class="mu">พิมพ์ชื่อที่อยากให้แสดงในแต่ละภาษา เว้นว่าง = แสดงชื่อภาษาไทย</p><div class="chips">${langs.map(l => `<button class="${l === V.trl ? 'on' : ''}" onclick="V.trl='${l}';draw()">${LANGS[l][0]}${M.clangs.includes(l) ? ' 👤' : ''}${M.slangs.includes(l) ? ' 👩‍🍳' : ''}</button>`).join('')}</div><small class="mu">👤 ลูกค้าเห็น • 👩‍🍳 พนักงานเห็น</small>` +
+  const miss = dictMissing().length;
+  return `<p class="mu">ระบบแปลชื่อเมนู หมวด และตัวเลือกให้อัตโนมัติด้วย Google ทุกครั้งที่เพิ่มหรือแก้เมนู ถ้าคำไหนแปลไม่ถูก แก้ในช่องได้เลย</p><div class="row" style="align-items:center;margin:6px 0 10px"><span class="mu" style="flex:1">${miss ? 'ยังไม่มีคำแปล ' + miss + ' ช่อง' : '✔ มีคำแปลครบทุกภาษา'}</span>${miss ? `<button class="p" style="flex:0;white-space:nowrap" onclick="autoDict(true)">แปลที่ยังว่างทั้งหมด</button>` : ''}</div><div class="chips">${langs.map(l => `<button class="${l === V.trl ? 'on' : ''}" onclick="V.trl='${l}';draw()">${LANGS[l][0]}${M.clangs.includes(l) ? ' 👤' : ''}${M.slangs.includes(l) ? ' 👩‍🍳' : ''}</button>`).join('')}</div><small class="mu">👤 ลูกค้าเห็น • 👩‍🍳 พนักงานเห็น</small>` +
     sec('หมวดหมู่', M.cats) + sec('เมนู', M.menu.map(m => m.name)) + sec('ตัวเลือก', M.groups.flatMap(g => [g.name, ...g.choices.map(c => c.name)])) +
     sec('คำในหมายเหตุที่จำไว้ (แก้คำที่แปลผิดได้ที่นี่)', phraseKeys()) + `<div class="row mt"><input id="phN" placeholder="เพิ่มคำ/ประโยคที่ลูกค้าเขียนบ่อย เช่น ไม่ใส่ผักชี"><button style="flex:0;white-space:nowrap" onclick="const v=$('#phN').value.trim();if(v){M.dict[v]=M.dict[v]||{'_p':1};saveM();draw()}">＋ เพิ่ม</button></div>`;
 }
@@ -970,7 +983,7 @@ async function staffInit() {
   await loadMtKey();
   if (OWN && M.pin && !ownerUnlock()) return;
   V.tab = (ROLES[D.role] || ROLES.all)[0]; draw(); await poll(); loadSales().then(draw);
-  setInterval(() => { if (['tables', 'kitchen', 'serve'].includes(V.tab)) draw(); else if (V.tab === 'dash') loadSales().then(() => V.tab === 'dash' && draw()); }, 30000); setInterval(poll, store.live ? 2500 : 1500);
+  setInterval(() => { if (['tables', 'kitchen', 'serve'].includes(V.tab)) draw(); else if (V.tab === 'dash') loadSales().then(() => V.tab === 'dash' && draw()); }, 30000); setInterval(poll, store.live ? 2500 : 1500); setTimeout(() => autoDict(), 8000);
   window.addEventListener('storage', e => { if (e.key === 'rjr_tree') poll(); });
 }
 function ownerUnlock() { if (sessionStorage.getItem('rj_own') === M.pin) return true; const v = prompt('รหัส PIN เจ้าของร้าน'); if (v === M.pin) { sessionStorage.setItem('rj_own', v); return true; }
