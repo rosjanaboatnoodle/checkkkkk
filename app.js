@@ -29,8 +29,8 @@ Object.assign(I18N.th, {stWait: 'รอชำระ', min: 'นาที', again
 Object.assign(I18N.en, {stWait: 'To pay', min: 'min', again: '1 more', moreAct: 'More'});
 Object.assign(I18N.my, {stWait: 'ငွေရှင်းရန်', min: 'မိနစ်', again: 'နောက် ၁', moreAct: 'နောက်ထပ်'});
 Object.assign(I18N.lo, {stWait: 'ລໍຖ້າຈ່າຍ', min: 'ນາທີ', again: 'ອີກ 1', moreAct: 'ເພີ່ມເຕີມ'});
-Object.assign(I18N.th, {round: 'รอบ', more2: 'สั่งเพิ่ม', toMake: 'ต้องทำรวม', autoC: 'อัตโนมัติ', imgOn: 'รูป: เปิด', imgOff: 'รูป: ปิด'});
-Object.assign(I18N.en, {round: 'Round', more2: 'added', toMake: 'To make', autoC: 'Auto', imgOn: 'Photos: on', imgOff: 'Photos: off'});
+Object.assign(I18N.th, {sentPrint: 'ส่งไปพิมพ์ที่เคาน์เตอร์แล้ว', round: 'รอบ', more2: 'สั่งเพิ่ม', toMake: 'ต้องทำรวม', autoC: 'อัตโนมัติ', imgOn: 'รูป: เปิด', imgOff: 'รูป: ปิด'});
+Object.assign(I18N.en, {sentPrint: 'Sent to the counter printer', round: 'Round', more2: 'added', toMake: 'To make', autoC: 'Auto', imgOn: 'Photos: on', imgOff: 'Photos: off'});
 Object.assign(I18N.th, {closeTb: 'ปิดโต๊ะ', closeQ: 'ปิดโต๊ะ {0} และยกเลิกรายการที่ยังไม่จ่ายทั้งหมด?', voidItems: 'ยกเลิกรายการ', voidPick: 'เลือกรายการที่จะยกเลิก', voidDo: 'ยกเลิก {0} หน่วย', sCancel: '{0} ยกเลิก {1}', allMenu: 'เมนูทั้งหมด', quickAdd: 'สั่งเพิ่มด่วน', quickEdit: 'เลือกเมนู', repeat: 'สั่งซ้ำ', listV: 'แบบรายการ', perRow: 'ต่อแถว'});
 Object.assign(I18N.en, {closeTb: 'Close table', closeQ: 'Close {0} and cancel all unpaid items?', voidItems: 'Cancel items', voidPick: 'Choose items to cancel', voidDo: 'Cancel {0}', sCancel: '{0} cancelled {1}', allMenu: 'Full menu', quickAdd: 'Quick add', quickEdit: 'Choose items', repeat: 'Repeat', listV: 'List', perRow: 'per row'});
 Object.assign(I18N.my, {closeTb: 'စားပွဲပိတ်', voidItems: 'ဟင်းပွဲဖျက်', voidPick: 'ဖျက်မည့်ပွဲ ရွေးပါ', sCancel: '{0} ဖျက်သည် {1}', allMenu: 'မီနူးအားလုံး', quickAdd: 'အမြန်ထပ်မှာ', repeat: 'ထပ်မှာ'});
@@ -477,16 +477,26 @@ async function poll() {
   if (lv.mv && lv.mv !== M.v) { try { const raw = await store.get('menu'); if (raw) { M = normM(JSON.parse(raw)); ch = true; loadMtKey(); } } catch (e) {} }
   const nt = normT(lv.tables); if (JSON.stringify(nt) !== JSON.stringify(L)) { L = nt; ch = true; }
   const sh = lv.shift || ''; if (sh !== JSON.stringify(SHIFT || '').replace(/^""$/, '')) { try { SHIFT = sh ? JSON.parse(sh) : null; } catch (e) {} if (['sales', 'dash'].includes(V.tab) && !$('#modal').innerHTML) draw(); }
-  if (!OWN) { handleEvents(lv.events || {}); autoPrint(); noteWork(); }
+  if (!OWN) { handleEvents(lv.events || {}); autoPrint(); noteWork(); pjobs(lv.pjobs); }
   if (ch && !['set', 'sales'].includes(V.tab)) draw();
 }
 
+/* ---------- พิมพ์ผ่านคอมเคาน์เตอร์ ---------- */
+let PBUSY = 0; const PDONE = new Set();
+function sendPJob(j) { W(store.put('live/pjobs/j' + uid(), JSON.stringify({...j, at: Date.now(), by: D.name}))); toast(tx('sentPrint')); }
+function pjobs(js) {
+  if (!D.phost || !js || PBUSY > Date.now()) return;
+  const k = Object.keys(js).sort().find(k => !PDONE.has(k)); if (!k) return;
+  PDONE.add(k); store.del('live/pjobs/' + k).catch(() => {}); let j; try { j = JSON.parse(js[k]); } catch (e) { return; }
+  if (j.at < Date.now() - 3600000) return; PBUSY = Date.now() + 4000;
+  if (j.k === 'tk') printTickets(j.jobs, true); else if (j.k === 'rc') receipt(j.s, j.paid, true);
+}
 /* ---------- พิมพ์ใบครัว ---------- */
 const inCats = (x, cats) => !cats || !cats.length || cats.includes(x.cat);
 function autoPrint() {
   if (!D.autoPrint) return; const jobs = [];
   Object.keys(L).forEach(tb => { const its = itemsOf(tb).filter(x => x.status === 'new' && !x.pr && inCats(x, D.pcats)); if (its.length) { its.forEach(x => { L[tb].items[x.k].pr = 1; W(store.put(`live/tables/${tb}/items/${x.k}/pr`, 1)); }); jobs.push([tb, its]); } });
-  if (jobs.length) printTickets(jobs);
+  if (jobs.length) printTickets(jobs, true);
 }
 function editNote(tb, k) { const x = L[tb].items[k], ls = [...new Set([UL, 'th'])], cur = l => { const t = (x.nt || {})[l]; return t && t !== '=' ? t : ''; };
   modal(`<h2>✎ แก้คำแปลหมายเหตุ</h2><label>ข้อความเดิม</label><input readonly value="${esc(x.note)}">${ls.map(l => `<label>คำแปล — ${LANGS[l][0]}</label><input class="enT" data-l="${l}" value="${esc(cur(l))}">`).join('')}
@@ -499,7 +509,8 @@ function noteWork() {
   Object.keys(L).forEach(tb => Object.entries(L[tb].items).forEach(([k, x]) => { if (!x.note) return; ls.forEach(l => { const bk = k + l; if ((x.nt || {})[l] != null || NTB[bk] > Date.now()) return; NTB[bk] = Date.now() + 60000;
     mt(x.note, l).then(out => { const it = L[tb] && L[tb].items[k]; if (out == null || !it) return; (it.nt = it.nt || {})[l] = out; W(store.put(`live/tables/${tb}/items/${k}/nt/${l}`, out)); if (!['set', 'sales', 'dash'].includes(V.tab)) draw(); }); }); }));
 }
-async function printTickets(jobs) {
+async function printTickets(jobs, here) {
+  if (D.rprint && !here) return sendPJob({k: 'tk', jobs});
   const pl = D.plang || D.lang, el = $('#print');
   await Promise.race([Promise.all(jobs.flatMap(j => j[1]).filter(x => x.note).flatMap(x => [mt(x.note, pl), mt(x.note, 'th')])), new Promise(r => setTimeout(r, 4000))]);
   el.className = 'tk';
@@ -698,7 +709,8 @@ function payDone(pr) {
   emit({type: 'paid', t: tb, method: cash ? 'cash' : 'other', net, recv: s.recv, chg: s.recv - net}); modal(); if (pr) receipt(s, true);
   if (cash) toast(tx('change') + ' ' + baht(s.recv - net)); if (!L[tb]) { if (V.table === tb) V.table = null; V.tab = 'tables'; } draw();
 }
-function receipt(s, paid) {
+function receipt(s, paid, here) {
+  if (D.rprint && !here) return sendPJob({k: 'rc', s, paid});
   const el = $('#print'); el.className = 'rc', ol = x => [...(x.opts || []), x.note].filter(Boolean).join(', ');
   el.innerHTML = `<div style="text-align:center">${M.logo ? `<img src="${M.logo}" style="width:22mm"><br>` : ''}<b style="font-size:16px">${esc(M.shop)}</b><br>${M.addr ? esc(M.addr) + '<br>' : ''}${M.tel ? 'โทร ' + esc(M.tel) + '<br>' : ''}${M.tax ? 'เลขผู้เสียภาษี ' + esc(M.tax) + '<br>' : ''}${paid ? 'ใบเสร็จรับเงิน #' + s.no : 'ใบแจ้งรายการ'}<br>${tNameL(s.table, 'th')} • ${new Date(s.at).toLocaleString('th-TH')}</div><hr>
   <table style="width:100%;border-collapse:collapse">${s.items.map(x => `<tr><td style="vertical-align:top">${x.qty}×</td><td>${esc(x.name)}${ol(x) ? '<br><small>' + esc(ol(x)) + '</small>' : ''}</td><td style="text-align:right;vertical-align:top">${(x.price * x.qty).toLocaleString()}</td></tr>`).join('')}</table><hr>
@@ -825,6 +837,8 @@ function sDev() {
   ${[['order', 'มีออเดอร์ใหม่'], ['cooked', 'ครัวทำเสร็จ พร้อมเสิร์ฟ'], ['served', 'เสิร์ฟแล้ว'], ['call', 'ลูกค้าเรียกพนักงาน / เช็คบิล'], ['paid', 'ชำระเงิน + เงินทอน']].map(([k, n]) => `<label class="ck"><input type="checkbox" ${D.say[k] ? 'checked' : ''} onchange="setSay('${k}',this.checked)"><span>${n}</span></label>`).join('')}</div>
   <div class="card"><h3>🖨️ ใบออเดอร์ครัว</h3>
   <label class="ck"><input type="checkbox" ${D.autoPrint ? 'checked' : ''} onchange="setD('autoPrint',this.checked)"><span>พิมพ์อัตโนมัติจากเครื่องนี้เมื่อมีออเดอร์ใหม่</span></label>
+  <label class="ck"><input type="checkbox" ${D.phost ? 'checked' : ''} onchange="setD('phost',this.checked);if(this.checked)setD('rprint',false)"><span>เครื่องนี้เป็น<b>คอมเคาน์เตอร์</b> — รับงานพิมพ์ (ใบครัว, บิล, ใบเสร็จ) ที่ส่งมาจาก iPhone / iPad</span></label>
+  <label class="ck"><input type="checkbox" ${D.rprint ? 'checked' : ''} onchange="setD('rprint',this.checked);if(this.checked)setD('phost',false)"><span>เครื่องนี้ไม่ได้ต่อเครื่องพิมพ์ — กด 🖨️ แล้วส่งไปพิมพ์ที่<b>คอมเคาน์เตอร์</b> (ใช้กับ iPhone / iPad)</span></label>
   <label>พิมพ์เฉพาะหมวด (ไม่ติ๊กเลย = ทุกหมวด)</label>${M.cats.map((c, i) => `<label class="ck"><input type="checkbox" ${D.pcats.includes(c) ? 'checked' : ''} onchange="togPcat(${i},this.checked)"><span>${esc(c)}</span></label>`).join('')}
   <label>ภาษาของใบครัวที่ออกจากเครื่องพิมพ์ของเครื่องนี้</label><select onchange="setD('plang',this.value)">${langOpts(M.slangs, D.plang, 'ตามภาษาของเครื่อง')}</select>
   <p class="mu" style="font-size:14px;margin:6px 0">ใบครัวมีภาษาไทยกำกับชื่อเมนูและตัวเลือกเสมอ เพื่อให้เจ้าของตรวจได้</p>
