@@ -571,9 +571,13 @@ let PSTART = Date.now() - 600000;
 function autoPrint() {
   if (!D.autoPrint) return; const jobs = [];
   /* แต่ละเครื่องพิมพ์จำว่าตัวเองพิมพ์รายการไหนไปแล้ว (pr/<id เครื่อง>) — หลายเครื่องพิมพ์หมวดซ้ำกันได้ ไม่แย่งกัน; ไม่พิมพ์ของเก่าที่ค้างก่อนเปิดเครื่อง */
-  const zs = (M.zones || []).filter(z => (D.pzones || []).includes(z.id)), sets = zs.length ? zs.map(z => [D.id + '_' + z.id, z.cats, {n: z.name, l: z.lang}]) : [[D.id, D.pcats, null]];
-  Object.keys(L).forEach(tb => sets.forEach(([key, cats, z]) => { const its = itemsOf(tb).filter(x => x.status === 'new' && !(x.pr === 1 || (x.pr && x.pr[key])) && x.at >= PSTART && inCats(x, cats));
-    if (!its.length) return; its.forEach(x => { const it = L[tb].items[x.k]; it.pr = Object.assign(typeof it.pr === 'object' && it.pr ? it.pr : {}, {[key]: 1}); W(store.put(`live/tables/${tb}/items/${x.k}/pr/${key}`, 1)); }); jobs.push([tb, its, z]); }));
+  /* เครื่องเดียวพิมพ์หลายครัว: รายการหนึ่งออกใบเดียว (ใช้ครัวแรกที่มีหมวดนั้น) ไม่พิมพ์ซ้ำแม้หมวดอยู่หลายครัว */
+  const zs = (M.zones || []).filter(z => (D.pzones || []).includes(z.id)), zOf = x => zs.find(z => !z.cats.length || z.cats.includes(x.cat));
+  const done = x => x.pr === 1 || (x.pr && x.pr[D.id]);
+  Object.keys(L).forEach(tb => { const its = itemsOf(tb).filter(x => x.status === 'new' && !done(x) && x.at >= PSTART && (zs.length ? zOf(x) : inCats(x, D.pcats)));
+    if (!its.length) return; its.forEach(x => { const it = L[tb].items[x.k]; it.pr = Object.assign(typeof it.pr === 'object' && it.pr ? it.pr : {}, {[D.id]: 1}); W(store.put(`live/tables/${tb}/items/${x.k}/pr/${D.id}`, 1)); });
+    if (!zs.length) return jobs.push([tb, its, null]);
+    zs.forEach(z => { const g = its.filter(x => zOf(x) === z); if (g.length) jobs.push([tb, g, {n: z.name, l: z.lang}]); }); });
   if (jobs.length) printTickets(jobs, true);
 }
 function editNote(tb, k) { const x = L[tb].items[k], ls = [...new Set([UL, 'th'])], cur = l => { const t = (x.nt || {})[l]; return t && t !== '=' ? t : ''; };
