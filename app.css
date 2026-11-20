@@ -285,3 +285,4 @@ h2 .si,h3 .si{color:var(--o);vertical-align:-.15em}
 .ki button .si,.kall .si{vertical-align:middle}
 .ki button{display:flex;align-items:center;justify-content:center}
 .age .si{vertical-align:-.2em}
+.tn{display:inline-block;min-width:15px;height:15px;line-height:15px;border-radius:5px;background:var(--bd);color:var(--tx);font-size:11px;text-align:center;margin-right:2px}.nav button.on .tn{background:#fff;color:var(--o)}
