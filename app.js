@@ -31,13 +31,18 @@ Object.assign(I18N.my, {stWait: 'ငွေရှင်းရန်', min: 'မ�
 Object.assign(I18N.lo, {stWait: 'ລໍຖ້າຈ່າຍ', min: 'ນາທີ', again: 'ອີກ 1', moreAct: 'ເພີ່ມເຕີມ'});
 Object.assign(I18N.th, {sentPrint: 'ส่งไปพิมพ์ที่เคาน์เตอร์แล้ว', round: 'รอบ', more2: 'สั่งเพิ่ม', toMake: 'ต้องทำรวม', autoC: 'อัตโนมัติ', imgOn: 'รูป: เปิด', imgOff: 'รูป: ปิด'});
 Object.assign(I18N.en, {sentPrint: 'Sent to the counter printer', round: 'Round', more2: 'added', toMake: 'To make', autoC: 'Auto', imgOn: 'Photos: on', imgOff: 'Photos: off'});
+Object.assign(I18N.th, {sOrderC: '{0} สั่งใหม่'});
 Object.assign(I18N.th, {closeTb: 'ปิดโต๊ะ', closeQ: 'ปิดโต๊ะ {0} และยกเลิกรายการที่ยังไม่จ่ายทั้งหมด?', voidItems: 'ยกเลิกรายการ', voidPick: 'เลือกรายการที่จะยกเลิก', voidDo: 'ยกเลิก {0} หน่วย', sCancel: '{0} ยกเลิก {1}', allMenu: 'เมนูทั้งหมด', quickAdd: 'สั่งเพิ่มด่วน', quickEdit: 'เลือกเมนู', repeat: 'สั่งซ้ำ', listV: 'แบบรายการ', perRow: 'ต่อแถว'});
+Object.assign(I18N.en, {sOrderC: '{0}, new order:'});
 Object.assign(I18N.en, {closeTb: 'Close table', closeQ: 'Close {0} and cancel all unpaid items?', voidItems: 'Cancel items', voidPick: 'Choose items to cancel', voidDo: 'Cancel {0}', sCancel: '{0} cancelled {1}', allMenu: 'Full menu', quickAdd: 'Quick add', quickEdit: 'Choose items', repeat: 'Repeat', listV: 'List', perRow: 'per row'});
+Object.assign(I18N.my, {sOrderC: '{0} အော်ဒါအသစ်'});
 Object.assign(I18N.my, {closeTb: 'စားပွဲပိတ်', voidItems: 'ဟင်းပွဲဖျက်', voidPick: 'ဖျက်မည့်ပွဲ ရွေးပါ', sCancel: '{0} ဖျက်သည် {1}', allMenu: 'မီနူးအားလုံး', quickAdd: 'အမြန်ထပ်မှာ', repeat: 'ထပ်မှာ'});
+Object.assign(I18N.lo, {sOrderC: '{0} ສັ່ງໃໝ່'});
 Object.assign(I18N.lo, {closeTb: 'ປິດໂຕະ', voidItems: 'ຍົກເລີກລາຍການ', voidPick: 'ເລືອກລາຍການທີ່ຈະຍົກເລີກ', sCancel: '{0} ຍົກເລີກ {1}', allMenu: 'ເມນູທັງໝົດ', quickAdd: 'ສັ່ງເພີ່ມດ່ວນ', repeat: 'ສັ່ງຊ້ຳ'});
 Object.assign(I18N.th, {added: 'เพิ่มลงตะกร้าแล้ว', yourCart: 'ตะกร้าของคุณ', confirmOrder: 'ยืนยันสั่งอาหาร', addMore: 'เลือกเมนูเพิ่ม', orderOk: 'ส่งออเดอร์แล้ว', orderOkSub: 'ร้านได้รับรายการแล้ว กำลังเตรียมอาหารให้ค่ะ', viewOrders: 'รายการที่สั่ง', viewCart: 'ดูตะกร้า', inCart: 'ในตะกร้า', results: 'ผลการค้นหา', needHelp: 'ต้องการความช่วยเหลือ', callStaffSub: 'ให้พนักงานมาที่โต๊ะ', billSub: 'พนักงานจะนำบิลมาให้', noOrders: 'ยังไม่ได้สั่งอาหาร', needPick: 'กรุณาเลือก'});
 Object.assign(I18N.en, {added: 'Added to cart', yourCart: 'Your cart', confirmOrder: 'Place order', addMore: 'Add more items', orderOk: 'Order sent', orderOkSub: 'The kitchen has your order and is preparing it.', viewOrders: 'My orders', viewCart: 'View cart', inCart: 'in cart', results: 'Results', needHelp: 'Need help?', callStaffSub: 'A staff member will come to your table', billSub: 'Staff will bring your bill', noOrders: 'No orders yet', needPick: 'Please choose'});
 Object.assign(I18N.zh, {added: '已加入购物车', yourCart: '购物车', confirmOrder: '确认下单', addMore: '继续点餐', orderOk: '已下单', orderOkSub: '厨房已收到您的订单', viewOrders: '我的订单', viewCart: '查看购物车', inCart: '已加入', results: '搜索结果', needHelp: '需要帮助？', callStaffSub: '服务员会到您的桌前', billSub: '服务员会送来账单', noOrders: '还没有点餐', needPick: '请选择'});
+Object.assign(I18N.zh, {sOrderC: '{0} 新订单'});
 Object.assign(I18N.my, {yourCart: 'ခြင်းတောင်း', confirmOrder: 'မှာမည်', viewOrders: 'မှာထားသည်', viewCart: 'ခြင်းကြည့်'});
 Object.assign(I18N.lo, {yourCart: 'ກະຕ່າຂອງທ່ານ', confirmOrder: 'ຢືນຢັນສັ່ງ', addMore: 'ເລືອກເມນູເພີ່ມ', orderOk: 'ສົ່ງອໍເດີແລ້ວ', viewOrders: 'ລາຍການທີ່ສັ່ງ', viewCart: 'ເບິ່ງກະຕ່າ'});
 I18N.th.dash = 'ภาพรวม'; I18N.en.dash = 'Overview'; I18N.my.dash = 'အနှစ်ချုပ်'; I18N.lo.dash = 'ພາບລວມ';
@@ -277,7 +282,7 @@ async function cuSend() {
   try {
     if (!(await store.get(base + '/openedAt'))) await store.put(base + '/openedAt', now);
     for (const x of C.cart) await store.put(base + '/items/i' + uid(), {...x, status: 'new', src: 'qr', by: '', at: now});
-    await store.put('live/events/e' + uid(), {type: 'order', t: C.T, at: now, dev: 'cust', by: '', n: C.cart.length, items: C.cart.map(x => ({name: x.name, qty: x.qty}))});
+    await store.put('live/events/e' + uid(), {type: 'order', t: C.T, at: now, dev: 'cust', by: '', n: C.cart.length, items: C.cart.map(x => ({name: x.name, qty: x.qty, cat: x.cat}))});
     C.cart = []; cuSave(); cuRefresh(); cuPull();
     modal(`<div class="cx-ok"><div class="ok">${IC.check}</div><h2>${tx('orderOk')}</h2><p class="mu">${tx('orderOkSub')}</p></div><button class="cx-cta" onclick="modal()">${tx('addMore')}</button><button class="cx-sec" onclick="cuMine()">${tx('viewOrders')}</button>`);
   } catch (e) { $('#cuSend').disabled = false; toast(tx('fail')); }
@@ -515,7 +520,9 @@ const vl = () => speakLang(D.vlang || D.lang);
 /* ---------- เหตุการณ์ + เสียงประกาศข้ามเครื่อง ---------- */
 function evText(e, l) {
   const tn = tNameL(e.t, l), names = (e.items || []).slice(0, 4).map(x => trL(x.name, l) + (x.qty > 1 ? ' ' + x.qty : '')).join(', ');
-  if (e.type === 'order') return fmt(TL('sOrder', l), [tn, e.n]) + ' ' + names;
+  if (e.type === 'order') { const c = {}; (e.items || []).forEach(x => { const k = x.cat || (M.menu.find(m => m.name === x.name) || {}).cat || x.name; c[k] = (c[k] || 0) + (Number(x.qty) || 1); });
+    const ks = Object.keys(c).sort((a, b) => { const i = M.cats.indexOf(a), j = M.cats.indexOf(b); return (i < 0 ? 99 : i) - (j < 0 ? 99 : j); });
+    return fmt(TL('sOrderC', l), [tn]) + ' ' + ks.map(k => trL(k, l) + ' ' + c[k]).join(l === 'th' || l === 'lo' ? ' ' : ', '); }
   if (e.type === 'cooked') return e.all ? fmt(TL('sCookedAll', l), [tn]) : fmt(TL('sCooked', l), [tn, names]);
   if (e.type === 'served') return e.all ? fmt(TL('sServedAll', l), [tn]) : fmt(TL('sServed', l), [tn, names]);
   if (e.type === 'cancel') return fmt(TL('sCancel', l), [tn, names]);
@@ -629,7 +636,7 @@ function ensureTable(tb) { if (!L[tb]) { L[tb] = {openedAt: Date.now(), call: ''
 function sendDraft() {
   const tb = V.table, d = V.draft[tb] || []; if (!d.length) return; const now = Date.now(); ensureTable(tb);
   d.forEach(x => { const k = 'i' + uid(), it = {...x, status: 'new', src: 'staff', by: D.name, at: now}; L[tb].items[k] = it; W(store.put(`live/tables/${tb}/items/${k}`, it)); });
-  emit({type: 'order', t: tb, n: d.length, items: d.map(x => ({name: x.name, qty: x.qty}))}); V.draft[tb] = []; toast(tx('sentOk')); autoPrint(); noteWork(); draw();
+  emit({type: 'order', t: tb, n: d.length, items: d.map(x => ({name: x.name, qty: x.qty, cat: x.cat}))}); V.draft[tb] = []; toast(tx('sentOk')); autoPrint(); noteWork(); draw();
 }
 function delItem(tb, k) { if (!confirm(tx('del'))) return; delete L[tb].items[k]; if (Object.keys(L[tb].items).length) W(store.del(`live/tables/${tb}/items/${k}`)); else { delete L[tb]; W(store.del('live/tables/' + tb)); } draw(); }
 function orderCart(tb) { const d = V.draft[tb] || [], its = itemsOf(tb);
@@ -668,14 +675,14 @@ function vQueue(st) {
     ${t.its.length > 1 ? `<button class="kall" onclick="advKs('${t.tb}','${ks}')">${I('check', 18)} ${tx('doneAll')} (${t.its.length})</button>` : ''}</div>`; }).join('')}</div>` : `<p class="mu c" style="padding:40px">${tx('empty')}</p>`);
 }
 function printTk(tb, ks) { const k = ks.split(','), its = itemsOf(tb).filter(x => k.includes(x.k)); if (its.length) printTickets([[tb, its]]); }
-function advKs(tb, ks) { const k = ks.split(','), its = itemsOf(tb).filter(x => k.includes(x.k)); if (!its.length) return; const st = its[0].status; its.forEach(x => setSt(tb, x.k, nextSt(x.status))); emit({type: nextSt(st), t: tb, all: its.length > 1, items: its.map(x => ({name: x.name, qty: x.qty}))}); draw(); }
+function advKs(tb, ks) { const k = ks.split(','), its = itemsOf(tb).filter(x => k.includes(x.k)); if (!its.length) return; const st = its[0].status; its.forEach(x => setSt(tb, x.k, nextSt(x.status))); emit({type: nextSt(st), t: tb, all: its.length > 1, items: its.map(x => ({name: x.name, qty: x.qty, cat: x.cat}))}); draw(); }
 const kRow = (tb, x, im) => `<div class="ki">${im ? thumb(x.id) : ''}<div class="n"><div class="kn"><b class="kqn">${x.qty}</b><span>${esc(tr(x.name))}</span><span class="spk" onclick="readItem('${tb}','${x.k}')">${I('vol', 18)}</span></div>${sub(x.name)}${x.opts.length ? `<div class="kop">${x.opts.map(o => `<span>${esc(bi(o))}</span>`).join('')}</div>` : ''}${x.note ? `<div class="knt" title="แก้คำแปล" onclick="editNote('${tb}','${x.k}')">${I('edit', 14)} ${esc(noteS(x))}</div>` : ''}</div><button onclick="adv('${tb}','${x.k}')" aria-label="${tx('done')}">${I('check', 26)}</button></div>`;
 function kSum(q) { const c = {}; q.forEach(({its}) => its.forEach(x => { c[x.name] = (c[x.name] || 0) + x.qty; })); const e = Object.entries(c).sort((a, b) => b[1] - a[1]);
   return e.length > 1 ? `<div class="ksum"><span class="mu">${tx('toMake')}</span>${e.map(([n, q]) => `<span><b>${q}</b> ${esc(tr(n))}</span>`).join('')}</div>` : ''; }
 const nextSt = s => s === 'new' ? 'cooked' : 'served';
 function setSt(tb, k, s) { L[tb].items[k].status = s; W(store.put(`live/tables/${tb}/items/${k}/status`, s)); }
 function adv(tb, k) { const x = L[tb].items[k], n = nextSt(x.status); setSt(tb, k, n); emit({type: n, t: tb, items: [{name: x.name, qty: x.qty}]}); draw(); }
-function advAll(tb, st) { const its = itemsOf(tb).filter(x => x.status === st && (st !== 'new' || inCats(x, D.kcat ? [D.kcat] : []))); its.forEach(x => setSt(tb, x.k, nextSt(st))); emit({type: nextSt(st), t: tb, all: its.length > 1, items: its.map(x => ({name: x.name, qty: x.qty}))}); draw(); }
+function advAll(tb, st) { const its = itemsOf(tb).filter(x => x.status === st && (st !== 'new' || inCats(x, D.kcat ? [D.kcat] : []))); its.forEach(x => setSt(tb, x.k, nextSt(st))); emit({type: nextSt(st), t: tb, all: its.length > 1, items: its.map(x => ({name: x.name, qty: x.qty, cat: x.cat}))}); draw(); }
 
 /* ---------- 5 เช็คบิล ---------- */
 function vBill() { const tbs = Object.keys(L).filter(tb => itemsOf(tb).length); return tbs.length ? `<div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(260px,1fr))">${tbs.map(tb => `<button class="big" style="margin:0;background:#fff;display:flex;justify-content:space-between" onclick="openCash('${tb}')"><span>${tName(tb)}${L[tb].call === 'bill' ? ' ' + I('bell', 16) : ''}</span><span style="color:var(--o)">${baht(sum(itemsOf(tb)))}</span></button>`).join('')}</div>` : `<p class="mu c" style="padding:40px">${tx('empty')}</p>`; }
@@ -692,7 +699,7 @@ function vCash() {
 function again(tb, k) { const x = L[tb].items[k], nk = 'i' + uid(), it = {id: x.id, name: x.name, cat: x.cat, price: x.price, qty: 1, opts: x.opts, note: x.note, status: 'new', src: 'staff', by: D.name, at: Date.now()}; L[tb].items[nk] = it; W(store.put(`live/tables/${tb}/items/${nk}`, it)); emit({type: 'order', t: tb, n: 1, items: [{name: x.name, qty: 1}]}); autoPrint(); draw(); }
 function editQty(tb, k) { const x = L[tb].items[k], v = prompt(tx('qtyH') + ' — ' + tr(x.name), x.qty); if (v === null) return; const n = parseInt(v); if (!(n >= 0)) return; if (n === 0) return delItem(tb, k); x.qty = Math.min(999, n); W(store.put(`live/tables/${tb}/items/${k}/qty`, x.qty)); draw(); }
 function editPrice(tb, k) { const x = L[tb].items[k], v = prompt(tx('priceH') + ' / 1 — ' + tr(x.name), x.price); if (v === null) return; const n = parseFloat(v); if (!(n >= 0)) return; x.price = n; W(store.put(`live/tables/${tb}/items/${k}/price`, n)); draw(); }
-function cancelTable(tb) { if (!confirm(tx('closeQ', tName(tb)))) return; const its = itemsOf(tb); if (its.length) emit({type: 'cancel', t: tb, items: its.map(x => ({name: x.name, qty: x.qty}))}); delete L[tb]; delete V.draft[tb]; W(store.del('live/tables/' + tb)); V.table = null; go('tables'); }
+function cancelTable(tb) { if (!confirm(tx('closeQ', tName(tb)))) return; const its = itemsOf(tb); if (its.length) emit({type: 'cancel', t: tb, items: its.map(x => ({name: x.name, qty: x.qty, cat: x.cat}))}); delete L[tb]; delete V.draft[tb]; W(store.del('live/tables/' + tb)); V.table = null; go('tables'); }
 /* ยกเลิกบางรายการ: เลือกจำนวนที่จะยกเลิกได้ทีละรายการ แจ้งครัวด้วยเสียง/ประวัติ */
 let VD = {};
 function voidPick(tb) { VD = {}; voidDraw(tb); }
