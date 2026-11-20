@@ -588,13 +588,13 @@ async function printTickets(jobs, here) {
   if (cut === 'item' || cut === 'unit') jobs = jobs.flatMap(([tb, its]) => { const one = cut === 'unit' ? its.flatMap(x => Array.from({length: x.qty}, () => ({...x, qty: 1}))) : its; return one.map((x, i) => [tb, [x], (i + 1) + '/' + one.length]); });
   else if (cut === 'cat') jobs = jobs.flatMap(([tb, its]) => { const cs = [...new Set(its.map(x => x.cat))]; return cs.map((c, i) => [tb, its.filter(x => x.cat === c), (i + 1) + '/' + cs.length]); });
   const big = D.paper >= 80, hmS = t => new Date(t).toLocaleTimeString('th-TH', {hour: '2-digit', minute: '2-digit'});
-  const ol = o => esc(trL(o, pl)) + (pl !== 'th' && trL(o, pl) !== o ? ' <small>(' + esc(o) + ')</small>' : '');
+  const ol = o => esc(trL(o, pl)) + (pl !== 'th' && trL(o, pl) !== o ? ' <small>' + esc(o) + '</small>' : '');
   el.innerHTML = jobs.map(([tb, its, part]) => { const ta = tb === 't0' || its.some(x => x.opts.includes(TA));
     return `<div class="pg kt" style="width:${D.paper - 8}mm;font-size:${big ? 16 : 13}px;${D.rail ? 'padding-top:' + (D.railMm || 15) + 'mm' : ''}">
     <div class="kt-h"><b>${esc(tNameL(tb, pl))}</b>${part ? `<span>${part}</span>` : ''}</div>
     <div class="kt-m">${hmS(its[0].at)} · ${esc(its[0].src === 'qr' ? TL('cust', pl) : its[0].by || '')}${ta ? ' · <b class="kt-ta">' + esc(TL('takeaway', pl)) + '</b>' : ''}</div>
     ${its.map(x => { const op = x.opts.filter(o => o !== TA); return `<div class="kt-i"><div class="kt-n">${cut === 'unit' && x.qty === 1 ? '' : `<span class="kt-q">${x.qty}</span>`}${esc(trL(x.name, pl))}</div>${pl !== 'th' ? `<div class="kt-th">${esc(x.name)}</div>` : ''}
-      ${op.length ? `<div class="kt-o">${op.map(o => `<div>• ${ol(o)}</div>`).join('')}</div>` : ''}${x.note ? `<div class="kt-note">${esc(noteL(x, pl))}</div>` : ''}</div>`; }).join('')}
+      ${op.length ? `<div class="kt-o${pl !== 'th' ? ' one' : ''}">${op.map(o => `<div>• ${ol(o)}</div>`).join('')}</div>` : ''}${x.note ? `<div class="kt-note">${esc(noteL(x, pl))}</div>` : ''}</div>`; }).join('')}
     ${D.rail ? `<div class="kt-h" style="margin-top:3mm"><b>${esc(tNameL(tb, pl))}</b>${part ? `<span>${part}</span>` : ''}</div>` : ''}</div>`; }).join('');
   setTimeout(() => window.print(), 50);
 }
