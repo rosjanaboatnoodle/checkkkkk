@@ -584,11 +584,18 @@ async function printTickets(jobs, here) {
   const pl = D.plang || D.lang, el = $('#print');
   await Promise.race([Promise.all(jobs.flatMap(j => j[1]).filter(x => x.note).flatMap(x => [mt(x.note, pl), mt(x.note, 'th')])), new Promise(r => setTimeout(r, 4000))]);
   el.className = 'tk';
-  const cut = D.cut || 'item';
+  const cut = D.cut || 'unit';
   if (cut === 'item' || cut === 'unit') jobs = jobs.flatMap(([tb, its]) => { const one = cut === 'unit' ? its.flatMap(x => Array.from({length: x.qty}, () => ({...x, qty: 1}))) : its; return one.map((x, i) => [tb, [x], (i + 1) + '/' + one.length]); });
   else if (cut === 'cat') jobs = jobs.flatMap(([tb, its]) => { const cs = [...new Set(its.map(x => x.cat))]; return cs.map((c, i) => [tb, its.filter(x => x.cat === c), (i + 1) + '/' + cs.length]); });
-  el.innerHTML = jobs.map(([tb, its, part]) => `<div class="pg" style="width:${D.paper - 8}mm;font-size:${D.paper >= 80 ? 15 : 13}px;${D.rail ? 'padding-top:' + (D.railMm || 15) + 'mm' : ''}"><div style="font-size:1.9em;font-weight:700;display:flex;justify-content:space-between"><span>${esc(tNameL(tb, pl))}</span>${part ? `<span style="font-size:.6em;font-weight:400">${part}</span>` : ''}</div><div>${new Date(its[0].at).toLocaleString('th-TH')} • ${esc(its[0].src === 'qr' ? TL('cust', pl) : its[0].by || '')}</div><hr>
-    ${its.map(x => `<div style="margin:6px 0"><div style="font-size:1.35em;font-weight:700">${x.qty} × ${esc(trL(x.name, pl))}</div>${pl !== 'th' ? `<div>${esc(x.name)}</div>` : ''}${x.opts.length ? `<div style="font-size:1.1em">- ${x.opts.map(o => esc(trL(o, pl)) + (pl !== 'th' && trL(o, pl) !== o ? ' (' + esc(o) + ')' : '')).join('<br>- ')}</div>` : ''}${x.note ? `<div style="font-weight:700">* ${esc(noteL(x, pl))}</div>` : ''}</div>`).join('<hr style="border-style:dashed">')}${D.rail ? `<hr><div style="font-size:1.9em;font-weight:700;text-align:center">${esc(tNameL(tb, pl))}${part ? ' • ' + part : ''}</div>` : ''}</div>`).join('');
+  const big = D.paper >= 80, hmS = t => new Date(t).toLocaleTimeString('th-TH', {hour: '2-digit', minute: '2-digit'});
+  const ol = o => esc(trL(o, pl)) + (pl !== 'th' && trL(o, pl) !== o ? ' <small>(' + esc(o) + ')</small>' : '');
+  el.innerHTML = jobs.map(([tb, its, part]) => { const ta = tb === 't0' || its.some(x => x.opts.includes(TA));
+    return `<div class="pg kt" style="width:${D.paper - 8}mm;font-size:${big ? 16 : 13}px;${D.rail ? 'padding-top:' + (D.railMm || 15) + 'mm' : ''}">
+    <div class="kt-h"><b>${esc(tNameL(tb, pl))}</b>${part ? `<span>${part}</span>` : ''}</div>
+    <div class="kt-m">${hmS(its[0].at)} · ${esc(its[0].src === 'qr' ? TL('cust', pl) : its[0].by || '')}${ta ? ' · <b class="kt-ta">' + esc(TL('takeaway', pl)) + '</b>' : ''}</div>
+    ${its.map(x => { const op = x.opts.filter(o => o !== TA); return `<div class="kt-i"><div class="kt-n">${cut === 'unit' && x.qty === 1 ? '' : `<span class="kt-q">${x.qty}</span>`}${esc(trL(x.name, pl))}</div>${pl !== 'th' ? `<div class="kt-th">${esc(x.name)}</div>` : ''}
+      ${op.length ? `<div class="kt-o">${op.map(o => `<div>• ${ol(o)}</div>`).join('')}</div>` : ''}${x.note ? `<div class="kt-note">${esc(noteL(x, pl))}</div>` : ''}</div>`; }).join('')}
+    ${D.rail ? `<div class="kt-h" style="margin-top:3mm"><b>${esc(tNameL(tb, pl))}</b>${part ? `<span>${part}</span>` : ''}</div>` : ''}</div>`; }).join('');
   setTimeout(() => window.print(), 50);
 }
 function printQueue(tb, st) { const its = itemsOf(tb).filter(x => x.status === st && (st !== 'new' || inCats(x, D.kcat ? [D.kcat] : []))); if (its.length) printTickets([[tb, its]]); }
@@ -912,7 +919,7 @@ function sDev() {
   <label>พิมพ์เฉพาะหมวด (ไม่ติ๊กเลย = ทุกหมวด)</label>${M.cats.map((c, i) => `<label class="ck"><input type="checkbox" ${D.pcats.includes(c) ? 'checked' : ''} onchange="togPcat(${i},this.checked)"><span>${esc(c)}</span></label>`).join('')}
   <label>ภาษาของใบครัวที่ออกจากเครื่องพิมพ์ของเครื่องนี้</label><select onchange="setD('plang',this.value)">${langOpts(M.slangs, D.plang, 'ตามภาษาของเครื่อง')}</select>
   <p class="mu" style="font-size:14px;margin:6px 0">ใบครัวมีภาษาไทยกำกับชื่อเมนูและตัวเลือกเสมอ เพื่อให้เจ้าของตรวจได้</p>
-  <label>การแยกใบ / ตัดกระดาษ</label><select onchange="setD('cut',this.value)">${[['item', 'แยก 1 รายการ 1 ใบ (ไม่รวมกัน)'], ['unit', 'แยก 1 ชาม/ชิ้น 1 ใบ (สั่ง 3 ชาม ออก 3 ใบ)'], ['cat', 'แยกตามหมวด (ก๋วยเตี๋ยว 1 ใบ ของทานเล่น 1 ใบ)'], ['order', 'รวมทั้งออเดอร์ของโต๊ะไว้ใบเดียว']].map(o => `<option value="${o[0]}" ${(D.cut || 'item') === o[0] ? 'selected' : ''}>${o[1]}</option>`).join('')}</select>
+  <label>การแยกใบ / ตัดกระดาษ</label><select onchange="setD('cut',this.value)">${[['item', 'แยก 1 รายการ 1 ใบ (ไม่รวมกัน)'], ['unit', 'แยก 1 ชาม/ชิ้น 1 ใบ (สั่ง 3 ชาม ออก 3 ใบ)'], ['cat', 'แยกตามหมวด (ก๋วยเตี๋ยว 1 ใบ ของทานเล่น 1 ใบ)'], ['order', 'รวมทั้งออเดอร์ของโต๊ะไว้ใบเดียว']].map(o => `<option value="${o[0]}" ${(D.cut || 'unit') === o[0] ? 'selected' : ''}>${o[1]}</option>`).join('')}</select>
   <p class="mu" style="font-size:14px;margin:6px 0">แต่ละใบถูกส่งเป็นคนละหน้า ให้ตั้งไดรเวอร์เครื่องพิมพ์เป็น "ตัดกระดาษทุกหน้า" (Cut per page) เครื่องจึงจะตัดให้ทีละใบ</p>
   <label class="ck"><input type="checkbox" ${D.rail ? 'checked' : ''} onchange="setD('rail',this.checked)"><span>ใช้กับรางเสียบบิล — เว้นหัวกระดาษไว้ให้รางหนีบ และพิมพ์เลขโต๊ะซ้ำที่ท้ายใบ</span></label>
   ${D.rail ? `<label>เว้นหัวกระดาษ (มม.)</label><input type="number" min="0" max="60" value="${D.railMm || 15}" onchange="setD('railMm',Math.max(0,Math.min(60,+this.value||15)))">` : ''}
