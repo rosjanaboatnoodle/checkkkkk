@@ -518,11 +518,13 @@ const itemsOf = tb => Object.entries((L[tb] || {}).items || {}).map(([k, x]) => 
 const vl = () => speakLang(D.vlang || D.lang);
 
 /* ---------- เหตุการณ์ + เสียงประกาศข้ามเครื่อง ---------- */
+/* ออเดอร์ใหม่: "โต๊ะ 3 สั่งใหม่" + หมวดละจำนวน — ชื่อหมวดพูดเป็นภาษาไทย ยกเว้นเครื่องที่ใช้ภาษาอังกฤษ */
+function ordParts(e, l) { const c = {}; (e.items || []).forEach(x => { const k = x.cat || (M.menu.find(m => m.name === x.name) || {}).cat || x.name; c[k] = (c[k] || 0) + (Number(x.qty) || 1); });
+  const ks = Object.keys(c).sort((a, b) => { const i = M.cats.indexOf(a), j = M.cats.indexOf(b); return (i < 0 ? 99 : i) - (j < 0 ? 99 : j); }), en = l === 'en';
+  return [fmt(TL('sOrderC', l), [tNameL(e.t, l)]), ks.map(k => (en ? trL(k, 'en') : k) + ' ' + c[k]).join(en ? ', ' : ' ')]; }
 function evText(e, l) {
   const tn = tNameL(e.t, l), names = (e.items || []).slice(0, 4).map(x => trL(x.name, l) + (x.qty > 1 ? ' ' + x.qty : '')).join(', ');
-  if (e.type === 'order') { const c = {}; (e.items || []).forEach(x => { const k = x.cat || (M.menu.find(m => m.name === x.name) || {}).cat || x.name; c[k] = (c[k] || 0) + (Number(x.qty) || 1); });
-    const ks = Object.keys(c).sort((a, b) => { const i = M.cats.indexOf(a), j = M.cats.indexOf(b); return (i < 0 ? 99 : i) - (j < 0 ? 99 : j); });
-    return fmt(TL('sOrderC', l), [tn]) + ' ' + ks.map(k => trL(k, l) + ' ' + c[k]).join(l === 'th' || l === 'lo' ? ' ' : ', '); }
+  if (e.type === 'order') return ordParts(e, l).join(' ');
   if (e.type === 'cooked') return e.all ? fmt(TL('sCookedAll', l), [tn]) : fmt(TL('sCooked', l), [tn, names]);
   if (e.type === 'served') return e.all ? fmt(TL('sServedAll', l), [tn]) : fmt(TL('sServed', l), [tn, names]);
   if (e.type === 'cancel') return fmt(TL('sCancel', l), [tn, names]);
@@ -530,7 +532,7 @@ function evText(e, l) {
   if (e.type === 'paid') return e.method === 'cash' ? fmt(TL('sCash', l), [tn, e.net, e.recv, e.chg]) : fmt(TL('sQr', l), [tn, e.net]);
   return '';
 }
-function announce(e) { if (document.hidden && D.notif && window.Notification && Notification.permission === 'granted') { try { new Notification(M.shop, {body: evText(e, UL)}); } catch (x) {} } V.log.unshift(e); V.log.length = Math.min(V.log.length, 40); if (D.voice && (D.say[e.type] ?? (e.type === 'cancel' ? 1 : 0))) { if (e.dev !== D.id) beep(); const l = vl(); speak(evText(e, l), l); } }
+function announce(e) { if (document.hidden && D.notif && window.Notification && Notification.permission === 'granted') { try { new Notification(M.shop, {body: evText(e, UL)}); } catch (x) {} } V.log.unshift(e); V.log.length = Math.min(V.log.length, 40); if (D.voice && (D.say[e.type] ?? (e.type === 'cancel' ? 1 : 0))) { if (e.dev !== D.id) beep(); const l = vl(); if (e.type === 'order' && l !== 'th' && l !== 'en') { const [h, t] = ordParts(e, l); speak(h, l); speak(t, 'th'); } else speak(evText(e, l), l); } }
 function emit(e) { e = {...e, at: Date.now(), dev: D.id, by: D.name}; const k = 'e' + uid(); if (seen) seen.add(k); announce(e); W(store.put('live/events/' + k, e)); }
 function handleEvents(evs) {
   const ks = Object.keys(evs).sort();
