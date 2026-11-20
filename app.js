@@ -563,9 +563,12 @@ function pjobs(js) {
 }
 /* ---------- พิมพ์ใบครัว ---------- */
 const inCats = (x, cats) => !cats || !cats.length || cats.includes(x.cat);
+let PSTART = Date.now() - 600000;
 function autoPrint() {
   if (!D.autoPrint) return; const jobs = [];
-  Object.keys(L).forEach(tb => { const its = itemsOf(tb).filter(x => x.status === 'new' && !x.pr && inCats(x, D.pcats)); if (its.length) { its.forEach(x => { L[tb].items[x.k].pr = 1; W(store.put(`live/tables/${tb}/items/${x.k}/pr`, 1)); }); jobs.push([tb, its]); } });
+  /* แต่ละเครื่องพิมพ์จำว่าตัวเองพิมพ์รายการไหนไปแล้ว (pr/<id เครื่อง>) — หลายเครื่องพิมพ์หมวดซ้ำกันได้ ไม่แย่งกัน; ไม่พิมพ์ของเก่าที่ค้างก่อนเปิดเครื่อง */
+  const mine = x => x.pr === 1 || (x.pr && x.pr[D.id]);
+  Object.keys(L).forEach(tb => { const its = itemsOf(tb).filter(x => x.status === 'new' && !mine(x) && x.at >= PSTART && inCats(x, D.pcats)); if (its.length) { its.forEach(x => { const it = L[tb].items[x.k]; it.pr = Object.assign(typeof it.pr === 'object' && it.pr ? it.pr : {}, {[D.id]: 1}); W(store.put(`live/tables/${tb}/items/${x.k}/pr/${D.id}`, 1)); }); jobs.push([tb, its]); } });
   if (jobs.length) printTickets(jobs, true);
 }
 function editNote(tb, k) { const x = L[tb].items[k], ls = [...new Set([UL, 'th'])], cur = l => { const t = (x.nt || {})[l]; return t && t !== '=' ? t : ''; };
@@ -913,7 +916,7 @@ function sDev() {
   <label>ให้เครื่องนี้พูดเมื่อ</label>
   ${[['order', 'มีออเดอร์ใหม่'], ['cooked', 'ครัวทำเสร็จ พร้อมเสิร์ฟ'], ['served', 'เสิร์ฟแล้ว'], ['call', 'ลูกค้าเรียกพนักงาน / เช็คบิล'], ['paid', 'ชำระเงิน + เงินทอน']].map(([k, n]) => `<label class="ck"><input type="checkbox" ${D.say[k] ? 'checked' : ''} onchange="setSay('${k}',this.checked)"><span>${n}</span></label>`).join('')}</div>
   <div class="card"><h3>${I('printer')} ใบออเดอร์ครัว</h3>
-  <label class="ck"><input type="checkbox" ${D.autoPrint ? 'checked' : ''} onchange="setD('autoPrint',this.checked)"><span>พิมพ์อัตโนมัติจากเครื่องนี้เมื่อมีออเดอร์ใหม่</span></label>
+  <label class="ck"><input type="checkbox" ${D.autoPrint ? 'checked' : ''} onchange="if(this.checked)PSTART=Date.now();setD('autoPrint',this.checked)"><span>พิมพ์อัตโนมัติจากเครื่องนี้เมื่อมีออเดอร์ใหม่</span></label>
   <label class="ck"><input type="checkbox" ${D.phost ? 'checked' : ''} onchange="setD('phost',this.checked);if(this.checked)setD('rprint',false)"><span>เครื่องนี้เป็น<b>คอมเคาน์เตอร์</b> — รับงานพิมพ์ (ใบครัว, บิล, ใบเสร็จ) ที่ส่งมาจาก iPhone / iPad</span></label>
   <label class="ck"><input type="checkbox" ${D.rprint ? 'checked' : ''} onchange="setD('rprint',this.checked);if(this.checked)setD('phost',false)"><span>เครื่องนี้ไม่ได้ต่อเครื่องพิมพ์ — กดปุ่มพิมพ์ แล้วส่งไปพิมพ์ที่<b>คอมเคาน์เตอร์</b> (ใช้กับ iPhone / iPad)</span></label>
   <label>พิมพ์เฉพาะหมวด (ไม่ติ๊กเลย = ทุกหมวด)</label>${M.cats.map((c, i) => `<label class="ck"><input type="checkbox" ${D.pcats.includes(c) ? 'checked' : ''} onchange="togPcat(${i},this.checked)"><span>${esc(c)}</span></label>`).join('')}
