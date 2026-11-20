@@ -105,10 +105,14 @@ function makeStore(db) {
     async put(p, v) { const t = rd(), ps = p.split('/'); walk(t, ps.slice(0, -1), 1)[ps.at(-1)] = v; localStorage.setItem(K, JSON.stringify(t)); },
     async del(p) { const t = rd(), ps = p.split('/'), o = walk(t, ps.slice(0, -1)); if (o) { delete o[ps.at(-1)]; localStorage.setItem(K, JSON.stringify(t)); } }};
 }
+/* ครัว/โซนพิมพ์ (แบบ ScanFood): แต่ละครัวมีหมวดของตัวเอง เครื่องที่ต่อเครื่องพิมพ์เลือกว่าพิมพ์ครัวไหนบ้าง */
+function seedZones(cats) { const has = c => (cats || []).includes(c);
+  return [['ก๋วยเตี๋ยว', ['ก๋วยเตี๋ยว', 'เครื่องดื่ม', 'เครื่องเคียง', 'ขนมหวาน']], ['เครื่องดื่ม', ['เครื่องเคียง', 'เครื่องดื่ม']], ['เป็ดย่าง', ['เป็ดย่าง']], ['อาหารตามสั่ง', ['อาหารตามสั่ง', 'ส้มตำ']], ['เตนท์', ['เตนท์']]]
+    .map(([n, cs], i) => ({id: 'z' + (i + 1), name: n, cats: cs.filter(has), lang: ''})).filter(z => z.cats.length); }
 function normM(m) {
   m.cats = m.cats || []; m.groups = (m.groups || []).map(g => ({...g, choices: g.choices || []})); m.menu = (m.menu || []).map(x => ({...x, opts: x.opts || []}));
   m.dict = m.dict || {}; m.clangs = m.clangs && m.clangs.length ? m.clangs : ['th', 'en', 'zh']; m.slangs = m.slangs && m.slangs.length ? m.slangs : ['th', 'my', 'lo', 'en'];
-  m.tables = Number(m.tables) || 12; m.cdef = m.clangs.includes(m.cdef) ? m.cdef : 'th'; m.channels = m.channels || ['Grab', 'LINE MAN', 'ShopeeFood']; return m;
+  m.tables = Number(m.tables) || 12; m.cdef = m.clangs.includes(m.cdef) ? m.cdef : 'th'; m.channels = m.channels || ['Grab', 'LINE MAN', 'ShopeeFood']; if (!Array.isArray(m.zones)) m.zones = seedZones(m.cats); return m;
 }
 function normT(ts) { const o = {}; Object.keys(ts || {}).forEach(k => { const t = ts[k] || {}, it = {}; Object.keys(t.items || {}).forEach(i => { const x = t.items[i]; if (x && x.name) it[i] = {...x, opts: x.opts || [], note: x.note || ''}; }); if (Object.keys(it).length || t.call) o[k] = {openedAt: t.openedAt || Date.now(), call: t.call || '', items: it}; }); return o; }
 
@@ -563,9 +567,17 @@ function pjobs(js) {
 }
 /* ---------- พิมพ์ใบครัว ---------- */
 const inCats = (x, cats) => !cats || !cats.length || cats.includes(x.cat);
+let PSTART = Date.now() - 600000;
 function autoPrint() {
   if (!D.autoPrint) return; const jobs = [];
-  Object.keys(L).forEach(tb => { const its = itemsOf(tb).filter(x => x.status === 'new' && !x.pr && inCats(x, D.pcats)); if (its.length) { its.forEach(x => { L[tb].items[x.k].pr = 1; W(store.put(`live/tables/${tb}/items/${x.k}/pr`, 1)); }); jobs.push([tb, its]); } });
+  /* แต่ละเครื่องพิมพ์จำว่าตัวเองพิมพ์รายการไหนไปแล้ว (pr/<id เครื่อง>) — หลายเครื่องพิมพ์หมวดซ้ำกันได้ ไม่แย่งกัน; ไม่พิมพ์ของเก่าที่ค้างก่อนเปิดเครื่อง */
+  /* เครื่องเดียวพิมพ์หลายครัว: รายการหนึ่งออกใบเดียว (ใช้ครัวแรกที่มีหมวดนั้น) ไม่พิมพ์ซ้ำแม้หมวดอยู่หลายครัว */
+  const zs = (M.zones || []).filter(z => (D.pzones || []).includes(z.id)), zOf = x => zs.find(z => !z.cats.length || z.cats.includes(x.cat));
+  const done = x => x.pr === 1 || (x.pr && x.pr[D.id]);
+  Object.keys(L).forEach(tb => { const its = itemsOf(tb).filter(x => x.status === 'new' && !done(x) && x.at >= PSTART && (zs.length ? zOf(x) : inCats(x, D.pcats)));
+    if (!its.length) return; its.forEach(x => { const it = L[tb].items[x.k]; it.pr = Object.assign(typeof it.pr === 'object' && it.pr ? it.pr : {}, {[D.id]: 1}); W(store.put(`live/tables/${tb}/items/${x.k}/pr/${D.id}`, 1)); });
+    if (!zs.length) return jobs.push([tb, its, null]);
+    zs.forEach(z => { const g = its.filter(x => zOf(x) === z); if (g.length) jobs.push([tb, g, {n: z.name, l: z.lang}]); }); });
   if (jobs.length) printTickets(jobs, true);
 }
 function editNote(tb, k) { const x = L[tb].items[k], ls = [...new Set([UL, 'th'])], cur = l => { const t = (x.nt || {})[l]; return t && t !== '=' ? t : ''; };
@@ -581,18 +593,19 @@ function noteWork() {
 }
 async function printTickets(jobs, here) {
   if (D.rprint && !here) return sendPJob({k: 'tk', jobs});
-  const pl = D.plang || D.lang, el = $('#print');
-  await Promise.race([Promise.all(jobs.flatMap(j => j[1]).filter(x => x.note).flatMap(x => [mt(x.note, pl), mt(x.note, 'th')])), new Promise(r => setTimeout(r, 4000))]);
+  const plOf = z => (z && z.l) || D.plang || D.lang, el = $('#print');
+  await Promise.race([Promise.all(jobs.flatMap(j => j[1].filter(x => x.note).flatMap(x => [mt(x.note, plOf(j[2])), mt(x.note, 'th')]))), new Promise(r => setTimeout(r, 4000))]);
   el.className = 'tk';
   const cut = D.cut || 'unit';
-  if (cut === 'item' || cut === 'unit') jobs = jobs.flatMap(([tb, its]) => { const one = cut === 'unit' ? its.flatMap(x => Array.from({length: x.qty}, () => ({...x, qty: 1}))) : its; return one.map((x, i) => [tb, [x], (i + 1) + '/' + one.length]); });
-  else if (cut === 'cat') jobs = jobs.flatMap(([tb, its]) => { const cs = [...new Set(its.map(x => x.cat))]; return cs.map((c, i) => [tb, its.filter(x => x.cat === c), (i + 1) + '/' + cs.length]); });
+  if (cut === 'item' || cut === 'unit') jobs = jobs.flatMap(([tb, its, z]) => { const one = cut === 'unit' ? its.flatMap(x => Array.from({length: x.qty}, () => ({...x, qty: 1}))) : its; return one.map((x, i) => [tb, [x], (i + 1) + '/' + one.length, z]); });
+  else if (cut === 'cat') jobs = jobs.flatMap(([tb, its, z]) => { const cs = [...new Set(its.map(x => x.cat))]; return cs.map((c, i) => [tb, its.filter(x => x.cat === c), (i + 1) + '/' + cs.length, z]); });
+  else jobs = jobs.map(([tb, its, z]) => [tb, its, '', z]);
   const big = D.paper >= 80, hmS = t => new Date(t).toLocaleTimeString('th-TH', {hour: '2-digit', minute: '2-digit'});
-  const ol = o => esc(trL(o, pl)) + (pl !== 'th' && trL(o, pl) !== o ? ' <small>' + esc(o) + '</small>' : '');
-  el.innerHTML = jobs.map(([tb, its, part]) => { const ta = tb === 't0' || its.some(x => x.opts.includes(TA));
+  el.innerHTML = jobs.map(([tb, its, part, z]) => { const pl = plOf(z), ta = tb === 't0' || its.some(x => x.opts.includes(TA));
+    const ol = o => esc(trL(o, pl)) + (pl !== 'th' && trL(o, pl) !== o ? ' <small>' + esc(o) + '</small>' : '');
     return `<div class="pg kt" style="width:${D.paper - 8}mm;font-size:${big ? 16 : 13}px;${D.rail ? 'padding-top:' + (D.railMm || 15) + 'mm' : ''}">
     <div class="kt-h"><b>${esc(tNameL(tb, pl))}</b>${part ? `<span>${part}</span>` : ''}</div>
-    <div class="kt-m">${hmS(its[0].at)} · ${esc(its[0].src === 'qr' ? TL('cust', pl) : its[0].by || '')}${ta ? ' · <b class="kt-ta">' + esc(TL('takeaway', 'th')) + (pl !== 'th' ? ' · ' + esc(TL('takeaway', pl)) : '') + '</b>' : ''}</div>
+    <div class="kt-m">${z && z.n ? `<b class="kt-z">${esc(z.n)}</b> · ` : ''}${hmS(its[0].at)} · ${esc(its[0].src === 'qr' ? TL('cust', pl) : its[0].by || '')}${ta ? ' · <b class="kt-ta">' + esc(TL('takeaway', 'th')) + (pl !== 'th' ? ' · ' + esc(TL('takeaway', pl)) : '') + '</b>' : ''}</div>
     ${its.map(x => { const op = x.opts.filter(o => o !== TA); return `<div class="kt-i"><div class="kt-n">${cut === 'unit' && x.qty === 1 ? '' : `<span class="kt-q">${x.qty}</span>`}${esc(trL(x.name, pl))}</div>${pl !== 'th' ? `<div class="kt-th">${esc(x.name)}</div>` : ''}
       ${op.length ? `<div class="kt-o${pl !== 'th' ? ' one' : ''}">${op.map(o => `<div>• ${ol(o)}</div>`).join('')}</div>` : ''}${x.note ? `<div class="kt-note">${esc(noteL(x, pl))}</div>` : ''}</div>`; }).join('')}
     ${D.rail ? `<div class="kt-h" style="margin-top:3mm"><b>${esc(tNameL(tb, pl))}</b>${part ? `<span>${part}</span>` : ''}</div>` : ''}</div>`; }).join('');
@@ -885,13 +898,24 @@ function langSheet() {
 }
 function setD(k, v) { D[k] = v; saveD(); if (k === 'lang') { UL = LANGS[D.lang] ? D.lang : 'th'; document.documentElement.lang = UL; } draw(); }
 function setSay(k, v) { D.say[k] = v ? 1 : 0; saveD(); }
+function togPzone(id, on) { D.pzones = (M.zones || []).map(z => z.id).filter(x => x === id ? on : (D.pzones || []).includes(x)); saveD(); draw(); }
+function sZones() {
+  return `<p class="mu">สร้างครัวไว้ครั้งเดียว แล้วไปที่เครื่องที่ต่อเครื่องพิมพ์ (ตั้งค่า › เครื่องนี้และเครื่องปริ้น) ติ๊กว่าเครื่องนั้นพิมพ์ครัวไหน — หลายครัวใช้เครื่องพิมพ์เดียวกันได้ ครัวไหนยังไม่มีเครื่องพิมพ์ก็สร้างทิ้งไว้ได้</p>` +
+    M.zones.map((z, i) => `<div class="card mt"><div class="row" style="align-items:center"><b style="flex:0;font-size:20px">${i + 1}.</b><input value="${esc(z.name)}" onchange="zSet(${i},'name',this.value.trim()||'ครัว ${i + 1}')"><button class="sm d" style="flex:0" onclick="zDel(${i})">${I('trash', 16)}</button></div>
+      <label>หมวดที่ออกครัวนี้</label><div>${M.cats.map(c => `<label class="ck" style="display:inline-flex;border:0;margin-right:12px"><input type="checkbox" ${z.cats.includes(c) ? 'checked' : ''} onchange="zCat(${i},'${esc(c)}',this.checked)"><span>${esc(c)}</span></label>`).join('')}</div>
+      <label>ภาษาใบครัว</label><select onchange="zSet(${i},'lang',this.value)">${langOpts(M.slangs, z.lang, 'ตามที่ตั้งในเครื่องพิมพ์')}</select></div>`).join('') +
+    `<button class="big mt" onclick="M.zones.push({id:'z'+uid(),name:'ครัว '+(M.zones.length+1),cats:[],lang:''});saveM();draw()">${I('plus')} เพิ่มครัว</button>`;
+}
+function zSet(i, k, v) { M.zones[i][k] = v; saveM(); draw(); }
+function zCat(i, c, on) { const z = M.zones[i]; z.cats = M.cats.filter(x => x === c ? on : z.cats.includes(x)); saveM(); }
+function zDel(i) { if (confirm('ลบครัว "' + M.zones[i].name + '"?')) { M.zones.splice(i, 1); saveM(); draw(); } }
 function togPcat(i, on) { const c = M.cats[i]; D.pcats = M.cats.filter(x => x === c ? on : D.pcats.includes(x)); saveD(); }
 function vSet() {
-  const tiles = [['menu', I('bowl', 28), 'จัดการเมนูอาหาร', 'เมนู หมวด ตัวเลือก รูป'], ['out', I('ban', 28), 'สินค้า / ตัวเลือก หมด', 'ปิด–เปิดขายแบบเร็ว'], ['dev', I('printer', 28), 'เครื่องนี้และเครื่องปริ้น', 'ภาษา เสียง ใบครัว หน้าที่ของเครื่อง'], ['shop', I('store', 28), 'โปรไฟล์ร้าน', 'ชื่อ ที่อยู่ โลโก้ โต๊ะ พร้อมเพย์ PIN'], ['qr', I('qr', 28), 'QR โต๊ะและบริการลูกค้า', 'พิมพ์ QR เปิด–ปิดการสแกนสั่ง'], ['trl', I('globe', 28), 'แปลภาษา', 'ชื่อเมนูและคำในหมายเหตุ'], ['data', I('db', 28), 'ข้อมูล', 'สำรอง กู้คืน โหลดเมนูตั้งต้น']];
-  const allow = OWN ? ['menu', 'out', 'shop', 'qr', 'trl', 'data'] : ['out', 'dev']; for (let i = tiles.length - 1; i >= 0; i--) if (!allow.includes(tiles[i][0])) tiles.splice(i, 1);
+  const tiles = [['menu', I('bowl', 28), 'จัดการเมนูอาหาร', 'เมนู หมวด ตัวเลือก รูป'], ['out', I('ban', 28), 'สินค้า / ตัวเลือก หมด', 'ปิด–เปิดขายแบบเร็ว'], ['dev', I('printer', 28), 'เครื่องนี้และเครื่องปริ้น', 'ภาษา เสียง ใบครัว หน้าที่ของเครื่อง'], ['shop', I('store', 28), 'โปรไฟล์ร้าน', 'ชื่อ ที่อยู่ โลโก้ โต๊ะ พร้อมเพย์ PIN'], ['qr', I('qr', 28), 'QR โต๊ะและบริการลูกค้า', 'พิมพ์ QR เปิด–ปิดการสแกนสั่ง'], ['trl', I('globe', 28), 'แปลภาษา', 'ชื่อเมนูและคำในหมายเหตุ'], ['zones', I('chef', 28), 'ครัว / โซนพิมพ์', 'แต่ละครัวพิมพ์หมวดไหน ภาษาอะไร'], ['data', I('db', 28), 'ข้อมูล', 'สำรอง กู้คืน โหลดเมนูตั้งต้น']];
+  const allow = OWN ? ['menu', 'out', 'shop', 'qr', 'trl', 'zones', 'data'] : ['out', 'dev', 'zones']; for (let i = tiles.length - 1; i >= 0; i--) if (!allow.includes(tiles[i][0])) tiles.splice(i, 1);
   if (!V.set || !tiles.some(t => t[0] === V.set)) return `<h2>${I('gear')} ${OWN ? 'ตั้งค่าหลังบ้าน' : 'ตั้งค่าเครื่องนี้'}</h2>${OWN ? '' : '<p class="mu">เมนู ราคา โปรไฟล์ร้าน และรายงาน ตั้งที่หน้าเจ้าของร้าน</p>'}<div class="grid mt" style="grid-template-columns:repeat(auto-fill,minmax(300px,1fr))">${tiles.map((t, i) => `<div class="card" style="cursor:pointer;display:flex;gap:14px;align-items:center" onclick="V.set='${t[0]}';draw();scrollTo(0,0)"><div style="width:56px;height:56px;border-radius:14px;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:28px">${t[1]}</div><div><b style="font-size:18px">${i + 1}. ${t[2]}</b><div class="mu">${t[3]}</div></div></div>`).join('')}</div>`;
   const t = tiles.find(x => x[0] === V.set);
-  return `<div class="hd"><button onclick="V.set='';draw()">‹ ตั้งค่า</button><h2>${t[1]} ${t[2]}</h2><span style="width:70px"></span></div>` + ({dev: sDev, shop: sShop, menu: vMenu, trl: sTrl, qr: sQr, data: sData, out: sOut}[V.set])();
+  return `<div class="hd"><button onclick="V.set='';draw()">‹ ตั้งค่า</button><h2>${t[1]} ${t[2]}</h2><span style="width:70px"></span></div>` + ({dev: sDev, shop: sShop, menu: vMenu, trl: sTrl, qr: sQr, data: sData, out: sOut, zones: sZones}[V.set])();
 }
 function togCh(gid, i) { const c = M.groups.find(g => g.id === gid).choices[i]; c.out = !c.out; saveM(); draw(); }
 function sOut() { const btn = (on, label, fn) => `<button class="sm" style="margin:0 6px 6px 0;${on ? 'background:#fee2e2;color:var(--r);border-color:#fecaca;text-decoration:line-through' : ''}" onclick="${fn}">${on ? I('ban', 15) + ' ' : ''}${esc(label)}</button>`;
@@ -913,11 +937,12 @@ function sDev() {
   <label>ให้เครื่องนี้พูดเมื่อ</label>
   ${[['order', 'มีออเดอร์ใหม่'], ['cooked', 'ครัวทำเสร็จ พร้อมเสิร์ฟ'], ['served', 'เสิร์ฟแล้ว'], ['call', 'ลูกค้าเรียกพนักงาน / เช็คบิล'], ['paid', 'ชำระเงิน + เงินทอน']].map(([k, n]) => `<label class="ck"><input type="checkbox" ${D.say[k] ? 'checked' : ''} onchange="setSay('${k}',this.checked)"><span>${n}</span></label>`).join('')}</div>
   <div class="card"><h3>${I('printer')} ใบออเดอร์ครัว</h3>
-  <label class="ck"><input type="checkbox" ${D.autoPrint ? 'checked' : ''} onchange="setD('autoPrint',this.checked)"><span>พิมพ์อัตโนมัติจากเครื่องนี้เมื่อมีออเดอร์ใหม่</span></label>
+  <label class="ck"><input type="checkbox" ${D.autoPrint ? 'checked' : ''} onchange="if(this.checked)PSTART=Date.now();setD('autoPrint',this.checked)"><span>พิมพ์อัตโนมัติจากเครื่องนี้เมื่อมีออเดอร์ใหม่</span></label>
   <label class="ck"><input type="checkbox" ${D.phost ? 'checked' : ''} onchange="setD('phost',this.checked);if(this.checked)setD('rprint',false)"><span>เครื่องนี้เป็น<b>คอมเคาน์เตอร์</b> — รับงานพิมพ์ (ใบครัว, บิล, ใบเสร็จ) ที่ส่งมาจาก iPhone / iPad</span></label>
   <label class="ck"><input type="checkbox" ${D.rprint ? 'checked' : ''} onchange="setD('rprint',this.checked);if(this.checked)setD('phost',false)"><span>เครื่องนี้ไม่ได้ต่อเครื่องพิมพ์ — กดปุ่มพิมพ์ แล้วส่งไปพิมพ์ที่<b>คอมเคาน์เตอร์</b> (ใช้กับ iPhone / iPad)</span></label>
-  <label>พิมพ์เฉพาะหมวด (ไม่ติ๊กเลย = ทุกหมวด)</label>${M.cats.map((c, i) => `<label class="ck"><input type="checkbox" ${D.pcats.includes(c) ? 'checked' : ''} onchange="togPcat(${i},this.checked)"><span>${esc(c)}</span></label>`).join('')}
-  <label>ภาษาของใบครัวที่ออกจากเครื่องพิมพ์ของเครื่องนี้</label><select onchange="setD('plang',this.value)">${langOpts(M.slangs, D.plang, 'ตามภาษาของเครื่อง')}</select>
+  ${M.zones.length ? `<label>เครื่องนี้พิมพ์ครัวไหนบ้าง (ติ๊กได้หลายครัว ถ้าใช้เครื่องพิมพ์เดียวกัน)</label>${M.zones.map(z => `<label class="ck"><input type="checkbox" ${(D.pzones || []).includes(z.id) ? 'checked' : ''} onchange="togPzone('${z.id}',this.checked)"><span><b>${esc(z.name)}</b><small class="mu" style="display:block">${esc(z.cats.join(', ') || 'ทุกหมวด')}${z.lang ? ' · ใบภาษา' + LANGS[z.lang][0] : ''}</small></span></label>`).join('')}<p class="mu" style="font-size:14px;margin:4px 0 8px">${(D.pzones || []).length ? '' : 'ยังไม่ได้เลือกครัว — ใช้แบบเลือกหมวดด้านล่าง · '}สร้าง/แก้ครัวได้ที่ ตั้งค่า › ครัว / โซนพิมพ์</p>` : ''}
+  <details ${M.zones.length ? '' : 'open'}><summary class="mu">${M.zones.length ? 'แบบเดิม: เลือกหมวดเอง (ใช้เมื่อไม่ได้เลือกครัว)' : 'พิมพ์เฉพาะหมวด (ไม่ติ๊กเลย = ทุกหมวด)'}</summary>${M.cats.map((c, i) => `<label class="ck"><input type="checkbox" ${D.pcats.includes(c) ? 'checked' : ''} onchange="togPcat(${i},this.checked)"><span>${esc(c)}</span></label>`).join('')}</details>
+  <label>ภาษาของใบครัวที่ออกจากเครื่องพิมพ์ของเครื่องนี้ (ใช้เมื่อครัวไม่ได้กำหนดภาษา)</label><select onchange="setD('plang',this.value)">${langOpts(M.slangs, D.plang, 'ตามภาษาของเครื่อง')}</select>
   <p class="mu" style="font-size:14px;margin:6px 0">ใบครัวมีภาษาไทยกำกับชื่อเมนูและตัวเลือกเสมอ เพื่อให้เจ้าของตรวจได้</p>
   <label>การแยกใบ / ตัดกระดาษ</label><select onchange="setD('cut',this.value)">${[['item', 'แยก 1 รายการ 1 ใบ (ไม่รวมกัน)'], ['unit', 'แยก 1 ชาม/ชิ้น 1 ใบ (สั่ง 3 ชาม ออก 3 ใบ)'], ['cat', 'แยกตามหมวด (ก๋วยเตี๋ยว 1 ใบ ของทานเล่น 1 ใบ)'], ['order', 'รวมทั้งออเดอร์ของโต๊ะไว้ใบเดียว']].map(o => `<option value="${o[0]}" ${(D.cut || 'unit') === o[0] ? 'selected' : ''}>${o[1]}</option>`).join('')}</select>
   <p class="mu" style="font-size:14px;margin:6px 0">แต่ละใบถูกส่งเป็นคนละหน้า ให้ตั้งไดรเวอร์เครื่องพิมพ์เป็น "ตัดกระดาษทุกหน้า" (Cut per page) เครื่องจึงจะตัดให้ทีละใบ</p>
