@@ -302,3 +302,7 @@ h2 .si,h3 .si{color:var(--o);vertical-align:-.15em}
 #print .kt-o.one{grid-template-columns:1fr}
 #print .kt-o.one small{font-size:.72em;font-weight:500;margin-left:1.5mm}
 #print .kt-z{font-size:1.15em}
+.seg2{display:flex;background:#fff;border:1px solid var(--bd);border-radius:12px;padding:3px;gap:3px}
+.seg2 button{flex:1;border:0;background:transparent;border-radius:9px;padding:8px;font-weight:700;color:var(--mu)}
+.seg2 button.on{background:var(--tx);color:#fff}
+.bl.bsum .n b{font-size:17px}.bl.bsum .mu{margin-top:2px}
