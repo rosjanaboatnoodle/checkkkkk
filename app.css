@@ -306,3 +306,4 @@ h2 .si,h3 .si{color:var(--o);vertical-align:-.15em}
 .seg2 button{flex:1;border:0;background:transparent;border-radius:9px;padding:8px;font-weight:700;color:var(--mu)}
 .seg2 button.on{background:var(--tx);color:#fff}
 .bl.bsum .n b{font-size:17px}.bl.bsum .mu{margin-top:2px}
+.mth{cursor:pointer}.mth.noimg{display:flex;align-items:center;justify-content:center;color:#c9bfb3;border:1px dashed var(--bd);background:#faf7f2}
